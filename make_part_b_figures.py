@@ -86,6 +86,8 @@ plt.close(fig)
 # ---------- Fig 2: ranking slopegraph (k=6, accuracy) ----------
 PANELS = ["human_nontata_promoters", "human_enhancers_ensembl", "demo_human_or_worm"]
 MCOL = {"LR": "#0072B2", "LinearSVC": "#56B4E9", "RF": "#D55E00", "HGB": "#009E73"}
+MARK = {"LR": "o", "LinearSVC": "^", "RF": "s", "HGB": "D"}   # distinct markers (grayscale/colorblind-safe)
+LSTY = {"LR": "-", "LinearSVC": "--", "RF": "-", "HGB": "-"}    # LR solid vs LinearSVC dashed
 fig, axes = plt.subplots(1, 3, figsize=(11, 4.6))
 for ax, d in zip(axes, PANELS):
     o = {m: acc(d, 6, "original", m) for m in MODELS}
@@ -95,7 +97,7 @@ for ax, d in zip(axes, PANELS):
     for m in MODELS:
         y0, y1 = ro.index(m) + 1, rc.index(m) + 1
         lw = 3.2 if m == "RF" else 1.8
-        ax.plot([0, 1], [y0, y1], "-o", color=MCOL[m], lw=lw, ms=7, label=m)
+        ax.plot([0, 1], [y0, y1], color=MCOL[m], linestyle=LSTY[m], marker=MARK[m], lw=lw, ms=7, label=m)
         ax.text(-0.04, y0, m, ha="right", va="center", fontsize=8.5, color=MCOL[m])
         ax.text(1.04, y1, m, ha="left", va="center", fontsize=8.5, color=MCOL[m])
     ax.set_xlim(-0.5, 1.5); ax.set_ylim(4.5, 0.5)

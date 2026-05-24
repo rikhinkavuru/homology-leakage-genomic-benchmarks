@@ -39,7 +39,7 @@
 %% full-scale value (15.6 pts) is reported throughout.
 \abstract{
 \textbf{Motivation:} Benchmarks for DNA sequence classification underpin method comparison, but standard train/test splits rarely control for sequence homology. When near-identical sequences span the split, models can score well by memorizing near-duplicates rather than generalizing, and the consequences for method comparison have not been systematically characterized.\\
-\textbf{Results:} We audit 7 binary datasets from the Genomic Benchmarks suite, quantifying train/test homology by exact $k$-mer Jaccard similarity and re-evaluating four classifiers under a homology-aware re-split that confines near-duplicate clusters to one side. Two datasets are materially leaky (38--41\% of test sequences have a training near-duplicate); correcting the split removes up to 15.6 points of accuracy, while the remaining datasets are unaffected. Crucially, leakage does not merely inflate scores---it inverts method rankings: the mean Kendall $\tau$ between leaky-split and corrected rankings is $-0.17$ on leaky datasets versus $+0.67$ on clean ones, and the apparent best model (a random forest) drops to last or near-last after correction. A homology-graded analysis confirms the mechanism is memorization of label-carrying near-duplicates. We provide a per-dataset leakage report card and a drop-in homology-aware splitter.\\
+\textbf{Results:} We audit 7 binary datasets from the Genomic Benchmarks suite, quantifying train/test homology by exact $k$-mer Jaccard similarity and re-evaluating four classifiers under a homology-aware re-split that confines near-duplicate clusters to one side. Two datasets are materially leaky (38--41\% of test sequences have a training near-duplicate); correcting the split removes up to 15.6 points of accuracy, while the remaining datasets are unaffected. Crucially, leakage does not merely inflate scores---it inverts method rankings: the mean Kendall $\tau$ between leaky-split and corrected rankings is $-0.17$ on leaky datasets versus $+0.67$ on clean ones, and the apparent best model (a random forest) drops to last or near-last after correction. A homology-graded analysis indicates the mechanism is largely memorization of label-carrying near-duplicates---cleanly on one leaky dataset and partially on the other. We provide a per-dataset leakage report card and a drop-in homology-aware splitter.\\
 \textbf{Availability and implementation:} Code and data are available at \url{https://github.com/rikhinkavuru/homology-leakage-genomic-benchmarks}; the audit is CPU-only and fully reproducible.}
 
 \keywords{data leakage, sequence homology, benchmark evaluation, genomics, model ranking}
@@ -71,7 +71,7 @@ We differ from these studies in three ways. Each prior study examines a single l
 
 \section{Methods}
 
-\subsection{Datasets}\label{sec:datasets}
+\subsection{Datasets}
 We study the seven binary datasets of the Genomic Benchmarks suite \citep{gresova2023}, and additionally report the three-class \textit{human\_ensembl\_regulatory} set separately. Per-dataset sizes, sequence lengths, and class balance are given in Table~\ref{tab:datasets}. Sizes range from 6{,}914 (\textit{drosophila\_enhancers\_stark}) to 174{,}756 (\textit{human\_ocr\_ensembl}) sequences; sequence lengths are fixed within some datasets (e.g.\ 251\,bp for \textit{human\_nontata\_promoters}, 200\,bp for the demonstration sets) and variable in others; classes are balanced ($0.50$ positive fraction) except \textit{human\_nontata\_promoters} ($0.544$).
 
 \subsection{Features and models}
@@ -120,7 +120,7 @@ Our study has limits. We use classical models rather than deep networks, though 
 %% ===================== TABLES =====================
 
 %% [Methods 3.1 / PAPER_NUMBERS.md S1 descriptors (+S13 report card for the 3-class n)]
-\begin{table*}[t]
+\begin{table*}[tbp]
 \begin{center}
 \begin{minipage}{\textwidth}
 \caption{Datasets in the Genomic Benchmarks binary suite (and the optional three-class set). Lengths are the median (with min--max range where variable); class balance is the positive-class fraction (binary).\label{tab:datasets}}
@@ -144,7 +144,7 @@ human\_ensembl\_regulatory (3-class) & 289{,}061 & 401 (89--802)  & 3 classes & 
 \end{table*}
 
 %% [Results 4.1 / PAPER_NUMBERS.md S13 leakage report card]
-\begin{table*}[t]
+\begin{table*}[tbp]
 \begin{center}
 \begin{minipage}{\textwidth}
 \caption{Leakage report card. Verdict is LEAKY if the full-scale near-duplicate test fraction exceeds $0.1$ at Jaccard $0.7$. ``Acc.\ drop'' is the best-model accuracy change under the homology-aware re-split (original $-$ corrected; positive $=$ accuracy lost under correction); ``RF rank'' is the random-forest rank before/after correction.\label{tab:reportcard}}
@@ -169,23 +169,32 @@ human\_ensembl\_regulatory (3-class) & 289{,}061 & 0.005 & 0.001 & clean & RF ($
 
 %% ===================== FIGURES =====================
 
-\begin{figure}[t]
+\begin{figure}[tbp]
 \centering
 \includegraphics[width=\linewidth]{fig_controls}
 \caption{Original split versus random re-split (negative control) versus homology-aware re-split, best model per dataset. Only the homology-aware split lowers accuracy, and only on leaky datasets.}\label{fig:controls}
 \end{figure}
 
-\begin{figure*}[t]
+\begin{figure*}[tbp]
 \centering
 \includegraphics[width=\textwidth]{fig_ranking_inversion}
-\caption{Model rankings on the original (leaky) split versus the homology-aware split ($k$=6, accuracy). The random forest is dethroned on the leaky datasets (left, middle) but rankings are stable on a clean control (right).}\label{fig:ranking}
+\caption{Model rankings on the original (leaky) split versus the homology-aware split ($k$=6, accuracy). The random forest is dethroned on the leaky datasets (left, middle) but rankings are stable on a clean control (right). Per-panel $\tau$ is the rank correlation for that dataset; on enhancers (Ensembl) the random forest's move to last flips only its own pairs, giving $\tau\approx0$, while the $-0.17$ in \S4.3 is the mean across both leaky datasets.}\label{fig:ranking}
 \end{figure*}
 
-\begin{figure*}[t]
+\begin{figure*}[tbp]
 \centering
 \includegraphics[width=\textwidth]{fig_graded_performance}
 \caption{Accuracy as a function of the test-to-train similarity bin (original split, $k$=6). On leaky datasets the random forest is near-perfect on high-similarity (near-duplicate) test sequences and falls on dissimilar ones; clean controls have near-empty high-similarity bins (hollow markers: $n<50$).}\label{fig:graded}
 \end{figure*}
+
+\section*{Funding}
+This research received no specific grant from any funding agency in the public, commercial, or not-for-profit sectors.
+
+\section*{Conflict of Interest}
+None declared.
+
+\section*{Data Availability}
+All code required to reproduce the analyses, along with the leakage report card, figures, and the homology-aware splitter tool, is available at \url{https://github.com/rikhinkavuru/homology-leakage-genomic-benchmarks}. The Genomic Benchmarks datasets analysed here are publicly available and were obtained via the genomic-benchmarks package \citep{gresova2023}; they are not redistributed in our repository.
 
 \bibliographystyle{oup-abbrvnat}
 \bibliography{references}
