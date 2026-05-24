@@ -92,7 +92,7 @@ All experiments are deterministic with logged seeds, CPU-only, and free of exter
 \section{Results}
 
 \subsection{Leakage is dataset-specific}
-Of the seven binary datasets, only two---\textit{human\_nontata\_promoters} and \textit{human\_enhancers\_ensembl}---exceed a 10\% near-duplicate test fraction at Jaccard $0.7$ ($0.406$ and $0.384$ respectively); the remaining five are near zero (Table~\ref{tab:reportcard}, Fig.~\ref{fig:reportcard}). The three-class \textit{human\_ensembl\_regulatory} set is likewise clean ($0.005$). Leakage is therefore concentrated, not endemic to the suite.
+Of the seven binary datasets, only two---\textit{human\_nontata\_promoters} and \textit{human\_enhancers\_ensembl}---exceed a 10\% near-duplicate test fraction at Jaccard $0.7$ ($0.406$ and $0.384$ respectively); the remaining five are near zero (Table~\ref{tab:reportcard}). The three-class \textit{human\_ensembl\_regulatory} set is likewise clean ($0.005$). Leakage is therefore concentrated, not endemic to the suite.
 
 \subsection{Correcting the split lowers accuracy only on leaky datasets}
 %% 15.6 = ensembl RF k=6 drop (primary frozen run); see the NOTE above the abstract.
@@ -168,12 +168,6 @@ human\_ensembl\_regulatory (3-class) & 289{,}061 & 0.005 & 0.001 & clean & RF ($
 \end{table*}
 
 %% ===================== FIGURES =====================
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{fig_report_card}
-\caption{Per-dataset leakage report card: full-scale near-duplicate test fraction and the resulting verdict. Two of seven binary datasets are leaky; the rest are clean.}\label{fig:reportcard}
-\end{figure*}
 
 \begin{figure}[t]
 \centering

@@ -29,12 +29,22 @@ for ax, d in zip(axes.ravel(), PANELS):
     for m in ["LR", "LinearSVC", "RF", "HGB"]:
         s = sub[sub.model == m].set_index("sim_bin").reindex(BINLAB)
         ys = [s.loc[b, "accuracy"] * 100 if pd.notna(s.loc[b, "accuracy"]) else np.nan for b in BINLAB]
-        ax.plot(range(4), ys, "-", color=MCOL[m], lw=2.6 if m == "RF" else 1.6,
-                label=m, zorder=5 if m == "RF" else 2)
+        lw = 2.6 if m == "RF" else 1.6
+        zo = 5 if m == "RF" else 2
+        # Connect only consecutive bins that are BOTH high-confidence (n>=50); a
+        # low-confidence bin (n<50) is shown as an isolated hollow point with no
+        # connecting segment, so the tiny-n swings do not read as a real trend.
+        for i in range(3):
+            if (n_by_bin[i] >= 50 and n_by_bin[i + 1] >= 50
+                    and not np.isnan(ys[i]) and not np.isnan(ys[i + 1])):
+                ax.plot([i, i + 1], [ys[i], ys[i + 1]], "-", color=MCOL[m], lw=lw, zorder=zo)
+        labeled = False
         for x, yy, nn in zip(range(4), ys, n_by_bin):
             if not np.isnan(yy):
                 ax.plot(x, yy, "o", color=MCOL[m], ms=8,
-                        mfc=MCOL[m] if nn >= 50 else "white", mew=1.5, zorder=6)
+                        mfc=MCOL[m] if nn >= 50 else "white", mew=1.5, zorder=6,
+                        label=(m if not labeled else None))
+                labeled = True
     ax.set_xticks(range(4))
     ax.set_xticklabels([f"{b}\nn={n}" for b, n in zip(BINLAB, n_by_bin)], fontsize=8)
     ax.set_title(f"{NICE[d]}  {'(LEAKY)' if d in LEAKY else '(clean control)'}", fontsize=11)
