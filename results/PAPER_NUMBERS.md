@@ -285,7 +285,65 @@ Rank the 4 models (k=6) by (a) original leaky-split accuracy, (b) homology-aware
 
 **Reading:** on **enhancers_ensembl** both honest routes dethrone RF from its leaky #1 and crown LinearSVC (RF novel-only acc 0.770 < LinearSVC 0.782; RF homology rank last) -- two independent confirmations that RF's leaky lead is memorization, not generalization. On **nonTATA promoters** the routes diverge (tau(b,c) = -0.67): the homology split demotes RF to 3rd, but RF stays best on truly-novel sequences (0.879). **Flagged:** nonTATA's RF advantage is therefore partly genuine generalization, not pure test-side memorization -- its homology demotion also reflects the de-duplicated training regime. The memorization mechanism is airtight for enhancers_ensembl and partial for nonTATA. *Source: `check2_novelonly_ranking.py` -> `novelonly_ranking.csv`.*
 
-## 16. Provenance (number -> script -> file)
+## 16. Variance and confidence intervals (uncertainty quantification)
+
+Quantifies the uncertainty behind the "within noise" / "statistically tied" statements; **no number in sections 1-15 is changed -- this section only adds variance.** Bootstrap CIs resample the stored per-example test correctness (1000 draws, no model refit), RNG seed **20240524**. Leaky datasets are at full scale, clean at the 20k subsample (seed 0), matching the frozen results above. Re-split seeds {0,1,2,3,4}.
+
+### 16.1 Re-split seed variance (5 cluster->side seeds, homology-aware corrected accuracy)
+
+Confirms that a single cluster->side assignment is not 'unlucky': corrected accuracy is stable across 5 independent assignments.
+
+| dataset | model | mean | SD | min | max | range | per-seed |
+|---|---|---|---|---|---|---|---|
+| human_nontata_promoters | RF_k6 | 0.8101 | 0.0055 | 0.8036 | 0.8200 | 0.0164 | [0.82, 0.8113, 0.8073, 0.8036, 0.808] |
+| human_nontata_promoters | LR_k6 | 0.8283 | 0.0080 | 0.8180 | 0.8424 | 0.0244 | [0.8294, 0.818, 0.8424, 0.8272, 0.8245] |
+| human_enhancers_ensembl | RF_k6 | 0.6951 | 0.0019 | 0.6930 | 0.6982 | 0.0052 | [0.6957, 0.6982, 0.6932, 0.6954, 0.693] |
+| human_enhancers_ensembl | LR_k6 | 0.7753 | 0.0033 | 0.7707 | 0.7806 | 0.0099 | [0.7806, 0.7764, 0.7758, 0.7731, 0.7707] |
+
+RF k6 reproduces `splitter_validation.csv` (seed-0 cross-check exact); SD <= 0.008 for every cell. *Source: `step2_rf_seeds.py` (RF) + `step_variance_ci.py` (LR) -> `step2_seed_variance.csv`; cross-checked vs `validate_splitter.py` -> `splitter_validation.csv`.*
+
+### 16.2 Test-set bootstrap 95% CIs and delta significance
+
+Accuracies with 95% bootstrap CIs (homology column = seed-0 corrected split):
+
+| dataset | model | original acc [95% CI] | homology acc [95% CI] |
+|---|---|---|---|
+| human_nontata_promoters | RF_k6 | 0.9284 [0.9232, 0.9338] | 0.8200 [0.8119, 0.8279] |
+| human_nontata_promoters | LR_k6 | 0.8702 [0.8635, 0.8771] | 0.8294 [0.8214, 0.8370] |
+| human_enhancers_ensembl | RF_k6 | 0.8596 [0.8562, 0.8635] | 0.6957 [0.6902, 0.7006] |
+| human_enhancers_ensembl | LR_k6 | 0.7809 [0.7765, 0.7856] | 0.7806 [0.7760, 0.7850] |
+
+Delta (original - corrected) with 95% CI; "excludes 0" => the drop is significant:
+
+| dataset | group | model | delta | 95% CI | excludes 0 |
+|---|---|---|---|---|---|
+| human_nontata_promoters | leaky | RF_k6 | +0.1083 | [+0.0993, +0.1183] | YES |
+| human_nontata_promoters | leaky | LR_k6 | +0.0407 | [+0.0305, +0.0517] | YES |
+| human_enhancers_ensembl | leaky | RF_k6 | +0.1639 | [+0.1579, +0.1704] | YES |
+| human_enhancers_ensembl | leaky | LR_k6 | +0.0004 | [-0.0057, +0.0069] | no |
+| human_enhancers_cohn | clean | LR_k6 | -0.0016 | [-0.0196, +0.0148] | no |
+| human_ocr_ensembl | clean | LR_k6 | +0.0059 | [-0.0146, +0.0254] | no |
+| demo_human_or_worm | clean | LR_k6 | -0.0034 | [-0.0120, +0.0058] | no |
+| demo_coding_vs_intergenomic_seqs | clean | LR_k6 | +0.0056 | [-0.0074, +0.0182] | no |
+| drosophila_enhancers_stark | clean | LR_k6 | +0.0229 | [-0.0048, +0.0553] | no |
+
+Bootstrap deltas use the seed-0 corrected split, so point estimates differ slightly from the frozen 3-seed-mean deltas in sections 3-5 (unchanged); the sign/significance is the result of interest. **Reading:** the high-capacity (RF) drop is significant on both leaky datasets (CIs exclude 0); the linear (LR) drop is significant on nonTATA but **null on enhancers_ensembl** (CI includes 0) -- only the memorizer inflates there. All five clean-dataset deltas are not significant (CIs include 0), which replaces 'within noise' with a tested statement. Clean per-model original-split CIs are in `step3_accuracy_ci.csv`. *Source: `step_variance_ci.py` -> `step3_accuracy_ci.csv`, `step3_delta_ci.csv`.*
+
+### 16.3 "Statistically tied": clean-dataset rank swaps
+
+For every clean-dataset rank swap, the swapped models' original-split accuracy CIs overlap, so 'statistically tied' is justified.
+
+| dataset | swapped pair | acc A [95% CI] | acc B [95% CI] | CI overlap | gap |
+|---|---|---|---|---|---|
+| human_enhancers_cohn | HGB / LinearSVC | 0.7164 [0.7042,0.7296] | 0.7144 [0.7018,0.7270] | yes | 0.0020 |
+| human_ocr_ensembl | HGB / LinearSVC | 0.6710 [0.6562,0.6853] | 0.6697 [0.6552,0.6838] | yes | 0.0013 |
+| demo_coding_vs_intergenomic_seqs | LR / LinearSVC | 0.8878 [0.8790,0.8970] | 0.8902 [0.8810,0.8990] | yes | 0.0024 |
+| drosophila_enhancers_stark | HGB / LinearSVC | 0.6890 [0.6670,0.7116] | 0.6873 [0.6665,0.7087] | yes | 0.0017 |
+| drosophila_enhancers_stark | LinearSVC / RF | 0.6873 [0.6665,0.7087] | 0.7058 [0.6850,0.7266] | yes | 0.0185 |
+
+Every swap-pair CI overlaps, so 'statistically tied' holds for all clean swaps (human_or_worm has no swap, tau=+1.00). The 'sub-0.003' magnitude in section 10 fits cohn/ocr/coding; drosophila's LinearSVC/RF swap (gap 0.019) is larger but unstable (2/3 seeds, not a stable inversion) and its CIs still overlap. *Source: `step_variance_ci.py` -> `step4_tie_overlap.csv`.*
+
+## 17. Provenance (number -> script -> file)
 
 | quantity | script | output file |
 |---|---|---|
@@ -304,6 +362,8 @@ Rank the 4 models (k=6) by (a) original leaky-split accuracy, (b) homology-aware
 | splitter tool + CLI + docs (Part 2 artifact) | `homology_split.py` | `homology_split.py, TOOL_README.md` |
 | label concordance of near-duplicates (Check 1) | `check1_label_concordance.py` | `label_concordance.csv` |
 | novel-only ranking, 3-way comparison (Check 2) | `check2_novelonly_ranking.py` | `novelonly_ranking.csv` |
+| re-split seed variance: RF+LR k6, 5 seeds, both leaky (Phase 14) | `step2_rf_seeds.py + step_variance_ci.py` | `step2_seed_variance.csv` |
+| test-set bootstrap 95% CIs + delta significance + 'tied' overlap (Phase 14) | `step_variance_ci.py` | `step3_accuracy_ci.csv, step3_delta_ci.csv, step4_tie_overlap.csv` |
 | this file | `paper_numbers.py` | `PAPER_NUMBERS.md` |
 
 *3-class human_ensembl_regulatory (leak@0.7=0.005, clean) and the dummy_mouse smoke test are in `summary.csv`/`leakage_full.csv`; excluded from the binary tables above.*

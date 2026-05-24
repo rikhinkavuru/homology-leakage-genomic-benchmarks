@@ -36,9 +36,11 @@ and cached in `~/.genomic_benchmarks/` (a few minutes total, one-time).
 | 14 | `python make_graded_figure.py` | graded-performance figure (PNG/SVG/PDF) | <5 s |
 | 15 | `python check1_label_concordance.py` | **Check 1**: nearest-train-neighbour label concordance for near-duplicates (leaky + clean) | ~6 min |
 | 16 | `python check2_novelonly_ranking.py` | **Check 2**: novel-only ranking + 3-way ranking comparison (no refit) | <5 s |
-| 17 | `python paper_numbers.py` | `results/PAPER_NUMBERS.md` (single consolidated source, with provenance) | <5 s |
+| 17 | `python step_variance_ci.py` | **Phase 14**: re-split seed variance (LR k6, 5 seeds) + test-set bootstrap 95% CIs (1000 draws, no refit) + 'statistically tied' CI overlap; leaky full-scale, clean 20k | ~25 min |
+| 18 | `python step2_rf_seeds.py` | **Phase 14**: RF k6 homology-aware corrected accuracy over 5 re-split seeds (both leaky) merged into the variance CSV | ~7 min |
+| 19 | `python paper_numbers.py` | `results/PAPER_NUMBERS.md` (single consolidated source, with provenance) | <5 s |
 
-Steps 1-5, 8, 10, 12, 15 do model fitting / similarity; 6-7, 9, 11, 13-14, 16-17 are pure aggregation.
+Steps 1-5, 8, 10, 12, 15, 17-18 do model fitting / similarity; 6-7, 9, 11, 13-14, 16, 19 are pure aggregation.
 
 **Splitter CLI (Part 2):** `python homology_split.py --fasta seqs.fasta --labels labels.txt --out splits.json` (see `results/TOOL_README.md`); no `--fasta` runs the self-test.
 

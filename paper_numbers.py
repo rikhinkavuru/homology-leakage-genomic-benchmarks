@@ -56,6 +56,13 @@ try:
     nor = pd.read_csv(f"{R}/novelonly_ranking.csv")
 except Exception:
     nor = None
+try:
+    s2var = pd.read_csv(f"{R}/step2_seed_variance.csv")
+    s3acc = pd.read_csv(f"{R}/step3_accuracy_ci.csv")
+    s3del = pd.read_csv(f"{R}/step3_delta_ci.csv")
+    s4tie = pd.read_csv(f"{R}/step4_tie_overlap.csv")
+except Exception:
+    s2var = s3acc = s3del = s4tie = None
 
 
 def balance(dset):
@@ -383,7 +390,78 @@ if nor is not None:
 else:
     L.append("*(pending: run `python check2_novelonly_ranking.py`)*\n")
 
-L.append("## 16. Provenance (number -> script -> file)\n")
+# ---- 16. variance & confidence intervals ----
+L.append("## 16. Variance and confidence intervals (uncertainty quantification)\n")
+if s2var is not None and s3acc is not None and s3del is not None and s4tie is not None:
+    L.append("Quantifies the uncertainty behind the \"within noise\" / \"statistically tied\" "
+             "statements; **no number in sections 1-15 is changed -- this section only adds "
+             "variance.** Bootstrap CIs resample the stored per-example test correctness "
+             "(1000 draws, no model refit), RNG seed **20240524**. Leaky datasets are at full "
+             "scale, clean at the 20k subsample (seed 0), matching the frozen results above. "
+             "Re-split seeds {0,1,2,3,4}.\n")
+
+    L.append("### 16.1 Re-split seed variance (5 cluster->side seeds, homology-aware corrected accuracy)\n")
+    L.append("Confirms that a single cluster->side assignment is not 'unlucky': corrected accuracy "
+             "is stable across 5 independent assignments.\n")
+    L.append("| dataset | model | mean | SD | min | max | range | per-seed |")
+    L.append("|---|---|---|---|---|---|---|---|")
+    for d in LEAKY:
+        for m in ["RF_k6", "LR_k6"]:
+            r = s2var[(s2var.dataset == d) & (s2var.model == m)]
+            if len(r):
+                r = r.iloc[0]
+                L.append(f"| {d} | {m} | {r['mean']:.4f} | {r['sd']:.4f} | {r['min']:.4f} "
+                         f"| {r['max']:.4f} | {r['range']:.4f} | {r['per_seed']} |")
+    L.append("\nRF k6 reproduces `splitter_validation.csv` (seed-0 cross-check exact); SD <= 0.008 "
+             "for every cell. *Source: `step2_rf_seeds.py` (RF) + `step_variance_ci.py` (LR) -> "
+             "`step2_seed_variance.csv`; cross-checked vs `validate_splitter.py` -> `splitter_validation.csv`.*\n")
+
+    L.append("### 16.2 Test-set bootstrap 95% CIs and delta significance\n")
+    L.append("Accuracies with 95% bootstrap CIs (homology column = seed-0 corrected split):\n")
+    L.append("| dataset | model | original acc [95% CI] | homology acc [95% CI] |")
+    L.append("|---|---|---|---|")
+    for d in LEAKY:
+        for m in ["RF_k6", "LR_k6"]:
+            o = s3acc[(s3acc.dataset == d) & (s3acc.model == m) & (s3acc.split == "original")]
+            h = s3acc[(s3acc.dataset == d) & (s3acc.model == m) & (s3acc.split.str.startswith("homology"))]
+            if len(o) and len(h):
+                o = o.iloc[0]; h = h.iloc[0]
+                L.append(f"| {d} | {m} | {o['accuracy']:.4f} [{o['ci_lo']:.4f}, {o['ci_hi']:.4f}] "
+                         f"| {h['accuracy']:.4f} [{h['ci_lo']:.4f}, {h['ci_hi']:.4f}] |")
+    L.append("")
+    L.append("Delta (original - corrected) with 95% CI; \"excludes 0\" => the drop is significant:\n")
+    L.append("| dataset | group | model | delta | 95% CI | excludes 0 |")
+    L.append("|---|---|---|---|---|---|")
+    for _, r in s3del.iterrows():
+        L.append(f"| {r['dataset']} | {r['group']} | {r['model']} | {r['delta_orig_minus_corr']:+.4f} "
+                 f"| [{r['ci_lo']:+.4f}, {r['ci_hi']:+.4f}] | {'YES' if r['excludes_zero'] else 'no'} |")
+    L.append("\nBootstrap deltas use the seed-0 corrected split, so point estimates differ slightly "
+             "from the frozen 3-seed-mean deltas in sections 3-5 (unchanged); the sign/significance "
+             "is the result of interest. **Reading:** the high-capacity (RF) drop is significant on "
+             "both leaky datasets (CIs exclude 0); the linear (LR) drop is significant on nonTATA but "
+             "**null on enhancers_ensembl** (CI includes 0) -- only the memorizer inflates there. All "
+             "five clean-dataset deltas are not significant (CIs include 0), which replaces 'within "
+             "noise' with a tested statement. Clean per-model original-split CIs are in "
+             "`step3_accuracy_ci.csv`. *Source: `step_variance_ci.py` -> `step3_accuracy_ci.csv`, "
+             "`step3_delta_ci.csv`.*\n")
+
+    L.append("### 16.3 \"Statistically tied\": clean-dataset rank swaps\n")
+    L.append("For every clean-dataset rank swap, the swapped models' original-split accuracy CIs "
+             "overlap, so 'statistically tied' is justified.\n")
+    L.append("| dataset | swapped pair | acc A [95% CI] | acc B [95% CI] | CI overlap | gap |")
+    L.append("|---|---|---|---|---|---|")
+    for _, r in s4tie.iterrows():
+        L.append(f"| {r['dataset']} | {r['model_a']} / {r['model_b']} | {r['acc_a']:.4f} {r['ci_a']} "
+                 f"| {r['acc_b']:.4f} {r['ci_b']} | {'yes' if r['ci_overlap'] else 'NO'} | {r['gap']:.4f} |")
+    L.append("\nEvery swap-pair CI overlaps, so 'statistically tied' holds for all clean swaps "
+             "(human_or_worm has no swap, tau=+1.00). The 'sub-0.003' magnitude in section 10 fits "
+             "cohn/ocr/coding; drosophila's LinearSVC/RF swap (gap 0.019) is larger but unstable "
+             "(2/3 seeds, not a stable inversion) and its CIs still overlap. *Source: "
+             "`step_variance_ci.py` -> `step4_tie_overlap.csv`.*\n")
+else:
+    L.append("*(pending: run `python step_variance_ci.py` then `python step2_rf_seeds.py`)*\n")
+
+L.append("## 17. Provenance (number -> script -> file)\n")
 L.append("| quantity | script | output file |")
 L.append("|---|---|---|")
 for q, s, f in [
@@ -410,6 +488,10 @@ for q, s, f in [
      "homology_split.py, TOOL_README.md"),
     ("label concordance of near-duplicates (Check 1)", "check1_label_concordance.py", "label_concordance.csv"),
     ("novel-only ranking, 3-way comparison (Check 2)", "check2_novelonly_ranking.py", "novelonly_ranking.csv"),
+    ("re-split seed variance: RF+LR k6, 5 seeds, both leaky (Phase 14)",
+     "step2_rf_seeds.py + step_variance_ci.py", "step2_seed_variance.csv"),
+    ("test-set bootstrap 95% CIs + delta significance + 'tied' overlap (Phase 14)",
+     "step_variance_ci.py", "step3_accuracy_ci.csv, step3_delta_ci.csv, step4_tie_overlap.csv"),
     ("this file", "paper_numbers.py", "PAPER_NUMBERS.md"),
 ]:
     L.append(f"| {q} | `{s}` | `{f}` |")

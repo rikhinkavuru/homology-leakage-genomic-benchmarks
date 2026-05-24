@@ -25,6 +25,10 @@ Graded performance (Part 3): original split only (no re-split seed), model seed 
 Splitter validation (Part C): re-split seeds [0,1,2,3,4] (5 seeds).
 Label concordance (Check 1):  original split, no random seed (nearest-neighbour is deterministic).
 Novel-only ranking (Check 2): pure aggregation of frozen CSVs, no seeds.
+Variance & CIs (Phase 14):    re-split seeds [0,1,2,3,4] (5 seeds) for RF k6 + LR k6 corrected
+                          accuracy, both leaky datasets; cross-checked vs splitter validation.
+                          Bootstrap CIs over the test set: 1000 resamples of per-example
+                          correctness, RNG seed 20240524, NO model refit (deterministic).
 
 Python:                   3.13.3   (CPU only; no GPU, no deep learning)
 Full dependency pin:      results/requirements.txt

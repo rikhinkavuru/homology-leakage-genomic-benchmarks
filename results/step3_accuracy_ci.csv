@@ -1,0 +1,29 @@
+dataset,scale,model,split,n_test,accuracy,ci_lo,ci_hi
+human_nontata_promoters,full,RF_k6,original,9034,0.9284,0.9232,0.9338
+human_nontata_promoters,full,RF_k6,homology@0.7 (seed0),9041,0.82,0.8119,0.8279
+human_nontata_promoters,full,LR_k6,original,9034,0.8702,0.8635,0.8771
+human_nontata_promoters,full,LR_k6,homology@0.7 (seed0),9041,0.8294,0.8214,0.837
+human_enhancers_ensembl,full,RF_k6,original,30970,0.8596,0.8562,0.8635
+human_enhancers_ensembl,full,RF_k6,homology@0.7 (seed0),30971,0.6957,0.6902,0.7006
+human_enhancers_ensembl,full,LR_k6,original,30970,0.7809,0.7765,0.7856
+human_enhancers_ensembl,full,LR_k6,homology@0.7 (seed0),30971,0.7806,0.776,0.785
+human_enhancers_cohn,subsample20k,LR_k6,original,5000,0.7362,0.7238,0.7484
+human_enhancers_cohn,subsample20k,LinearSVC_k6,original,5000,0.7144,0.7018,0.727
+human_enhancers_cohn,subsample20k,RF_k6,original,5000,0.6932,0.6798,0.706
+human_enhancers_cohn,subsample20k,HGB_k6,original,5000,0.7164,0.7042,0.7296
+human_ocr_ensembl,subsample20k,LR_k6,original,4000,0.677,0.6623,0.692
+human_ocr_ensembl,subsample20k,LinearSVC_k6,original,4000,0.6697,0.6552,0.6838
+human_ocr_ensembl,subsample20k,RF_k6,original,4000,0.6565,0.6415,0.672
+human_ocr_ensembl,subsample20k,HGB_k6,original,4000,0.671,0.6562,0.6853
+demo_human_or_worm,subsample20k,LR_k6,original,5000,0.9374,0.9312,0.9444
+demo_human_or_worm,subsample20k,LinearSVC_k6,original,5000,0.939,0.9324,0.946
+demo_human_or_worm,subsample20k,RF_k6,original,5000,0.9184,0.9112,0.9258
+demo_human_or_worm,subsample20k,HGB_k6,original,5000,0.9298,0.9234,0.937
+demo_coding_vs_intergenomic_seqs,subsample20k,LR_k6,original,5000,0.8878,0.879,0.897
+demo_coding_vs_intergenomic_seqs,subsample20k,LinearSVC_k6,original,5000,0.8902,0.881,0.899
+demo_coding_vs_intergenomic_seqs,subsample20k,RF_k6,original,5000,0.8414,0.831,0.8518
+demo_coding_vs_intergenomic_seqs,subsample20k,HGB_k6,original,5000,0.8702,0.8614,0.8798
+drosophila_enhancers_stark,subsample20k,LR_k6,original,1730,0.7179,0.6983,0.7393
+drosophila_enhancers_stark,subsample20k,LinearSVC_k6,original,1730,0.6873,0.6665,0.7087
+drosophila_enhancers_stark,subsample20k,RF_k6,original,1730,0.7058,0.685,0.7266
+drosophila_enhancers_stark,subsample20k,HGB_k6,original,1730,0.689,0.667,0.7116

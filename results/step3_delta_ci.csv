@@ -1,0 +1,10 @@
+dataset,group,model,delta_orig_minus_corr,ci_lo,ci_hi,excludes_zero
+human_nontata_promoters,leaky,RF_k6,0.1083,0.0993,0.1183,True
+human_nontata_promoters,leaky,LR_k6,0.0407,0.0305,0.0517,True
+human_enhancers_ensembl,leaky,RF_k6,0.1639,0.1579,0.1704,True
+human_enhancers_ensembl,leaky,LR_k6,0.0004,-0.0057,0.0069,False
+human_enhancers_cohn,clean,LR_k6,-0.0016,-0.0196,0.0148,False
+human_ocr_ensembl,clean,LR_k6,0.0059,-0.0146,0.0254,False
+demo_human_or_worm,clean,LR_k6,-0.0034,-0.012,0.0058,False
+demo_coding_vs_intergenomic_seqs,clean,LR_k6,0.0056,-0.0074,0.0182,False
+drosophila_enhancers_stark,clean,LR_k6,0.0229,-0.0048,0.0553,False

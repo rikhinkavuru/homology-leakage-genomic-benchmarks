@@ -1,0 +1,6 @@
+dataset,model_a,acc_a,ci_a,model_b,acc_b,ci_b,ci_overlap,gap
+human_enhancers_cohn,HGB,0.7164,"[0.7042,0.7296]",LinearSVC,0.7144,"[0.7018,0.7270]",True,0.002
+human_ocr_ensembl,HGB,0.671,"[0.6562,0.6853]",LinearSVC,0.6697,"[0.6552,0.6838]",True,0.0013
+demo_coding_vs_intergenomic_seqs,LR,0.8878,"[0.8790,0.8970]",LinearSVC,0.8902,"[0.8810,0.8990]",True,0.0024
+drosophila_enhancers_stark,HGB,0.689,"[0.6670,0.7116]",LinearSVC,0.6873,"[0.6665,0.7087]",True,0.0017
+drosophila_enhancers_stark,LinearSVC,0.6873,"[0.6665,0.7087]",RF,0.7058,"[0.6850,0.7266]",True,0.0185
