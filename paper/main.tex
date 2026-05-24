@@ -22,28 +22,25 @@
 
 \title[Homology leakage selectively inverts model rankings]{Homology leakage selectively inverts model rankings on genomic sequence-classification benchmarks}
 
-%% ===== AUTHORS / AFFILIATIONS: placeholders for the corresponding author to fill =====
-\author[1,$\ast$]{First Author}
-\author[1]{Second Author}
-\address[1]{\orgdiv{Department}, \orgname{Institution}, \orgaddress{\street{Street}, \postcode{Postcode}, \state{State}, \country{Country}}}
-\corresp[$\ast$]{Corresponding author. \href{mailto:author@example.org}{author@example.org}}
-%% =====================================================================================
+%% ===== Author / affiliation =====
+\author[1,$\ast$]{Rikhin Kavuru}
+\address[1]{\orgname{Ivy Tech Community College}, \orgaddress{\country{USA}}}
+\corresp[$\ast$]{Corresponding author. \href{mailto:rkavuru1@ivytech.edu}{rkavuru1@ivytech.edu}}
 
 %\received{Date}{0}{Year}
 %\revised{Date}{0}{Year}
 %\accepted{Date}{0}{Year}
 
-%% MISMATCH/NOTE [task-tagged "verify S9: 15.6"]: the 15.6-point figure (used in the
-%% abstract and Section 4.2) is the ensembl RandomForest k=6 homology drop from the
-%% PRIMARY frozen run -- PAPER_NUMBERS.md S3 (main results), S4 (capacity scaling) and
-%% S5 (robustness) all give 0.1558 = 15.6 pts. The separate 4-model extended-capacity
-%% table (PAPER_NUMBERS.md S9) lists 0.164 (16.4 pts) for the same cell, a documented
-%% RandomForest load-order variance between run paths; 15.6 is the canonical/headline
-%% value and is used here.
+%% NOTE [15.6 reconciliation]: 15.6 pts (= 0.1558) is the ensembl RandomForest k=6
+%% homology-split accuracy drop from the PRIMARY frozen tables (PAPER_NUMBERS.md S3
+%% main results, S4 capacity scaling, S5 robustness). The separate 4-model
+%% extended-capacity table differs by <0.01 for this cell due to RandomForest
+%% bootstrap order-sensitivity and is not used in the manuscript; the primary
+%% full-scale value (15.6 pts) is reported throughout.
 \abstract{
 \textbf{Motivation:} Benchmarks for DNA sequence classification underpin method comparison, but standard train/test splits rarely control for sequence homology. When near-identical sequences span the split, models can score well by memorizing near-duplicates rather than generalizing, and the consequences for method comparison have not been systematically characterized.\\
 \textbf{Results:} We audit 7 binary datasets from the Genomic Benchmarks suite, quantifying train/test homology by exact $k$-mer Jaccard similarity and re-evaluating four classifiers under a homology-aware re-split that confines near-duplicate clusters to one side. Two datasets are materially leaky (38--41\% of test sequences have a training near-duplicate); correcting the split removes up to 15.6 points of accuracy, while the remaining datasets are unaffected. Crucially, leakage does not merely inflate scores---it inverts method rankings: the mean Kendall $\tau$ between leaky-split and corrected rankings is $-0.17$ on leaky datasets versus $+0.67$ on clean ones, and the apparent best model (a random forest) falls to last after correction. A homology-graded analysis confirms the mechanism is memorization of label-carrying near-duplicates. We provide a per-dataset leakage report card and a drop-in homology-aware splitter.\\
-\textbf{Availability and implementation:} Code, data-processing scripts, and the splitter are available at \href{https://github.com/PLACEHOLDER/homology-leakage-audit}{[repository URL --- placeholder]}; the audit is CPU-only and fully reproducible.}
+\textbf{Availability and implementation:} Code and data are available at \url{https://github.com/Rikhin/homology-leakage-genomic-benchmarks}; the audit is CPU-only and fully reproducible.}
 
 \keywords{data leakage, sequence homology, benchmark evaluation, genomics, model ranking}
 
@@ -98,7 +95,7 @@ All experiments are deterministic with logged seeds, CPU-only, and free of exter
 Of the seven binary datasets, only two---\textit{human\_nontata\_promoters} and \textit{human\_enhancers\_ensembl}---exceed a 10\% near-duplicate test fraction at Jaccard $0.7$ ($0.406$ and $0.384$ respectively); the remaining five are near zero (Table~\ref{tab:reportcard}, Fig.~\ref{fig:reportcard}). The three-class \textit{human\_ensembl\_regulatory} set is likewise clean ($0.005$). Leakage is therefore concentrated, not endemic to the suite.
 
 \subsection{Correcting the split lowers accuracy only on leaky datasets}
-%% 15.6 = ensembl RF k=6 drop (primary frozen run); see the MISMATCH/NOTE above the abstract.
+%% 15.6 = ensembl RF k=6 drop (primary frozen run); see the NOTE above the abstract.
 Under the homology-aware re-split, accuracy drops sharply on the leaky datasets---up to $15.6$ points for the random forest on \textit{human\_enhancers\_ensembl} and $12.1$ points on \textit{human\_nontata\_promoters}---while clean datasets are unaffected (within noise). The negative control confirms causation: a random re-split of the same data, at matched size and balance, leaves the leaky-dataset accuracies essentially unchanged (best-model deltas $-0.001$ and $-0.002$; all datasets within $\pm0.006$ except one small-$n$ dataset). Only removing homology, not re-splitting per se, lowers the score (Fig.~\ref{fig:controls}).
 
 \subsection{Leakage inverts method rankings}
