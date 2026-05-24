@@ -1,0 +1,9 @@
+dataset,n_full,leak_at_0p7,leak_at_0p9,verdict,best_model,acc_drop_corrected,ranking_inverts,rf_rank_orig_to_corr
+human_nontata_promoters,36131,0.406,0.225,LEAKY,RF_k6,0.121,yes,1->3
+human_enhancers_ensembl,154842,0.384,0.38,LEAKY,RF_k6,0.156,yes,1->4
+demo_coding_vs_intergenomic_seqs,100000,0.078,0.024,clean,LR_k6,-0.001,no,4->4
+human_ocr_ensembl,174756,0.01,0.001,clean,LR_k6,0.004,no,4->4
+demo_human_or_worm,100000,0.012,0.003,clean,LR_k6,-0.004,no,4->4
+drosophila_enhancers_stark,6914,0.016,0.006,clean,LR_k6,0.012,no,2->3
+human_enhancers_cohn,27791,0.001,0.0,clean,LR_k6,-0.004,no,4->4
+human_ensembl_regulatory (3-class),289061,0.005,0.001,clean,RF_k4,-0.01,n/a,n/a

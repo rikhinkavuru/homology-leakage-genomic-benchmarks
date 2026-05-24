@@ -1,0 +1,10 @@
+dataset,n_train,n_test,median_maxsim,p99_maxsim,leak_full_0.5,leak_full_0.7,leak_full_0.9
+human_nontata_promoters,27097,9034,0.088,0.9918,0.4497,0.4064,0.2254
+human_enhancers_cohn,20843,6948,0.0344,0.4547,0.0075,0.0012,0.0004
+human_enhancers_ensembl,123872,30970,0.1205,1.0,0.3938,0.3839,0.3802
+human_ocr_ensembl,139804,34952,0.0408,0.7048,0.0382,0.0104,0.001
+demo_human_or_worm,75000,25000,0.0475,0.7376,0.0292,0.0124,0.0026
+demo_coding_vs_intergenomic_seqs,75000,25000,0.0492,0.9592,0.142,0.0784,0.0243
+drosophila_enhancers_stark,5184,1730,0.0517,0.7763,0.0283,0.0156,0.0058
+dummy_mouse_enhancers_ensembl,968,242,0.0406,0.0723,0.0,0.0,0.0
+human_ensembl_regulatory,231348,57713,0.0383,0.6017,0.0169,0.0049,0.0006

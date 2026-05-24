@@ -1,0 +1,3 @@
+dataset,a_leaky_ranking,b_homology_ranking,c_novelonly_ranking,rf_rank_leaky,rf_rank_homology,rf_rank_novelonly,rf_acc_novel,best_novel_model,best_novel_acc,tau_a_b,tau_a_c,tau_b_c,homology_novelonly_agree
+human_nontata_promoters,RF>HGB>LinearSVC>LR,LR>HGB>RF>LinearSVC,RF>LinearSVC>HGB>LR,1,3,1,0.8793,RF,0.8793,-0.333,0.667,-0.667,False
+human_enhancers_ensembl,RF>LinearSVC>LR>HGB,LinearSVC>LR>HGB>RF,LinearSVC>RF>LR>HGB,1,4,2,0.7698,LinearSVC,0.782,0.0,0.667,0.333,False

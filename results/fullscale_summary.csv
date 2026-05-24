@@ -1,0 +1,13 @@
+dataset,model,k,original_acc,random_acc_mean,homology_acc_mean,homology_acc_std,delta_acc_homology,delta_acc_random,original_auroc,homology_auroc_mean
+human_nontata_promoters,LR,4,0.8268,0.8305,0.8182,0.0054,0.0086,-0.0038,0.8974,0.8884
+human_nontata_promoters,LR,6,0.8702,0.8749,0.83,0.01,0.0402,-0.0048,0.9381,0.9072
+human_nontata_promoters,RF,4,0.8907,0.8916,0.807,0.0023,0.0837,-0.0008,0.9811,0.8954
+human_nontata_promoters,RF,6,0.9317,0.9324,0.8105,0.006,0.1212,-0.0007,0.9938,0.922
+human_enhancers_ensembl,LR,4,0.7337,0.7376,0.7383,0.0016,-0.0046,-0.0039,0.802,0.8063
+human_enhancers_ensembl,LR,6,0.7809,0.781,0.7776,0.0021,0.0033,-0.0,0.8573,0.8542
+human_enhancers_ensembl,RF,4,0.8461,0.8485,0.6934,0.0029,0.1527,-0.0024,0.9398,0.7873
+human_enhancers_ensembl,RF,6,0.8556,0.8577,0.6999,0.0021,0.1558,-0.0021,0.9428,0.8031
+demo_coding_vs_intergenomic_seqs,LR,4,0.8836,0.8839,0.8842,0.0017,-0.0006,-0.0003,0.9528,0.9526
+demo_coding_vs_intergenomic_seqs,LR,6,0.9003,0.9026,0.9011,0.0008,-0.0008,-0.0022,0.9643,0.9642
+demo_coding_vs_intergenomic_seqs,RF,4,0.8765,0.8762,0.8693,0.0016,0.0073,0.0004,0.9487,0.9441
+demo_coding_vs_intergenomic_seqs,RF,6,0.8632,0.8659,0.8598,0.0018,0.0033,-0.0027,0.9437,0.9399

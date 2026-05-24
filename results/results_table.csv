@@ -1,0 +1,5 @@
+feature_k,model,original_accuracy,corrected_accuracy_mean,corrected_accuracy_std,delta_accuracy,original_auroc,corrected_auroc_mean,corrected_auroc_std,delta_auroc,original_f1,corrected_f1_mean,corrected_f1_std,delta_f1
+4,LR,0.8268,0.8183,0.0055,0.0085,0.8974,0.8884,0.0064,0.0089,0.8329,0.8244,0.0047,0.0084
+4,RF,0.8907,0.8065,0.0034,0.0842,0.9811,0.8952,0.005,0.0859,0.8913,0.825,0.0028,0.0662
+6,LR,0.8702,0.83,0.0098,0.0402,0.9381,0.9073,0.0066,0.0308,0.8747,0.8422,0.0076,0.0326
+6,RF,0.9317,0.8117,0.0053,0.12,0.9938,0.9211,0.0049,0.0727,0.9342,0.8401,0.0038,0.0941

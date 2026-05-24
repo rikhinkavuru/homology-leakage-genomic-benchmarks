@@ -1,0 +1,8 @@
+dataset,drop_scale,n_full,leak_full_0p5,leak_full_0p7,leak_full_0p9,best_model,original_acc,random_acc,homology_acc,homology_acc_std,delta_homology,delta_random,original_auroc,homology_auroc
+human_nontata_promoters,full,36131,0.4497,0.4064,0.2254,RF_k6,0.9317,0.9324,0.8105,0.006,0.1212,-0.0007,0.9938,0.922
+human_enhancers_ensembl,full,154842,0.3938,0.3839,0.3802,RF_k6,0.8556,0.8577,0.6999,0.0021,0.1558,-0.0021,0.9428,0.8031
+demo_coding_vs_intergenomic_seqs,full,100000,0.142,0.0784,0.0243,LR_k6,0.9003,0.9026,0.9011,0.0008,-0.0008,-0.0022,0.9643,0.9642
+human_enhancers_cohn,subsample,27791,0.0075,0.0012,0.0004,LR_k6,0.7362,0.7331,0.7405,0.0023,-0.0043,0.0031,0.8103,0.8168
+human_ocr_ensembl,subsample,174756,0.0382,0.0104,0.001,LR_k6,0.677,0.6762,0.6732,0.0015,0.0038,0.0008,0.7473,0.7423
+demo_human_or_worm,subsample,100000,0.0292,0.0124,0.0026,LR_k6,0.9374,0.9435,0.9414,0.0004,-0.004,-0.0061,0.984,0.9862
+drosophila_enhancers_stark,subsample,6914,0.0283,0.0156,0.0058,LR_k6,0.7179,0.6934,0.7061,0.009,0.0118,0.0245,0.7869,0.7621

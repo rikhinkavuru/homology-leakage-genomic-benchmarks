@@ -1,0 +1,9 @@
+dataset,LR k4,LR k6,RF k4,RF k6,leak_full_0.7,group
+human_nontata_promoters,0.86,4.02,8.37,12.12,0.4064,leaky
+human_enhancers_ensembl,-0.46,0.33,15.27,15.58,0.3839,leaky
+demo_coding_vs_intergenomic_seqs,-0.06,-0.08,0.73,0.33,0.0784,clean
+human_ocr_ensembl,0.11,0.38,1.85,1.01,0.0104,clean
+drosophila_enhancers_stark,1.54,1.18,0.5,2.31,0.0156,clean
+demo_human_or_worm,-0.91,-0.4,-0.56,-0.47,0.0124,clean
+human_enhancers_cohn,-0.31,-0.43,-1.1,-0.54,0.0012,clean
+RANDOM_CONTROL_MEAN,0.011,0.219,0.127,0.379,,control

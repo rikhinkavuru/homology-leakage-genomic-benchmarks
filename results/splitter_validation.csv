@@ -1,0 +1,3 @@
+dataset,model,n_seeds,corrected_acc_mean,corrected_acc_std,max_residual_leak,test_frac_mean
+human_nontata_promoters,RF_k6,5,0.8101,0.0055,0.0,0.2502
+human_enhancers_ensembl,RF_k6,5,0.6951,0.0019,0.0,0.2

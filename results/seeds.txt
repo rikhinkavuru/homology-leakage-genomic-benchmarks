@@ -1,0 +1,30 @@
+Random seeds and deterministic settings (homology-leakage audit)
+================================================================
+Every reported number is deterministic given these settings.
+
+Global numpy seed:        np.random.seed(0)        [run_audit.py, run_suite.py]
+Model seed (random_state): 0                        [run_audit.make_models]
+    LogisticRegression(C=1.0, max_iter=5000, random_state=0)  (after L2 row-normalization)
+    RandomForestClassifier(n_estimators=150, n_jobs=-1, random_state=0)
+Subsample seed:           0                          [run_suite.SUBSAMPLE_SEED]
+    stratified by (split x class); cap N_CAP = 20000 pooled sequences
+Cluster->split seeds:     [0, 1, 2]                  [run_suite.SPLIT_SEEDS]
+Random re-split seeds:    [0, 1, 2]  (RNG seeded as 1000 + seed)  [run_suite.random_split]
+
+Featurization:            overlapping k-mer counts, fixed ACGT vocabulary
+                          k = 4 (256 features) and k = 6 (4096 features)
+                          L2 row-normalized for LogisticRegression
+Similarity:               EXACT Jaccard of 8-mer sets (k=8), sparse M @ M.T (no MinHash)
+Leakage / cluster thresholds: Jaccard {0.5, 0.7, 0.9}; main re-split @ 0.7
+Re-split rule:            connected components (single linkage); whole clusters assigned
+                          per class to ~original test fraction; no cluster spans the split
+
+Extended models (Part A):  LinearSVC(C=1.0, dual=False, max_iter=5000, random_state=0);
+                          HistGradientBoosting(random_state=0). Same splits/seeds as above.
+Graded performance (Part 3): original split only (no re-split seed), model seed 0, k=6.
+Splitter validation (Part C): re-split seeds [0,1,2,3,4] (5 seeds).
+Label concordance (Check 1):  original split, no random seed (nearest-neighbour is deterministic).
+Novel-only ranking (Check 2): pure aggregation of frozen CSVs, no seeds.
+
+Python:                   3.13.3   (CPU only; no GPU, no deep learning)
+Full dependency pin:      results/requirements.txt

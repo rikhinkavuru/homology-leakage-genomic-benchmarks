@@ -1,0 +1,10 @@
+dataset,hom_delta_LR_k4,rand_delta_LR_k4,hom_delta_LR_k6,rand_delta_LR_k6,hom_delta_RF_k4,rand_delta_RF_k4,hom_delta_RF_k6,rand_delta_RF_k6,homology_monotone_increasing,hom_delta_min,hom_delta_max
+human_nontata_promoters,0.0044,0.0038,0.0273,0.0061,0.0365,0.0003,0.059,-0.0015,True,0.0044,0.059
+human_enhancers_cohn,-0.0031,0.001,-0.0043,0.0031,-0.011,-0.0031,-0.0054,0.0003,False,-0.011,-0.0031
+human_enhancers_ensembl,-0.0004,0.0093,0.0109,0.0085,0.013,0.0104,0.0201,0.0127,True,-0.0004,0.0201
+human_ocr_ensembl,0.0011,0.0002,0.0038,0.0008,0.0185,0.0083,0.0101,0.0,False,0.0011,0.0185
+demo_human_or_worm,-0.0091,-0.0097,-0.004,-0.0061,-0.0056,-0.0045,-0.0047,-0.0018,False,-0.0091,-0.004
+demo_coding_vs_intergenomic_seqs,0.0009,-0.0011,-0.0029,-0.0027,-0.0008,0.0007,-0.0022,-0.0048,False,-0.0029,0.0009
+drosophila_enhancers_stark,0.0154,0.0173,0.0118,0.0245,0.005,0.011,0.0231,0.0335,False,0.005,0.0231
+dummy_mouse_enhancers_ensembl,-0.0193,0.0234,-0.0455,-0.0055,-0.0041,0.0344,-0.0028,0.0386,False,-0.0455,-0.0028
+human_ensembl_regulatory,-0.0114,-0.0059,-0.0181,-0.0216,-0.0098,-0.0086,-0.0048,-0.0046,False,-0.0181,-0.0048

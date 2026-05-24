@@ -1,0 +1,9 @@
+dataset,leaky,threshold,n_pairs,frac_same_label,low_confidence
+human_enhancers_cohn,False,0.7,6,1.0,True
+human_enhancers_cohn,False,0.9,2,1.0,True
+demo_human_or_worm,False,0.7,16,1.0,True
+demo_human_or_worm,False,0.9,6,1.0,True
+human_nontata_promoters,True,0.7,3671,0.9992,False
+human_nontata_promoters,True,0.9,2037,0.9995,False
+human_enhancers_ensembl,True,0.7,11889,0.9993,False
+human_enhancers_ensembl,True,0.9,11774,0.9999,False
