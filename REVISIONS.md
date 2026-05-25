@@ -1,6 +1,12 @@
-# REVISIONS.md — Phase 2 proposals (judgment-required; NOT yet applied)
+# REVISIONS.md — Phase 2 proposals (RESOLVED)
 
-These touch scientific claims or need author input. **Nothing here has been edited into `main.tex`.** Review and tell me which to apply. Line numbers refer to `paper/main.tex` at commit `e73ee82`.
+**STATUS (final, after a 4-round hostile audit that converged clean):**
+- **Item 1 (abstract clean-vs-partial telegraph): APPLIED** (commits `903425d`/`3ccffda`/`f244d52`). The abstract now names the mechanism as clean on the Ensembl-enhancer dataset and only partial on the nonTATA-promoter dataset, where the random forest keeps a genuine edge on novel sequences.
+- **Item 2 (§4.3 Kendall-τ compression): APPLIED** (`3ccffda`). τ demoted to descriptive support, value-set listing dropped, deferred to Fig 2.
+- **Item 3 (Methods bootstrap sentence): APPLIED** (`903425d`). §3.6 now specifies 1,000 percentile resamples of the per-test-example correctness vector, no refit, fixed seed.
+- **Item 4 (two reviewer-risk experiments): STILL OPEN — out of scope.** Both remain flagged-only per your instruction; they need data/compute (MMseqs2 binary + raw FASTA; a GPU for the CNN) and are documented below as concrete plans for if/when you green-light them.
+
+Original proposal text retained below for reference. Line numbers refer to `paper/main.tex` at commit `e73ee82`.
 
 ---
 
