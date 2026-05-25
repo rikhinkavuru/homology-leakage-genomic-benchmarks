@@ -1,0 +1,11 @@
+dataset,rf_seed,corrected_rf_acc,rf_rank,LR_corrected,LinearSVC_corrected,HGB_corrected,original_rf_acc_seed0
+human_enhancers_ensembl,0,0.6957,4,0.7806,0.7975,0.7608,0.8596
+human_enhancers_ensembl,1,0.6987,4,0.7806,0.7975,0.7608,0.8596
+human_enhancers_ensembl,2,0.7014,4,0.7806,0.7975,0.7608,0.8596
+human_enhancers_ensembl,3,0.6988,4,0.7806,0.7975,0.7608,0.8596
+human_enhancers_ensembl,4,0.6968,4,0.7806,0.7975,0.7608,0.8596
+human_nontata_promoters,0,0.82,3,0.8294,0.8083,0.827,0.9284
+human_nontata_promoters,1,0.8161,3,0.8294,0.8083,0.827,0.9284
+human_nontata_promoters,2,0.8239,3,0.8294,0.8083,0.827,0.9284
+human_nontata_promoters,3,0.8249,3,0.8294,0.8083,0.827,0.9284
+human_nontata_promoters,4,0.8214,3,0.8294,0.8083,0.827,0.9284
