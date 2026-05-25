@@ -10,13 +10,13 @@
 \begin{document}
 
 \journaltitle{Bioinformatics Advances}
-\DOI{DOI added during production}
-\copyrightyear{2026}
-\pubyear{2026}
-\access{Advance Access Publication Date: Day Month Year}
+\DOI{DOI added during production}% TODO: pre-acceptance stub -- DOI assigned by OUP at production
+\copyrightyear{2026}% TODO: confirm copyright year at acceptance
+\pubyear{2026}% TODO: confirm publication year at acceptance; Volume/Issue stay blank until production (running header shows them empty -- no \volume/\issue command yet)
+\access{Advance Access Publication Date: Day Month Year}% TODO: pre-acceptance stub -- publication date set at production
 \appnotes{Original Paper}
 
-\firstpage{1}
+\firstpage{1}% TODO: pre-acceptance stub -- first page assigned at production
 
 %\subtitle{Genome analysis}
 
@@ -27,6 +27,7 @@
 \address[1]{\orgname{Independent Researcher}}
 \corresp[$\ast$]{Corresponding author. \href{mailto:rikhinkavuru@gmail.com}{rikhinkavuru@gmail.com}}
 
+% TODO: uncomment and fill the received/revised/accepted dates at acceptance
 %\received{Date}{0}{Year}
 %\revised{Date}{0}{Year}
 %\accepted{Date}{0}{Year}
@@ -108,7 +109,7 @@ The consequence for method comparison is the central result. On both leaky datas
 Binning test sequences by similarity to training reveals the mechanism directly (Fig.~\ref{fig:graded}). On \textit{human\_enhancers\_ensembl}, the random forest scores $1.000$ on near-duplicate test sequences ($\ge0.9$ similarity) but only $0.770$ on novel ones ($<0.5$), a gap of $+0.230$, versus a gap of roughly $0.035$ for the other models; tellingly, on the novel sequences the random forest ($0.770$) is \emph{worse} than the linear SVM ($0.782$). The label-concordance analysis explains why memorization pays: at $\ge0.9$ similarity, $99.95\%$ (nontata) and $99.99\%$ (ensembl) of near-duplicate test sequences share the label of their nearest training neighbour, so a model that recognizes a near-copy is correct essentially for free. On \textit{human\_enhancers\_ensembl} the inflation is confined to the high-capacity model: the random-forest drop is significant ($16.4$ points, 95\% CI $[15.8, 17.0]$, excludes zero) while the logistic-regression drop is null ($\approx0.000$, 95\% CI $[-0.006, +0.007]$, includes zero), indicating that only the model able to memorize near-duplicates is inflated. Clean datasets have near-empty high-similarity bins, leaving nothing to memorize.
 
 \subsection{Honest scope of the mechanism}
-The two leaky datasets differ in how cleanly the memorization account applies. On \textit{human\_enhancers\_ensembl}, two independent honest evaluations agree: the corrected split and a novel-sequences-only ranking both dethrone the random forest. On \textit{human\_nontata\_promoters}, these routes diverge ($\tau=-0.67$ between the corrected and novel-only rankings): the random forest is demoted under the corrected split but remains the best model on truly novel sequences (accuracy $0.879$). Its advantage there is therefore partly genuine generalization, not pure test-side memorization. The inflation and ranking-change findings hold for both datasets; the mechanistic claim is clean for \textit{human\_enhancers\_ensembl} and partial for \textit{human\_nontata\_promoters}. This implies a scope limit for homology-aware splitting: it reliably detects and removes near-duplicate leakage, but because cluster removal can also discard legitimately learnable signal, the corrected ranking is not guaranteed to recover the true generalization ranking---as \textit{human\_nontata\_promoters} shows, where the random forest retains a genuine advantage on novel sequences.
+The two leaky datasets differ in how cleanly the memorization account applies. On \textit{human\_enhancers\_ensembl}, two independent evaluation routes agree: the corrected split and a novel-sequences-only ranking both dethrone the random forest. On \textit{human\_nontata\_promoters}, these routes diverge ($\tau=-0.67$ between the corrected and novel-only rankings): the random forest is demoted under the corrected split but remains the best model on truly novel sequences (accuracy $0.879$). Its advantage there is therefore partly genuine generalization, not pure test-side memorization. The inflation and ranking-change findings hold for both datasets; the mechanistic claim is clean for \textit{human\_enhancers\_ensembl} and partial for \textit{human\_nontata\_promoters}. This implies a scope limit for homology-aware splitting: it reliably detects and removes near-duplicate leakage, but because cluster removal can also discard legitimately learnable signal, the corrected ranking is not guaranteed to recover the true generalization ranking---as \textit{human\_nontata\_promoters} shows, where the random forest retains a genuine advantage on novel sequences.
 
 \section{Discussion}
 
@@ -150,10 +151,10 @@ human\_ensembl\_regulatory (3-class) & 289{,}061 & 401 (89--802)  & 3 classes & 
 \begin{table*}[tbp]
 \begin{center}
 \begin{minipage}{\textwidth}
-\caption{Leakage report card. Verdict is LEAKY if the full-scale near-duplicate test fraction exceeds $0.1$ at Jaccard $0.7$. ``Acc.\ drop'' is the best-model accuracy change under the homology-aware re-split (original $-$ corrected; positive $=$ accuracy lost under correction); ``RF rank'' is the random-forest rank before/after correction.\label{tab:reportcard}}
+\caption{Leakage report card. Verdict is LEAKY if the full-scale near-duplicate test fraction exceeds $0.1$ at Jaccard $0.7$. ``Acc.\ lost'' is the best-model accuracy change under the homology-aware re-split (original $-$ corrected; positive $=$ accuracy lost under correction); ``RF rank'' is the random-forest rank before/after correction.\label{tab:reportcard}}
 \resizebox{\textwidth}{!}{\begin{tabular}{@{}lrrrllrll@{}}
 \toprule
-Dataset & $n$ & leak@0.7 & leak@0.9 & Verdict & Best model & Acc.\ drop & Rank change? & RF rank\\
+Dataset & $n$ (full) & leak@0.7 & leak@0.9 & Verdict & Best model & Acc.\ lost & Rank change? & RF rank\\
 \midrule
 human\_nontata\_promoters          & 36{,}131  & 0.406 & 0.225 & \textbf{LEAKY} & RF ($k$=6) & $+0.108$ & yes  & $1\!\to\!3$\\
 human\_enhancers\_ensembl          & 154{,}842 & 0.384 & 0.380 & \textbf{LEAKY} & RF ($k$=6) & $+0.164$ & yes  & $1\!\to\!4$\\
@@ -175,7 +176,7 @@ human\_ensembl\_regulatory (3-class) & 289{,}061 & 0.005 & 0.001 & clean & RF ($
 \begin{figure}[tbp]
 \centering
 \includegraphics[width=\linewidth]{fig_controls}
-\caption{Original split versus random re-split (negative control) versus homology-aware re-split, best model per dataset. Only the homology-aware split lowers accuracy, and only on leaky datasets.}\label{fig:controls}
+\caption{Original split versus random re-split (negative control) versus homology-aware re-split, best model per dataset. Only the homology-aware split lowers accuracy, and only on leaky datasets. The $y$-axis is truncated at 50\% (not 0\%) to make the homology-aware accuracy drop visible; bars span best-model accuracies of roughly 70--93\%.}\label{fig:controls}
 \end{figure}
 
 \begin{figure*}[tbp]

@@ -24,7 +24,12 @@ LSTY = {"LR": "-", "LinearSVC": "--", "RF": "-", "HGB": "-"}    # LR solid vs Li
 plt.rcParams.update({"font.size": 11, "axes.spines.top": False, "axes.spines.right": False})
 
 g = pd.read_csv(os.path.join(R, "graded_performance.csv"))
-fig, axes = plt.subplots(2, 2, figsize=(11, 8))
+# Bottom row = clean controls with sparse high-similarity bins (mostly empty).
+# Give that row less vertical space than the populated (leaky) top row so the
+# figure is not dominated by whitespace. x-axis n-count labels keep their own
+# font size, so compressing panel height does not make them illegible.
+fig, axes = plt.subplots(2, 2, figsize=(11, 6.4),
+                         gridspec_kw={"height_ratios": [1.7, 1.0]})
 for ax, d in zip(axes.ravel(), PANELS):
     sub = g[g.dataset == d]
     n_by_bin = [int(sub[sub.model == "RF"].set_index("sim_bin").reindex(BINLAB).loc[b, "n"]) for b in BINLAB]

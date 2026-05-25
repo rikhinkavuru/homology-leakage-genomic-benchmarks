@@ -116,7 +116,10 @@ ax.set_xticks(xs)
 ax.set_xticklabels([f"{NICE[d]}\n({summ.loc[d,'best_model']}, leak@0.7={summ.loc[d,'leak_full_0p7']:.2f})" for d in LEAKY])
 ax.set_ylabel("test accuracy (%)")
 ax.set_ylim(50, 100)
-ax.set_title("Negative control: only the homology-aware split removes the inflation")
+# Headroom + title pad so the title and the top (100) tick label do not crowd
+# against the top of the plot. y-floor intentionally kept at 50 (see caption).
+ax.set_title("Negative control: only the homology-aware split removes the inflation",
+             pad=14)
 ax.legend(fontsize=9, frameon=False, loc="upper right")
 savefig(fig, "fig_controls")
 pd.DataFrame(bar_rows).to_csv(os.path.join(FIG, "fig_controls_data.csv"), index=False)
