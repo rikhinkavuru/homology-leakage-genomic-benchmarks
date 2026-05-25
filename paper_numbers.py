@@ -339,6 +339,9 @@ if rcard is not None:
         L.append(f"| {r['dataset']} | {int(r['n_full']):,} | {r['leak_at_0p7']:.3f} | {r['leak_at_0p9']:.3f} "
                  f"| {r['verdict']} | {r['best_model']} | {r['acc_drop_corrected']:+.3f} "
                  f"| {r['ranking_inverts']} | {r['rf_rank_orig_to_corr']} |")
+    L.append("\n*Drop values are the bootstrap-consistent point estimates (seed-0 corrected "
+             "split, with 95% CIs reported in §16); 3-seed-mean corrected accuracies and "
+             "SDs are in §16.*")
     L.append("\nVerdict rule: LEAKY if full-scale test/train near-duplicate fraction > 0.1 at "
              "Jaccard 0.7. *Source: `report_card.py` -> `leakage_report_card.csv`; figure "
              "`fig_report_card.*`.*\n")

@@ -246,14 +246,16 @@ On the ORIGINAL split, test sequences are binned by max 8-mer Jaccard to the tra
 
 | dataset | n | leak@0.7 | leak@0.9 | verdict | best model | acc drop (corrected) | ranking inverts | RF rank orig->corr |
 |---|---|---|---|---|---|---|---|---|
-| human_nontata_promoters | 36,131 | 0.406 | 0.225 | LEAKY | RF_k6 | +0.121 | yes | 1->3 |
-| human_enhancers_ensembl | 154,842 | 0.384 | 0.380 | LEAKY | RF_k6 | +0.156 | yes | 1->4 |
+| human_nontata_promoters | 36,131 | 0.406 | 0.225 | LEAKY | RF_k6 | +0.108 | yes | 1->3 |
+| human_enhancers_ensembl | 154,842 | 0.384 | 0.380 | LEAKY | RF_k6 | +0.164 | yes | 1->4 |
 | demo_coding_vs_intergenomic_seqs | 100,000 | 0.078 | 0.024 | clean | LR_k6 | -0.001 | no | 4->4 |
 | human_ocr_ensembl | 174,756 | 0.010 | 0.001 | clean | LR_k6 | +0.004 | no | 4->4 |
 | demo_human_or_worm | 100,000 | 0.012 | 0.003 | clean | LR_k6 | -0.004 | no | 4->4 |
 | drosophila_enhancers_stark | 6,914 | 0.016 | 0.006 | clean | LR_k6 | +0.012 | no | 2->3 |
 | human_enhancers_cohn | 27,791 | 0.001 | 0.000 | clean | LR_k6 | -0.004 | no | 4->4 |
 | human_ensembl_regulatory (3-class) | 289,061 | 0.005 | 0.001 | clean | RF_k4 | -0.010 | nan | nan |
+
+*Drop values are the bootstrap-consistent point estimates (seed-0 corrected split, with 95% CIs reported in §16); 3-seed-mean corrected accuracies and SDs are in §16.*
 
 Verdict rule: LEAKY if full-scale test/train near-duplicate fraction > 0.1 at Jaccard 0.7. *Source: `report_card.py` -> `leakage_report_card.csv`; figure `fig_report_card.*`.*
 

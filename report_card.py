@@ -21,6 +21,16 @@ sfin = pd.read_csv(f"{R}/summary_final.csv").set_index("dataset")
 subsum = pd.read_csv(f"{R}/summary.csv").set_index("dataset")
 ext = pd.read_csv(f"{R}/extended_models_long.csv")
 
+# Leaky-dataset "acc drop" uses the bootstrap-consistent point estimate (seed-0
+# corrected split; 95% CIs in PAPER_NUMBERS S16.2), matching manuscript Table 2.
+# Clean rows keep the 3-seed-mean delta (~0). 3-seed/5-seed values are in S16.
+try:
+    _s3 = pd.read_csv(f"{R}/step3_delta_ci.csv")
+    BOOT_DROP = {r["dataset"]: round(float(r["delta_orig_minus_corr"]), 3)
+                 for _, r in _s3.iterrows() if r["group"] == "leaky" and r["model"] == "RF_k6"}
+except Exception:
+    BOOT_DROP = {}
+
 # order: leaky first, then clean by descending leakage
 BINARY = ["human_nontata_promoters", "human_enhancers_ensembl",
           "demo_coding_vs_intergenomic_seqs", "human_ocr_ensembl",
@@ -45,7 +55,7 @@ for d in BINARY:
     inverts = (top_o != top_c) and (o[top_o] - o[top_c] > 0.01)
     rows.append(dict(dataset=d, n_full=n, leak_at_0p7=round(l7, 3), leak_at_0p9=round(l9, 3),
                      verdict=verdict, best_model=sfin.loc[d, "best_model"],
-                     acc_drop_corrected=round(float(sfin.loc[d, "delta_homology"]), 3),
+                     acc_drop_corrected=BOOT_DROP.get(d, round(float(sfin.loc[d, "delta_homology"]), 3)),
                      ranking_inverts="yes" if inverts else "no",
                      rf_rank_orig_to_corr=f"{rf_o}->{rf_c}"))
 # 3-class regulatory, noted separately (numbers from the subsample suite)
