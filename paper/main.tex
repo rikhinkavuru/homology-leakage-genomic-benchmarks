@@ -91,7 +91,7 @@ To correct leakage we build a similarity graph in which sequences are connected 
 Three controls isolate and explain the effect. (i) A \emph{random} re-split at matched size and class balance, ignoring clusters, serves as a negative control. (ii) A homology-graded analysis bins test sequences by their maximum similarity to training and reports per-bin accuracy. (iii) A label-concordance analysis records, for each near-duplicate test sequence, whether its nearest training neighbour shares its label.
 
 \subsection{Reproducibility}
-All experiments are deterministic with logged seeds, CPU-only, and free of external services. The homology-aware splitter is released as a standalone tool (\texttt{homology\_split.py}, dependencies \texttt{numpy}/\texttt{scipy}).
+All experiments are deterministic with logged seeds, CPU-only, and free of external services. The homology-aware splitter is released as a standalone tool (\texttt{homology\_split.py}, dependencies \texttt{numpy}/\texttt{scipy}). Reported 95\% confidence intervals are percentile bootstrap intervals (the 2.5th and 97.5th percentiles of $1{,}000$ resamples of the per-test-example correctness vector; the resampling unit is the individual test sequence, models are not refit, and the random seed is fixed).
 
 \section{Results}
 
