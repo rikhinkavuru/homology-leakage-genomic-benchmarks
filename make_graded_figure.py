@@ -59,7 +59,7 @@ for ax, d in zip(axes.ravel(), PANELS):
 handles, labels = axes[0, 0].get_legend_handles_labels()
 fig.legend(handles, labels, loc="upper center", ncol=4, frameon=False, fontsize=10,
            bbox_to_anchor=(0.5, 0.925))
-fig.suptitle("Accuracy vs test→train similarity bin (original split, k=6)\n"
+fig.suptitle("Accuracy vs test→train similarity bin (original split, $k$=6)\n"
              "hollow markers: n<50 (low-confidence bin)", fontsize=12)
 fig.text(0.5, 0.005, "max 8-mer Jaccard of a test sequence to the training set", ha="center", fontsize=10)
 fig.tight_layout(rect=[0, 0.02, 1, 0.88])

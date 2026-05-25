@@ -107,7 +107,7 @@ for ax, d in zip(axes, PANELS):
     ax.set_title(f"{NICE[d]}\n{'LEAKY' if d in LEAKY else 'clean'}  (τ={tau:+.2f})", fontsize=10)
     for s in ("top", "right", "left"):
         ax.spines[s].set_visible(False)
-fig.suptitle("Model ranking: original (leaky) vs homology-aware split  (k=6, accuracy)", fontsize=12)
+fig.suptitle("Model ranking: original (leaky) vs homology-aware split  ($k$=6, accuracy)", fontsize=12)
 fig.tight_layout(rect=[0, 0, 1, 0.96])
 for ext in ("png", "svg", "pdf"):
     fig.savefig(os.path.join(FIG, f"fig_ranking_inversion.{ext}"), bbox_inches="tight")

@@ -113,7 +113,7 @@ for i, (col, lab, color, errcol) in enumerate(specs):
         bar_rows.append({"dataset": d, "split": lab, "accuracy_pct": round(v, 2),
                          "best_model": summ.loc[d, "best_model"]})
 ax.set_xticks(xs)
-ax.set_xticklabels([f"{NICE[d]}\n({summ.loc[d,'best_model']}, leak@0.7={summ.loc[d,'leak_full_0p7']:.2f})" for d in LEAKY])
+ax.set_xticklabels([f"{NICE[d]}\n({summ.loc[d,'best_model'].replace('_k',' ($k$=')+')'}, leak@0.7={summ.loc[d,'leak_full_0p7']:.2f})" for d in LEAKY])
 ax.set_ylabel("test accuracy (%)")
 ax.set_ylim(50, 100)
 # Headroom + title pad so the title and the top (100) tick label do not crowd
