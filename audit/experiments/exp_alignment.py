@@ -14,12 +14,17 @@ NOTE: MMseqs2/BLAST are themselves k-mer-SEEDED; we do NOT claim 'k-mer-independ
 only 'alignment-scored / gapped', a different and stricter near-duplicate definition.
 """
 import os, subprocess, time, tempfile
+import tempfile
 import numpy as np, pandas as pd
 from audit.core import expkit as E
 
 t0 = time.time()
-TMP = "/private/tmp/claude-502/-Users-rikhinkavuru-homology-audit/a0a824c4-7be0-4f3c-ad5a-164c624bc48e/scratchpad/mmseqs"
-os.makedirs(TMP, exist_ok=True)
+# Scratch space for MMseqs2 intermediates. Honours AUDIT_SCRATCH when set; otherwise
+# uses the platform temp dir. (This was a hardcoded session-scoped absolute path,
+# which broke a fresh clone -- and broke it AT IMPORT, since the makedirs ran at
+# module scope.)
+TMP = os.path.join(os.environ.get("AUDIT_SCRATCH", tempfile.gettempdir()),
+                   "homology_audit", "mmseqs")
 
 def write_fasta(seqs, path):
     with open(path, "w") as fh:
@@ -28,6 +33,7 @@ def write_fasta(seqs, path):
 
 def mmseqs_cluster(seqs, tag, min_seq_id=0.7, cov=0.8):
     """Return per-sequence cluster-id array from mmseqs easy-cluster."""
+    os.makedirs(TMP, exist_ok=True)
     fa = os.path.join(TMP, f"{tag}.fasta"); write_fasta(seqs, fa)
     pref = os.path.join(TMP, f"{tag}_clu"); tmpd = os.path.join(TMP, f"{tag}_tmp")
     cmd = ["mmseqs", "easy-cluster", fa, pref, tmpd,

@@ -6,14 +6,17 @@ removal is a fix (locus duplication) or an over-correction (genuine repeat-famil
 Reports the low-complexity-masked fraction of leaked vs non-leaked test sequences.
 """
 import os, subprocess, time
+import tempfile
 import numpy as np, pandas as pd
 from audit.core import expkit as E
 
 t0 = time.time()
-TMP = "/private/tmp/claude-502/-Users-rikhinkavuru-homology-audit/a0a824c4-7be0-4f3c-ad5a-164c624bc48e/scratchpad/dust"
-os.makedirs(TMP, exist_ok=True)
+# See exp_alignment.py: scratch dir is configurable and created lazily, not at import.
+TMP = os.path.join(os.environ.get("AUDIT_SCRATCH", tempfile.gettempdir()),
+                   "homology_audit", "dust")
 
 def dust_masked_fraction(seqs, tag):
+    os.makedirs(TMP, exist_ok=True)
     fa = os.path.join(TMP, f"{tag}.fasta")
     with open(fa, "w") as fh:
         for i, s in enumerate(seqs):

@@ -177,7 +177,11 @@ def certify_dataset(seqs, y, tr, te, name="dataset", boot=2000, seed=0,
     from audit.core import homology_split as H
     t0 = time.time()
     y = np.asarray(y)
-    full_scale_n = full_scale_n or len(seqs)
+    # full_scale_n=None means the caller could not tell us the true dataset size, so C1
+    # is UNVERIFIABLE -- not "pass". Defaulting it to len(seqs) would compare the input
+    # to itself and affirmatively certify full scale having checked nothing, which is
+    # exactly the inert-check failure this tool exists to catch.
+    c1_unverifiable = full_scale_n is None
     rep = dict(dataset=name, n=len(seqs), n_train=len(tr), n_test=len(te),
                len_min=int(min(map(len, seqs))), len_med=int(np.median([len(s) for s in seqs])),
                len_max=int(max(map(len, seqs))),
@@ -294,7 +298,8 @@ def certify_dataset(seqs, y, tr, te, name="dataset", boot=2000, seed=0,
           if rep["leak_containment_0p7"] > LEAK_CUT >= rep["leak_jaccard_0p7"]
           else "pass")
     checks = {
-        "C1_full_scale": "pass" if rep["n"] >= full_scale_n else "NOT_FULL_SCALE",
+        "C1_full_scale": ("UNVERIFIABLE" if c1_unverifiable
+                          else "pass" if rep["n"] >= full_scale_n else "NOT_FULL_SCALE"),
         "C2_two_metrics": c2,
         "C3_alignment_engine": ("not_applicable" if rep["engine_agreement"] is None
                                 else "pass" if rep["engine_agreement"] else "DISAGREE"),
@@ -322,9 +327,13 @@ def certify_dataset(seqs, y, tr, te, name="dataset", boot=2000, seed=0,
     # C1 must be able to MOVE the verdict, not merely warn: a clean badge earned on a
     # subsample is not a clean badge, because subsampling removes near-duplicate
     # partners and can only under-report leakage.
-    if v == "clean" and checks["C1_full_scale"] == "NOT_FULL_SCALE":
+    if v == "clean" and checks["C1_full_scale"] in ("NOT_FULL_SCALE", "UNVERIFIABLE"):
         v = "provisional-clean"
-        escalations.append("C1: not full scale; clean verdict is provisional")
+        escalations.append(
+            "C1: not full scale; clean verdict is provisional"
+            if checks["C1_full_scale"] == "NOT_FULL_SCALE"
+            else "C1: full-scale status unverifiable from the input; pass --full-n to "
+                 "assert the true dataset size. Clean verdict is provisional")
     rep["verdict"] = v
     rep["escalated_by"] = escalations or None
     rep["seconds"] = round(time.time() - t0, 1)
@@ -362,6 +371,11 @@ def main():
     ap.add_argument("--cap", type=int,
                     help="certify a subsample of --dataset; C1 then reports the run as "
                          "not full scale and any clean verdict becomes provisional")
+    ap.add_argument("--full-n", type=int, dest="full_n",
+                    help="size of the UNSUBSAMPLED dataset, for the --fasta path. "
+                         "Without it C1 is UNVERIFIABLE and a clean verdict is "
+                         "downgraded to provisional-clean, since the tool cannot tell a "
+                         "full dataset from a subsample by looking at it")
     a = ap.parse_args()
 
     if a.self_validate:
@@ -393,8 +407,8 @@ def main():
             tr, te = perm[:cut], perm[cut:]
             print("[certify] no --splits given: using a random 80/20 split, which is "
                   "exactly the construction this tool exists to test")
-        rep = certify_dataset(seqs, y, tr, te,
-                              name=os.path.basename(a.fasta), boot=a.boot, seed=a.seed)
+        rep = certify_dataset(seqs, y, tr, te, name=os.path.basename(a.fasta),
+                              boot=a.boot, seed=a.seed, full_scale_n=a.full_n)
     else:
         ap.error("give --self-validate, or --dataset, or --fasta with --labels")
 

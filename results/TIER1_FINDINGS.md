@@ -5,9 +5,9 @@ Companion to `results/tier1_preregistration.md`, which is committed at `2edad5c`
 predictions in its §4 have a tamper-evident position in history. Every number below
 names the CSV it comes from; those CSVs are committed alongside this file.
 
-These findings have been through **three rounds** of adversarial audit — independent
+These findings have been through **four rounds** of adversarial audit — independent
 hostile lenses, with every finding re-verified against source by a separate agent
-(147 raised, 122 confirmed across the three rounds). §7 lists what each round changed and
+(179 raised, 144 confirmed across the four rounds). §7 lists what each round changed and
 §8 states what is still open. Several headline claims are weaker here than in the first
 draft and **one was retracted outright**; corrections are marked in place rather than
 quietly absorbed. The loop has **not** converged to the two-consecutive-clean-rounds bar
@@ -255,9 +255,9 @@ manipulations are matched to different degrees, and the difference matters:
 - **Manipulation B is matched on balance only** (50 % positive in both), *not* on size:
   81,868 rows against a 154,842-row control. Size cannot be matched here without
   discarding data the intervention is defined to keep, so the residual confound is
-  acknowledged rather than removed. Its direction is against us — the manipulated arm has
-  less training data, which should *depress* accuracy — so it cannot manufacture the
-  observed collapse of the drop toward zero.
+  acknowledged rather than removed. We do not argue it away: the estimand is a
+  *difference* of two accuracies measured on the same reduced set, so a smaller training
+  set depresses both terms and has no determinate effect on their difference.
 
 | condition | n | pos % | leak@0.7 | RF acc orig→corr | RF drop | RF rank | inverts |
 |---|---|---|---|---|---|---|---|
@@ -453,22 +453,26 @@ committed in `results/audit_findings.csv`.
 | 1 | 7 | 56 | 47 | 0 | 22 | 19 | 6 |
 | 2 | 6 (rotated) | 44 | 38 | **3** | 21 | 13 | 1 |
 | 3 | 6 (rotated) | 47 | 37 | **4** | 19 | 13 | 1 |
+| 4 | 6 (rotated, frozen state) | 32 | 22 | **0** | **3** | 6 | **13** |
 
-**Severity has not decreased across rounds, so the loop has not converged.** The protocol
-requires two consecutive rounds of cosmetic-only findings; we are not close to that. Two
-observations about *why*, neither of which excuses it:
+**Round 4 is the first round to show the convergence signature.** Blockers went 4 → 0,
+majors 19 → 3, and the severity mass moved to nits (1 → 13). Rounds 2 and 3 had *risen*
+in severity, for two reasons worth naming rather than excusing:
 
 - Each round's targets largely did not exist when the previous round ran. Round 2 audited
   the construct-and-break experiment and the rewritten document; round 3 audited the
-  matched arms, the BH implementation and the retraction — all created in response to
+  matched arms, the BH implementation and the retraction — all written in response to
   round 2.
-- Round 3's four blockers share **one root cause**: corrections were applied to
-  `TIER1_FINDINGS.md` but not propagated to `paper/tier1_sections.tex`, which continued
-  to assert the retracted natural-experiment claim and the superseded counts. That is a
-  process failure (two documents, one edited), not four independent defects.
+- Round 3's four blockers shared **one root cause**: corrections applied to
+  `TIER1_FINDINGS.md` but not propagated to `paper/tier1_sections.tex`. A process failure
+  (two documents, one edited), not four independent defects. Round 4 was therefore run
+  against a **frozen state with no concurrent edits**, and its three majors included the
+  mirror image of that same failure — a correction that reached the paper but not this
+  document.
 
-Both point the same way: a fourth round is required, and it should run against a frozen
-state with no concurrent edits.
+The protocol's bar is two *consecutive* cosmetic-only rounds. Round 4's three majors have
+been fixed, so **one further round is required** to certify convergence; the trend across
+four rounds is unambiguous, but the bar has not formally been met.
 
 ### 7.1 Round-1 corrections
 
@@ -531,17 +535,26 @@ state with no concurrent edits.
 | 45 | Disclosed that A's size-matching downsample halves the imposed defect (leak 0.498 → 0.204), making the resulting effect conservative |
 | 46 | Manipulation deltas disclosed as carrying no uncertainty interval, so only order-of-magnitude contrasts are read |
 
+### 7.4 Round-4 corrections (0 blockers, 3 majors)
+
+| # | correction |
+|---|---|
+| 47 | **The round-3 failure mode recurred with its polarity reversed.** Correction #39 claimed to have removed a non-sequitur ("less training data should depress accuracy", invalid because the estimand is a *difference*) — it was removed from the paper but left in §2.4 of this document, which also made correction #39 itself a false entry in the audit trail. Now removed here too, so §2.4, §7.3 and the manuscript state the same thing |
+| 48 | **certify's C1 was inert on the `--fasta` path — the one every external user takes.** Only the `--dataset` branch passed `full_scale_n`, so for FASTA input the check compared the input to itself and reported "pass", affirmatively certifying full scale having verified nothing. Demonstrated: a 400-sequence subsample earned a clean badge via `--fasta` while the same data via `--dataset --cap` was correctly demoted. C1 now reports `UNVERIFIABLE` when the true size is unknown and downgrades the verdict to `provisional-clean`; a new `--full-n` flag lets the caller assert it |
+| 49 | Three pre-existing modules (`exp_alignment.py`, `exp_repeat.py`, `exp_deep.py`) hardcoded an absolute scratch path containing a stale session UUID, and created it **at module scope**, so a fresh clone would fail at *import* on any machine where that path is not writable. Replaced with `AUDIT_SCRATCH`-or-tempdir and lazy creation at point of use |
+
 ---
 
 ## 8. Open items — what is NOT closed
 
 Stated because the convergence protocol requires a third round and has not had one.
 
-1. **The loop has not converged.** §5.2 of EXECUTION_PLAN.md requires two consecutive
-   rounds with only cosmetic findings. Rounds 1–3 produced 0, 3 and 4 blockers. A round 4
-   is required, run against a frozen state with no concurrent edits, targeting what
-   rounds 1–3 created: the propagated paper text, the C1/`--cap` path, the BH
-   disclosures, and this document's own §7.3.
+1. **The loop has not formally converged, though it is close.** §5.2 of
+   EXECUTION_PLAN.md requires two *consecutive* cosmetic-only rounds. Round 4 was the
+   first cosmetic-leaning round (0 blockers, 3 majors, 13 nits) and its three majors are
+   fixed, so **one further round is required** to certify. Its targets should be §7.4,
+   the `UNVERIFIABLE` C1 path, and the scratch-path changes — all written after round 4
+   observed the state.
 2. ~~A pre-existing manuscript claim is unsupported.~~ **RESOLVED — the claim was true
    but had no artifact.** `paper/main.tex:146` states that Benjamini–Hochberg at q = 0.05
    leaves the two leaky random-forest drops and the nonTATA logistic-regression drop

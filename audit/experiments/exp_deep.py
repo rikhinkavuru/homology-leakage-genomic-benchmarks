@@ -23,6 +23,7 @@ Env flags:
 """
 from __future__ import annotations
 import os, sys, time, copy, json
+import tempfile
 import numpy as np
 import torch
 import torch.nn as nn
@@ -35,9 +36,10 @@ from audit.core import expkit as E
 # ----------------------------------------------------------------------------
 SMOKE = os.environ.get("EXP_DEEP_SMOKE") == "1"
 GRID_MODE = os.environ.get("EXP_DEEP_GRID", "full")
-SCRATCH = "/private/tmp/claude-502/-Users-rikhinkavuru-homology-audit/a0a824c4-7be0-4f3c-ad5a-164c624bc48e/scratchpad"
+# See exp_alignment.py: scratch dir is configurable and created lazily, not at import.
+SCRATCH = os.path.join(os.environ.get("AUDIT_SCRATCH", tempfile.gettempdir()),
+                       "homology_audit")
 PREP_DIR = os.path.join(SCRATCH, "deep_prep")
-os.makedirs(PREP_DIR, exist_ok=True)
 
 FIXED_LEN = {"human_nontata_promoters": 251, "human_enhancers_ensembl": 269}
 BOOT = 1000
@@ -199,6 +201,7 @@ def train_and_correct(X, y, train_idx, test_idx, dropout, wd, converge,
 # per-dataset prep (expensive; cached to scratchpad): splits, sim, within-test clusters
 # ----------------------------------------------------------------------------
 def prep_dataset(d, t0):
+    os.makedirs(PREP_DIR, exist_ok=True)
     cache = os.path.join(PREP_DIR, f"{d}__prep.npz")
     if os.path.exists(cache):
         z = np.load(cache, allow_pickle=True)
