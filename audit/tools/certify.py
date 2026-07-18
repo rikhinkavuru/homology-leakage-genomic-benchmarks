@@ -230,13 +230,20 @@ def certify_dataset(seqs, y, tr, te, name="dataset", boot=2000, seed=0,
     # drops significant -- an earlier version of this function reported drosophila_stark
     # as [0.0019, 0.0434] against the frozen [-0.0067, 0.0539]. We therefore call the
     # repo's frozen two-arm estimator rather than reimplementing it.
-    from audit.experiments.cluster_bootstrap import test_internal_clusters, delta_boot
+    from audit.experiments.cluster_bootstrap import (test_internal_clusters, delta_boot,
+                                                  BOOT as _FROZEN_BOOT)
     blocks, _ = test_internal_clusters([seqs[i] for i in te], 0.7)
     blocks_c, _ = test_internal_clusters([seqs[i] for i in cte], 0.7)
     for m in ("RF", "LR"):
         c_o = E.correctness(E.models()[m], X, y, tr, te)
         c_c = E.correctness(E.models()[m], X, y, ctr, cte)
         d_pt, lo, hi, excl0 = delta_boot(c_o, blocks, c_c, blocks_c, mode="cluster")
+        # delta_boot's replicate count is the frozen module constant cluster_bootstrap.BOOT,
+        # deliberately: it is the estimator the paper's intervals were computed with, and
+        # letting a CLI flag vary it would mean two datasets certified by this tool could
+        # carry intervals from different estimators. `boot` is therefore recorded, not used.
+        rep["boot_requested"] = int(boot)
+        rep["boot_actual"] = int(_FROZEN_BOOT)
         st = E.icc_oneway(c_o, blocks)
         rep[f"{m}_acc_corrected"] = round(float(c_c.mean()), 4)
         rep[f"{m}_drop"] = round(d_pt, 4)
@@ -366,7 +373,10 @@ def main():
     ap.add_argument("--fasta"), ap.add_argument("--labels")
     ap.add_argument("--splits", help="JSON with {'train': [...], 'test': [...]} indices")
     ap.add_argument("--out", default=os.path.join(R, "certify_report.json"))
-    ap.add_argument("--boot", type=int, default=2000)
+    ap.add_argument("--boot", type=int, default=2000,
+                    help="recorded in the report for provenance; the cluster-bootstrap\n"
+                         "replicate count is fixed by the frozen estimator so that every\n"
+                         "certified dataset carries an interval from the same estimator")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--cap", type=int,
                     help="certify a subsample of --dataset; C1 then reports the run as "

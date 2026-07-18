@@ -5,14 +5,15 @@ Companion to `results/tier1_preregistration.md`, which is committed at `2edad5c`
 predictions in its §4 have a tamper-evident position in history. Every number below
 names the CSV it comes from; those CSVs are committed alongside this file.
 
-These findings have been through **four rounds** of adversarial audit — independent
+These findings have been through **five rounds** of adversarial audit — independent
 hostile lenses, with every finding re-verified against source by a separate agent
-(179 raised, 144 confirmed across the four rounds). §7 lists what each round changed and
+(209 raised, 170 confirmed across the five rounds). §7 lists what each round changed and
 §8 states what is still open. Several headline claims are weaker here than in the first
 draft and **one was retracted outright**; corrections are marked in place rather than
-quietly absorbed. Severity fell sharply in round 4 (blockers 4 → 0, majors 19 → 3), but
-the loop has **not** formally met the two-consecutive-cosmetic-rounds bar the protocol
-sets — one further round is required.
+quietly absorbed. Severity has fallen sharply (majors 22 → 21 → 19 → 3 → 2; blockers
+4 → 0 → 0), but **the protocol's convergence bar has not been met and the two-round clock
+has not started** — see §7 for the arithmetic, which an earlier draft of this document got
+wrong in its own favour.
 
 ---
 
@@ -402,6 +403,48 @@ are homologous splice sites across species rather than repeated human windows. B
 genuine leakage for a benchmark that reports a single held-out score; they are not the
 same finding.
 
+### 4.1b Does the ranking invert on the second suite? **No — and the law said so first.**
+
+`crosssuite_ranking.csv`, `crosssuite_ranking_pairs.csv`. The paper's own pipeline, run
+unchanged on the three leaky NT-original tasks plus `promoter_no_tata` as a clean control.
+For `enhancers`, whose shipped test set holds only 400 sequences, train and test were
+pooled and re-split at 80/20 so the intervals are usable (disclosed as `pooled_resplit`).
+
+**Leakage inflates scores there, exactly as on Genomic Benchmarks.** On `enhancers` the
+random forest drops 0.0413 [0.0241, 0.0583], LinearSVC 0.0221 [0.0055, 0.0381] and HGB
+0.0185 [0.0021, 0.0366], all excluding zero under the two-arm cluster bootstrap.
+
+**But no ranking inverts.** The best model is unchanged on all four tasks — RF on both
+splice tasks, LR on `enhancers`, LR on the control.
+
+| task | φ | order as-shipped | order corrected | inverts |
+|---|---|---|---|---|
+| splice_sites_acceptors | 0.0766 | RF>HGB>LR>LinearSVC | RF>HGB>LR>LinearSVC | no |
+| splice_sites_donors | 0.0814 | RF>HGB>LR>LinearSVC | RF>HGB>LR>LinearSVC | no |
+| enhancers *(pooled)* | 0.0992 | LR>LinearSVC>RF>HGB | LR>LinearSVC>HGB>RF | no |
+| promoter_no_tata *(control)* | 0.0070 | LR>LinearSVC>HGB>RF | LR>LinearSVC>HGB>RF | no |
+
+**This is the inversion law's first genuinely out-of-sample test, and it passed.** Every
+pairwise prediction was emitted from as-shipped measurements *before* any corrected split
+existed, and recorded in the same CSV row as the outcome: **23 of 24 pairs correct**, with
+one false positive (`enhancers` RF→HGB, φ* = 0.0727 against φ = 0.0992, a margin of
+0.027). The law's account of the null is specific and checkable: **δ ≤ 0 for essentially
+every pair** — on the splice tasks the random forest is not merely the leaky winner but
+the genuinely better model on novel sequences too, so there is nothing to invert. Leakage
+inflates every model's score without changing their order.
+
+That is the result, and it is the one the pre-registration's refutation condition
+anticipated: *"if no ranking inverts, the law should say so in advance via δ ≤ 0, and that
+is reportable as a confirmed prediction rather than a failed experiment."*
+
+**Consequence for the paper's scope, stated plainly: the ranking inversion remains n = 1.**
+The second suite supplies a confirmed leak census, significant score inflation, and a
+passed out-of-sample test of the mechanism — but not a second inversion. What it also
+supplies is a *reason*: inversion needs a challenger that is genuinely better on novel
+sequences (δ > 0) as well as a leak fraction above φ*, and NT-original has the second
+condition without the first. The law thus converts "we looked and did not find one" into
+a screenable criterion.
+
 ### 4.2 A pre-registered prediction that failed
 
 The registered call `NT-original → LEAKY` was **wrong as a suite-level statement**: only
@@ -421,7 +464,7 @@ and corroborates §2, while refuting the coarser prediction we registered.
 | hyperparameter choice | **closed** | the identity reproduces the reg-path outcome across a 12-fold change in *g* |
 | bootstrap methodology | **closed** | cluster bootstrap over within-test components, ICC + design effect, two-arm deltas, and a Benjamini–Hochberg correction that is computed and recorded rather than asserted |
 | homology-detection validation | **closed** | coordinates are k-mer-independent; MMseqs2 agreement |
-| single-suite, n = 1, not systematic | **PARTIALLY closed** | a second suite has 3 independent leaky tasks, one 25 % byte-identical — but this is a **leak census, not a demonstrated re-ranking**. No model was trained on NT. The precondition for inversion is shown to be widespread; the inversion itself is still n = 1 |
+| single-suite, n = 1, not systematic | **PARTIALLY closed, and now tested** | a second suite has 3 independent leaky tasks, one 25 % byte-identical, with score inflation confirmed by cluster bootstrap (§4.1b). **Models were trained there and the ranking did NOT invert.** The inversion remains n = 1. What the second suite establishes is that the *precondition* is widespread and that the mechanism predicts where inversion will and will not occur (23/24 pairs out of sample) |
 | CNN and Transformer generality | **partially closed** | the identity holds on the from-scratch CNN cells; the foundation-model roster remains Tier 2/3 |
 | protein / long-range reach | **open** | Tier 2/3 |
 
@@ -446,7 +489,7 @@ python -m audit.tools.certify --self-validate                # ~2 s, exit 1 on d
 ## 7. What the adversarial audit changed
 
 Recorded because a QA gate that leaves no trace is indistinguishable from one that never
-ran. Every confirmed finding from both rounds, with its lens and disposition, is
+ran. Every confirmed finding from all five rounds, with its lens and disposition, is
 committed in `results/audit_findings.csv`.
 
 | round | lenses | raised | confirmed | blockers | majors | minors | nits |
@@ -455,10 +498,35 @@ committed in `results/audit_findings.csv`.
 | 2 | 6 (rotated) | 44 | 38 | **3** | 21 | 13 | 1 |
 | 3 | 6 (rotated) | 47 | 37 | **4** | 19 | 13 | 1 |
 | 4 | 6 (rotated, frozen state) | 32 | 22 | **0** | **3** | 6 | **13** |
+| 5 | 5 (rotated, frozen state) | 30 | 26 | **0** | **2** | 15 | 9 |
 
-**Round 4 is the first round to show the convergence signature.** Blockers went 4 → 0,
-majors 19 → 3, and the severity mass moved to nits (1 → 13). Rounds 2 and 3 had *risen*
-in severity, for two reasons worth naming rather than excusing:
+### The convergence bar has NOT been met, and an earlier draft said otherwise
+
+The protocol (EXECUTION_PLAN.md §5.2 step 5) is explicit: *"Repeat until a full round
+**yields** zero blocker/major and only cosmetic nits, and hold that for **two consecutive
+rounds**."* The gate is on what a round **yields**, not on whether its findings were
+later fixed.
+
+- Round 4 yielded **3 majors and 6 minors** → does not qualify.
+- Round 5 yielded **2 majors and 15 minors** → does not qualify.
+
+So **no round has yet started the two-round clock.** Earlier drafts of this section
+asserted that round 4 was "the first cosmetic-leaning round" and that "one further round
+is required" — reasoning that its majors had since been fixed. That substitution is not
+licensed: every round's findings get fixed, so if fixing retroactively qualified a round,
+the two-round bar would be vacuous. Round 5's two confirmed majors were *this very
+error*, caught by two independent lenses. The correct statement is that a first
+cosmetic-only round and a second consecutive one are both still outstanding.
+
+Recording this prominently rather than burying it, because it is the one claim in this
+document that governs whether the work is submission-ready, and the failure mode was
+self-serving.
+
+**The trend is nonetheless real and monotone since round 3:** blockers 0/3/4/0/0, majors
+22/21/19/3/2. What remains at rounds 4–5 are documentation-consistency defects, not
+defects in the experiments or their numbers.
+
+Rounds 2 and 3 had *risen* in severity, for two reasons worth naming rather than excusing:
 
 - Each round's targets largely did not exist when the previous round ran. Round 2 audited
   the construct-and-break experiment and the rewritten document; round 3 audited the
@@ -471,9 +539,8 @@ in severity, for two reasons worth naming rather than excusing:
   mirror image of that same failure — a correction that reached the paper but not this
   document.
 
-The protocol's bar is two *consecutive* cosmetic-only rounds. Round 4's three majors have
-been fixed, so **one further round is required** to certify convergence; the trend across
-four rounds is unambiguous, but the bar has not formally been met.
+See the arithmetic above: neither round 4 nor round 5 qualifies, so the two-round clock
+has not started. The trend across five rounds is unambiguous, but the bar has not been met.
 
 ### 7.1 Round-1 corrections
 
@@ -544,18 +611,33 @@ four rounds is unambiguous, but the bar has not formally been met.
 | 48 | **certify's C1 was inert on the `--fasta` path — the one every external user takes.** Only the `--dataset` branch passed `full_scale_n`, so for FASTA input the check compared the input to itself and reported "pass", affirmatively certifying full scale having verified nothing. Demonstrated: a 400-sequence subsample earned a clean badge via `--fasta` while the same data via `--dataset --cap` was correctly demoted. C1 now reports `UNVERIFIABLE` when the true size is unknown and downgrades the verdict to `provisional-clean`; a new `--full-n` flag lets the caller assert it |
 | 49 | Three pre-existing modules (`exp_alignment.py`, `exp_repeat.py`, `exp_deep.py`) hardcoded an absolute scratch path containing a stale session UUID, and created it **at module scope**, so a fresh clone would fail at *import* on any machine where that path is not writable. Replaced with `AUDIT_SCRATCH`-or-tempdir and lazy creation at point of use |
 
+### 7.5 Round-5 corrections (0 blockers, 2 majors)
+
+Both majors were the same defect, found independently by two lenses, and it was the most
+consequential kind: **the status report about the audit was itself wrong, in the
+direction that flattered the work.**
+
+| # | correction |
+|---|---|
+| 50 | **The convergence arithmetic was wrong in our own favour.** Three places claimed round 4 was "the first cosmetic-leaning round" and that "one further round is required" to certify. The protocol gates on what a round *yields*, and round 4 yielded 3 majors and 6 minors, so it does not qualify and the two-round clock never started. Reasoning that its majors "have since been fixed" is not licensed — every round's findings get fixed, so that substitution makes the bar vacuous. Corrected at all sites, and the §7 table now states the arithmetic explicitly |
+| 51 | The §8 parenthetical enumerated round 4 as "(0 blockers, 3 majors, 13 nits)", silently dropping the 6 minors the §7 table records — making the round read as more cosmetic than our own data showed. Restored |
+| 52 | Stale preambles: "Every confirmed finding from both rounds" (there were four) and "the convergence protocol requires a third round and has not had one" (this was the fifth). Both corrected |
+| 53 | `certify --boot` was inert: `certify_dataset` accepts `boot` but never reads it, because round-1 correction #1 replaced the inline bootstrap with the frozen `delta_boot`, whose replicate count is a module constant. `--boot 50` and `--boot 100000` produced identical output |
+
 ---
 
 ## 8. Open items — what is NOT closed
 
-Stated because the convergence protocol requires a third round and has not had one.
+Stated because the convergence protocol's bar has not been met.
 
-1. **The loop has not formally converged, though it is close.** §5.2 of
-   EXECUTION_PLAN.md requires two *consecutive* cosmetic-only rounds. Round 4 was the
-   first cosmetic-leaning round (0 blockers, 3 majors, 13 nits) and its three majors are
-   fixed, so **one further round is required** to certify. Its targets should be §7.4,
-   the `UNVERIFIABLE` C1 path, and the scratch-path changes — all written after round 4
-   observed the state.
+1. **The loop has not converged, and the two-round clock has not started.** §5.2 of
+   EXECUTION_PLAN.md requires a round that *yields* zero blocker/major and only cosmetic
+   nits, held for two consecutive rounds. Round 4 yielded 3 majors and 6 minors; round 5
+   yielded 2 majors and 15 minors. **At minimum two further rounds are required** — one
+   to produce a cosmetic-only result and a second to hold it. Their targets should be
+   §7.5, the corrected convergence arithmetic itself, and the cross-suite ranking
+   experiment, all written after round 5 observed the state. What remains at this stage
+   is documentation consistency, not experimental defects.
 2. ~~A pre-existing manuscript claim is unsupported.~~ **RESOLVED — the claim was true
    but had no artifact.** `paper/main.tex:146` states that Benjamini–Hochberg at q = 0.05
    leaves the two leaky random-forest drops and the nonTATA logistic-regression drop
