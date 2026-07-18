@@ -1,0 +1,13 @@
+dataset,leader_A,challenger_B,n_clusters,n_boot,phi,delta,Dg,phi_star,m_inv,delta_ci,delta_excl0,m_inv_ci,m_inv_excl0,verdict
+human_enhancers_ensembl,LR,HGB,29311,10000,0.3802,-0.0161,0.0031,-5.1813,0.0173,"[-0.0216, -0.0106]",True,"[0.0131, 0.0215]",True,no-inversion
+human_enhancers_ensembl,LinearSVC,LR,29311,10000,0.3802,-0.0171,0.0003,-55.2584,0.0172,"[-0.0205, -0.0138]",True,"[0.0147, 0.0198]",True,no-inversion
+human_enhancers_ensembl,LinearSVC,HGB,29311,10000,0.3802,-0.0332,0.0034,-9.7198,0.0345,"[-0.0391, -0.0274]",True,"[0.0300, 0.0389]",True,no-inversion
+human_enhancers_ensembl,RF,LR,29311,10000,0.3802,-0.0049,0.1932,-0.0254,0.0783,"[-0.0116, 0.0019]",False,"[0.0733, 0.0835]",True,FRAGILE
+human_enhancers_ensembl,RF,LinearSVC,29311,10000,0.3802,0.0122,0.1929,0.0633,0.0611,"[0.0054, 0.0192]",True,"[0.0560, 0.0663]",True,CLEAN
+human_enhancers_ensembl,RF,HGB,29311,10000,0.3802,-0.021,0.1963,-0.107,0.0956,"[-0.0272, -0.0148]",True,"[0.0906, 0.1005]",True,no-inversion
+human_nontata_promoters,LinearSVC,LR,7618,10000,0.2255,-0.0205,0.0055,-3.731,0.0218,"[-0.0276, -0.0136]",True,"[0.0158, 0.0278]",True,no-inversion
+human_nontata_promoters,RF,LR,7618,10000,0.2255,-0.0453,0.0294,-1.5418,0.0519,"[-0.0544, -0.0364]",True,"[0.0443, 0.0597]",True,no-inversion
+human_nontata_promoters,RF,LinearSVC,7618,10000,0.2255,-0.0247,0.0239,-1.0371,0.0301,"[-0.0344, -0.0148]",True,"[0.0221, 0.0381]",True,no-inversion
+human_nontata_promoters,RF,HGB,7618,10000,0.2255,-0.041,-0.0165,,0.0373,"[-0.0487, -0.0335]",True,"[0.0312, 0.0436]",True,no-inversion
+human_nontata_promoters,HGB,LR,7618,10000,0.2255,-0.0042,0.0458,-0.0921,0.0146,"[-0.0121, 0.0039]",False,"[0.0076, 0.0213]",True,FRAGILE
+human_nontata_promoters,HGB,LinearSVC,7618,10000,0.2255,0.0163,0.0403,0.4038,-0.0072,"[0.0073, 0.0257]",True,"[-0.0150, 0.0002]",False,no-inversion

@@ -1,0 +1,2 @@
+dataset,pair,leader_A,challenger_B,n_LR,n_RF,delta_n_LR_minus_n_RF,g_LR,g_RF,Dg,phi_star,n_injected_star,f_star,f_star_bracket,obs_order_f0,obs_order_f0p1,obs_flip_between_f0_and_f0p1
+human_ensembl_regulatory,RF_overtakes_LR,RF,LR,0.5908,0.5785,0.0123,0.1188,0.4203,0.3015,0.0408,169.8,0.0106,"(0, 0.1)",LR>RF,RF>LR,True

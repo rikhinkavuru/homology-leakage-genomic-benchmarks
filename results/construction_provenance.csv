@@ -1,0 +1,9 @@
+dataset,positive_source,category,merge_step,predicted,observed_verdict,leak_jaccard_0p7,leak_containment_0p7_fullscale,R_self_max,rule_hit
+human_enhancers_ensembl,"FANTOM5-derived enhancer set (per GB docs); observed as exact 2x row duplication of 40,934 unique intervals",un-deduplicated assembly (exact multiplicity-2 duplication),none,LEAKY,LEAKY,0.384,0.8454,0.4713,True
+human_nontata_promoters,EPDnew fixed 251 bp TSS windows (Dreos 2013/2015; Umarov 2017),"fixed window over recurring loci, redundancy filter omitted",none (community-standard CD-HIT-EST 0.8 step not applied),LEAKY,LEAKY,0.406,0.4452,0.9605,True
+human_ocr_ensembl,Ensembl Regulatory Build open chromatin regions (Zerbino 2015),merged segmentation consensus,MultiCell merge,CLEAN,CLEAN,0.01,0.0681,0.0101,True
+human_ensembl_regulatory,Ensembl Regulatory Build 3-class segmentation (Zerbino 2015),merged segmentation consensus,MultiCell merge,CLEAN,CLEAN,0.005,,0.0,True
+human_enhancers_cohn,Cohn et al. 2018 curated enhancer set,deduplicated curated set,curation/dedup,CLEAN,CLEAN,0.001,0.0047,0.009,True
+drosophila_enhancers_stark,Stark lab Drosophila enhancers,deduplicated curated set,curation/dedup,CLEAN,CLEAN,0.016,0.0329,0.313,True
+demo_coding_vs_intergenomic_seqs,random genome draw (coding vs intergenomic),random genome draw,n/a (disjoint draw),CLEAN,borderline,0.078,0.1305,0.0085,True
+demo_human_or_worm,random genome draw (human vs C. elegans),random genome draw,n/a (disjoint draw),CLEAN,CLEAN,0.012,0.0421,0.0966,True

@@ -1,0 +1,9 @@
+dataset,category,merge_step,redundant_class,R_self_max,xsplit_ge1bp_max,xsplit_ge50pct_max,xsplit_exact_max,frac_rows_on_dup_coord_max,coord_pred_leak_ge90,coord_pred_leak_exact,seq_leak_0p9_measured,seq_leak_0p7_measured,coord_verdict,seq_verdict,provenance_verdict,coord_agrees_seq_lenient,coord_agrees_seq_strict,coord_agrees_seq,provenance_agrees_seq,classes_not_measurable_in_coord_space
+human_enhancers_ensembl,un-deduplicated assembly (exact multiplicity-2 duplication),none,positive,0.4713,0.7553,0.7552,0.7552,0.9426,0.3776,0.3776,0.38,0.384,LEAKY,LEAKY,LEAKY,True,True,True,True,0
+human_nontata_promoters,"fixed window over recurring loci, redundancy filter omitted",none (community-standard CD-HIT-EST 0.8 step not applied),negative,0.9605,0.9956,0.992,0.0,0.0,0.3434,0.0,0.225,0.406,LEAKY,LEAKY,LEAKY,True,True,True,True,0
+human_ocr_ensembl,merged segmentation consensus,MultiCell merge,negative,0.0101,0.0162,0.0062,0.0,0.0,0.0001,0.0,0.001,0.01,CLEAN,CLEAN,CLEAN,True,True,True,True,0
+human_ensembl_regulatory,merged segmentation consensus,MultiCell merge,enhancer,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.001,0.005,CLEAN,CLEAN,CLEAN,True,True,True,True,0
+human_enhancers_cohn,deduplicated curated set,curation/dedup,negative,0.009,0.0135,0.006,0.0,0.0,0.0003,0.0,0.0,0.001,CLEAN,CLEAN,CLEAN,True,True,True,True,0
+demo_coding_vs_intergenomic_seqs,random genome draw,n/a (disjoint draw),intergenomic_seqs,0.0085,0.0132,0.0064,0.0,0.0,0.0009,0.0,0.024,0.078,CLEAN,borderline,CLEAN,True,False,True,True,1
+demo_human_or_worm,random genome draw,n/a (disjoint draw),worm,0.0966,0.1446,0.073,0.0003,0.0004,0.0077,0.0001,0.003,0.012,CLEAN,CLEAN,CLEAN,True,True,True,True,0
+drosophila_enhancers_stark,deduplicated curated set,curation/dedup,negative,0.313,0.4058,0.0358,0.0,0.0,0.0034,0.0,0.006,0.016,CLEAN,CLEAN,CLEAN,True,True,True,True,0

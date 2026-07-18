@@ -1,0 +1,9 @@
+dataset,readout,pred_orig_winner,obs_orig_winner,pred_corr_winner,obs_corr_winner,orig_match,corr_match,tautological
+human_enhancers_ensembl,corrected_acc,RF,RF,LinearSVC,LinearSVC,True,True,False
+human_enhancers_ensembl,corrected_auroc,RF,RF,LinearSVC,LinearSVC,True,True,False
+human_enhancers_ensembl,corrected_f1,RF,RF,LinearSVC,LinearSVC,True,True,False
+human_enhancers_ensembl,novel_only,RF,RF,LinearSVC,LinearSVC,True,True,True
+human_nontata_promoters,corrected_acc,RF,RF,RF,LR,True,False,False
+human_nontata_promoters,corrected_auroc,RF,RF,RF,RF,True,True,False
+human_nontata_promoters,corrected_f1,RF,RF,RF,RF,True,True,False
+human_nontata_promoters,novel_only,RF,RF,RF,RF,True,True,True

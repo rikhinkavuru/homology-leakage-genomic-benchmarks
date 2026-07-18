@@ -1,0 +1,9 @@
+dataset,leak_jaccard_0p7,leak_containment_0p7,containment_source,coord_xsplit_ge50pct,verdict,expected,match
+human_nontata_promoters,0.406,0.4452,exp_gb1_containment(full),0.992,LEAKY,LEAKY,True
+human_enhancers_ensembl,0.384,0.8454,exp_gb1_containment(full),0.7552,LEAKY,LEAKY,True
+demo_coding_vs_intergenomic_seqs,0.078,0.1305,full_scale_containment,0.0064,borderline,borderline,True
+human_ocr_ensembl,0.01,0.0681,full_scale_containment,0.0062,clean,clean,True
+demo_human_or_worm,0.012,0.0421,full_scale_containment,0.073,clean,clean,True
+drosophila_enhancers_stark,0.016,0.0329,full_scale_containment,0.0358,clean,clean,True
+human_enhancers_cohn,0.001,0.0047,full_scale_containment,0.006,clean,clean,True
+human_ensembl_regulatory,0.005,,unavailable,0.0,clean,clean,True

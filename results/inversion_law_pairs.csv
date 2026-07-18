@@ -1,0 +1,13 @@
+dataset,leader_A,challenger_B,phi,n_A,n_B,delta,g_A,g_B,Dg,phi_star,m_inv,mu_orig,pred_inversion_phi_g,obs_form_identity_check,obs_inversion_novel,obs_inversion_corrected_acc,agree_phi_g_vs_novel,obs_form_is_tautological
+human_enhancers_ensembl,LR,HGB,0.3802,0.7649,0.7488,-0.0161,0.037,0.0339,0.0031,-5.1935,0.0173,0.0173,False,False,False,False,True,True
+human_enhancers_ensembl,LinearSVC,LR,0.3802,0.782,0.7649,-0.0171,0.0373,0.037,0.0003,-57.0,0.0172,0.0171,False,False,False,False,True,True
+human_enhancers_ensembl,LinearSVC,HGB,0.3802,0.782,0.7488,-0.0332,0.0373,0.0339,0.0034,-9.7647,0.0345,0.0344,False,False,False,False,True,True
+human_enhancers_ensembl,RF,LR,0.3802,0.7698,0.7649,-0.0049,0.2302,0.037,0.1932,-0.0254,0.0783,0.0787,False,True,False,True,True,True
+human_enhancers_ensembl,RF,LinearSVC,0.3802,0.7698,0.782,0.0122,0.2302,0.0373,0.1929,0.0632,0.0611,0.0616,True,True,True,True,True,True
+human_enhancers_ensembl,RF,HGB,0.3802,0.7698,0.7488,-0.021,0.2302,0.0339,0.1963,-0.107,0.0956,0.096,False,True,False,True,True,True
+human_nontata_promoters,LinearSVC,LR,0.2255,0.8546,0.834,-0.0206,0.0968,0.0914,0.0054,-3.8148,0.0218,0.0174,False,True,False,True,True,True
+human_nontata_promoters,RF,LR,0.2255,0.8793,0.834,-0.0453,0.1207,0.0914,0.0293,-1.5461,0.0519,0.0582,False,True,False,True,True,True
+human_nontata_promoters,RF,LinearSVC,0.2255,0.8793,0.8546,-0.0247,0.1207,0.0968,0.0239,-1.0335,0.0301,0.0408,False,False,False,False,True,True
+human_nontata_promoters,RF,HGB,0.2255,0.8793,0.8383,-0.041,0.1207,0.1372,-0.0165,,0.0373,0.0379,False,True,False,True,True,True
+human_nontata_promoters,HGB,LR,0.2255,0.8383,0.834,-0.0043,0.1372,0.0914,0.0458,-0.0939,0.0146,0.0203,False,True,False,True,True,True
+human_nontata_promoters,HGB,LinearSVC,0.2255,0.8383,0.8546,0.0163,0.1372,0.0968,0.0404,0.4035,-0.0072,0.0029,False,False,True,False,False,True

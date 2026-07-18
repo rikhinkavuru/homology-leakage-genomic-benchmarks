@@ -1,0 +1,17 @@
+dataset,detector,leader_A,challenger_B,phi,phi_star,delta,Dg,phi_exceeds_phi_star,pred_inversion
+human_enhancers_ensembl,kmer_jaccard_0.9,RF,LR,0.3802,-0.0254,-0.0049,0.1932,True,False
+human_enhancers_ensembl,kmer_jaccard_0.9,RF,LinearSVC,0.3802,0.0632,0.0122,0.1929,True,True
+human_enhancers_ensembl,kmer_jaccard_0.9,RF,HGB,0.3802,-0.107,-0.021,0.1963,True,False
+human_enhancers_ensembl,containment_0.9,RF,LR,0.816,-0.0254,-0.0049,0.1932,True,False
+human_enhancers_ensembl,containment_0.9,RF,LinearSVC,0.816,0.0632,0.0122,0.1929,True,True
+human_enhancers_ensembl,containment_0.9,RF,HGB,0.816,-0.107,-0.021,0.1963,True,False
+human_enhancers_ensembl,mmseqs2_corrected_split,RF,LR,,,0.0818,,,True
+human_enhancers_ensembl,mmseqs2_corrected_split,RF,LinearSVC,,,0.0977,,,True
+human_enhancers_ensembl,mmseqs2_corrected_split,RF,HGB,,,0.0646,,,True
+human_nontata_promoters,kmer_jaccard_0.9,RF,LR,0.2255,-1.5461,-0.0453,0.0293,True,False
+human_nontata_promoters,kmer_jaccard_0.9,RF,LinearSVC,0.2255,-1.0335,-0.0247,0.0239,True,False
+human_nontata_promoters,containment_0.9,RF,LR,0.3361,-1.5461,-0.0453,0.0293,True,False
+human_nontata_promoters,containment_0.9,RF,LinearSVC,0.3361,-1.0335,-0.0247,0.0239,True,False
+human_nontata_promoters,mmseqs2_corrected_split,RF,LR,,,-0.0204,,,False
+human_nontata_promoters,mmseqs2_corrected_split,RF,LinearSVC,,,-0.0361,,,False
+human_nontata_promoters,mmseqs2_corrected_split,RF,HGB,,,-0.0195,,,False

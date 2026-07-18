@@ -1,0 +1,9 @@
+dataset,order_check,glob_match,len_match,n_rows,label_match
+human_enhancers_ensembl,derived,,1.0,154842,1.0
+human_nontata_promoters,derived,True,1.0,36131,1.0
+human_ocr_ensembl,derived,,1.0,174756,1.0
+human_ensembl_regulatory,derived,True,1.0,289061,1.0
+human_enhancers_cohn,derived,True,1.0,27791,1.0
+demo_coding_vs_intergenomic_seqs,derived,True,1.0,100000,1.0
+demo_human_or_worm,derived,True,1.0,100000,1.0
+drosophila_enhancers_stark,derived,True,1.0,6914,1.0
