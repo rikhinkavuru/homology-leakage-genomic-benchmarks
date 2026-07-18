@@ -5,11 +5,13 @@ Companion to `results/tier1_preregistration.md`, which is committed at `2edad5c`
 predictions in its §4 have a tamper-evident position in history. Every number below
 names the CSV it comes from; those CSVs are committed alongside this file.
 
-These findings survived an adversarial audit (seven independent hostile lenses, every
-finding re-verified against source by a separate agent: 56 raised, 47 confirmed). §7
-lists what the audit changed. Several headline claims are weaker here than in the first
-draft, and one is materially reframed; the corrections are marked in place rather than
-quietly absorbed.
+These findings have been through **three rounds** of adversarial audit — independent
+hostile lenses, with every finding re-verified against source by a separate agent
+(147 raised, 122 confirmed across the three rounds). §7 lists what each round changed and
+§8 states what is still open. Several headline claims are weaker here than in the first
+draft and **one was retracted outright**; corrections are marked in place rather than
+quietly absorbed. The loop has **not** converged to the two-consecutive-clean-rounds bar
+the protocol sets.
 
 ---
 
@@ -52,7 +54,7 @@ not, and saying so is the difference between a law and a restatement.
 | P1 | `a_orig ≈ n + φ·g` | **IDENTITY, not a prediction.** `a_orig` *is* the bin-weighted mean of the same graded accuracies (same model, same fit, same test set), so the multi-bin form is exact by construction | 4-bin residual 0.0000 / 0.0001; 2-bin residual 0.0020 / 0.0175 — this measures only mid-bin mass (1.4 % vs 22.4 %), not predictive skill |
 | P2 | corrected winner = `argmax(n)` | **genuinely out of sample** — the theory never sees the corrected split, which needs re-splitting *and* retraining | **5/6** scored readouts: ensembl 3/3, nonTATA 2/3 |
 | P3 | reg-path rank, 22 cells | **IN-SAMPLE** restatement of P1 as an ordering, on the same as-shipped test set | 21/22, but see the caveat below |
-| P4 | injection sweep, *h* fitted at f = 0.1 | **out of sample** on the held-out cells; the f\* value is **not falsifiable** at this grid | held-out cells predicted to 0.0011 and 0.0008 |
+| P4 | injection sweep, *h* fitted at f = 0.1 | **out of sample** on the held-out cells; the f\* value is **not falsifiable** at this grid | **4** held-out cells, max abs error **0.0049** (the two RF cells are the tightest at 0.0011 / 0.0008) |
 | — | observable form `0<μ<Δ_A−Δ_B` | **TAUTOLOGY** — reduces to `a_B^corr > a_A^corr` | 12/12 by algebra; zero content |
 
 Two further deflations we owe the reader. The P2 tally **excludes a fourth readout**
@@ -80,9 +82,19 @@ quoting its uncorrected interval would be post-selection inference. Benjamini–
 q = 0.05 is now *computed*, not asserted: two-sided bootstrap p-values are recorded per
 pair in `inversion_law_bootstrap.csv` (`p_delta`, `p_m_inv`, `bh_sig_*`, `verdict_bh`).
 The ensembl RF → LinearSVC pair survives on both estimands (p = 0.0004 and 0.0001), so
-**BH changes no verdict** — but that is now a demonstrated result rather than a claim.
-An earlier draft announced a BH correction in a code comment and never performed it; the
+**BH changes no verdict** — now a demonstrated result rather than a claim. An earlier
+draft announced a BH correction in a code comment and never performed it; the
 implementing function was dead code.
+
+Three qualifications, since a correction that is itself sloppy is worse than none.
+**(i)** BH is applied to **two families of 12**, one per estimand, not once over all 24;
+FDR is therefore controlled at 0.05 within each family separately. **(ii)** δ and m_inv
+are not independent — m_inv = φ·Δg − δ contains δ — so a joint 24-test BH would in any
+case violate the independence its simplest justification assumes. **(iii)** p-values
+reported as 0.0001 are **censored at the resolution floor** 1/B = 1/10,000: they mean
+"no replicate crossed zero", not a measured value. None of the three can change the one
+verdict at issue, whose smaller p-value (0.0004) is four times the floor and whose
+BH threshold is nowhere near it.
 
 ### 1.3 The law's real operating point
 
@@ -234,7 +246,7 @@ never clear one**, and the sequence detectors remain necessary.
 coordinates**, so both interventions shift class balance and dataset size unless
 explicitly corrected — collapsing duplicates takes ensembl from 50/50 to 34.6 % positive
 (majority baseline 0.500 → 0.654), and duplicating positives takes ocr to 65.4 % positive
-and 47 % more rows. A first version of this section reported only the uncorrected arms
+and 44.6 % more rows. A first version of this section reported only the uncorrected arms
 and was confounded on both counts. We therefore report **matched** arms as primary and the unmatched arms alongside. The two
 manipulations are matched to different degrees, and the difference matters:
 
@@ -256,8 +268,9 @@ manipulations are matched to different degrees, and the difference matters:
 | **A manipulated, size+balance-matched** | 20,000 | 50.0 | **0.2040** | 0.7330 → 0.6276 | **+0.1054** | **1 → 4** | **yes** |
 | A manipulated, unmatched | 28,914 | 65.4 | 0.4977 | 0.7579 → 0.6952 | +0.0627 | 1 → 4 | yes |
 
-Reading only the matched rows, where the arms differ **solely** in whether
-near-duplicates are present:
+Reading only the matched rows — where, for break-a-clean, the arms differ **solely** in
+whether near-duplicates are present, and for fix-a-leaky they differ in that plus dataset
+size:
 
 - **Fix a leaky set.** Applying the omitted merge step collapses the leak fraction from
   0.390 to 0.012 and drives the random-forest inflation from +0.165 to **−0.008** — a
@@ -269,8 +282,11 @@ near-duplicates are present:
   rank 1 on the contaminated split, then demoted to rank 4 again by correction — the
   exact syndrome the paper documents on `human_enhancers_ensembl`.
 
-Both effects are *larger* under matching than without it, so the confounds were
-suppressing the result rather than creating it.
+The break-a-clean effect is *larger* under matching (+0.0627 unmatched → +0.1054
+matched), so there the confounds were suppressing the result rather than creating it. For
+fix-a-leaky the two arms differ by only 0.0120 (−0.0080 matched vs +0.0040 unbalanced),
+which is not a difference we read as meaningful — see the note on intervals below. What
+is read there is that both arms sit two orders of magnitude below the control's +0.1650.
 
 **No uncertainty interval is attached to these manipulation drops.** Each condition is a
 single fit at a single split seed, so the contrast between −0.0080 and +0.0040 in the two
@@ -354,8 +370,10 @@ and C8 are now wired into it, and every check's state is recorded in the report.
 | NT-original | 13 (12) | **4 (3)** | 3 | 6 | **0.2500** | **0.2500** |
 | NT-revised | 13 (12) | 0 | 0 | 13 | 0.0020 | 0.0000 |
 
-Parenthesised counts deduplicate `enhancers` / `enhancers_types`, whose train and test
-FASTA files are byte-identical.
+Parenthesised counts deduplicate `enhancers` / `enhancers_types`: their train and test
+**sequence sets are identical in content and order**, the two tasks differing only in the
+label field (binary vs multi-class), so the FASTA files themselves are not byte-identical
+— the sequences they carry are.
 
 **Verified independently of the census code path** (plain string set membership, no
 k-mers): NT-original `enhancers` ships 400 test sequences of which **exactly 100 are
@@ -365,8 +383,8 @@ holds 14,968 rows on 14,002 unique sequences.
 ### 4.1 What the leaky NT-original tasks actually are
 
 Counting honestly, **`enhancers` and `enhancers_types` are the same sequences** — their
-train and test FASTA files are byte-identical, differing only in label granularity — so
-they are one dataset scored twice. The independent tally is therefore **3 leaky tasks of
+train and test sequence sets are identical in content and order, the files differing only
+in the label field — so they are one dataset scored twice. The independent tally is therefore **3 leaky tasks of
 12 independent tasks**, not 4 of 13:
 
 | task (independent) | jac@0.7 | containment@0.7 | exact | mechanism |
@@ -386,7 +404,7 @@ same finding.
 ### 4.2 A pre-registered prediction that failed
 
 The registered call `NT-original → LEAKY` was **wrong as a suite-level statement**: only
-4 of 13 tasks are leaky and 6 are clean, including all three promoter tasks. The
+3 of 12 independent tasks are leaky and 6 are clean, including all three promoter tasks. The
 informative consequence is that **`human_nontata_promoters`' leak fraction of 0.406 is
 not a property of the promoter task** — NT's equivalent is clean at 0.0059 — but of
 Genomic Benchmarks' construction of it. That separates task effect from curation effect
@@ -402,7 +420,7 @@ and corroborates §2, while refuting the coarser prediction we registered.
 | hyperparameter choice | **closed** | the identity reproduces the reg-path outcome across a 12-fold change in *g* |
 | bootstrap methodology | **closed** | cluster bootstrap over within-test components, ICC + design effect, two-arm deltas, and a Benjamini–Hochberg correction that is computed and recorded rather than asserted |
 | homology-detection validation | **closed** | coordinates are k-mer-independent; MMseqs2 agreement |
-| single-suite, n = 1, not systematic | **PARTIALLY closed** | a second suite has 4 leaky tasks, one 25 % byte-identical — but this is a **leak census, not a demonstrated re-ranking**. No model was trained on NT. The precondition for inversion is shown to be widespread; the inversion itself is still n = 1 |
+| single-suite, n = 1, not systematic | **PARTIALLY closed** | a second suite has 3 independent leaky tasks, one 25 % byte-identical — but this is a **leak census, not a demonstrated re-ranking**. No model was trained on NT. The precondition for inversion is shown to be widespread; the inversion itself is still n = 1 |
 | CNN and Transformer generality | **partially closed** | the identity holds on the from-scratch CNN cells; the foundation-model roster remains Tier 2/3 |
 | protein / long-range reach | **open** | Tier 2/3 |
 
@@ -430,15 +448,27 @@ Recorded because a QA gate that leaves no trace is indistinguishable from one th
 ran. Every confirmed finding from both rounds, with its lens and disposition, is
 committed in `results/audit_findings.csv`.
 
-| round | lenses | raised | confirmed | blockers | majors |
-|---|---|---|---|---|---|
-| 1 | 7 | 56 | 47 | 0 | 22 |
-| 2 | 6 (rotated) | 44 | 38 | **3** | 21 |
+| round | lenses | raised | confirmed | blockers | majors | minors | nits |
+|---|---|---|---|---|---|---|---|
+| 1 | 7 | 56 | 47 | 0 | 22 | 19 | 6 |
+| 2 | 6 (rotated) | 44 | 38 | **3** | 21 | 13 | 1 |
+| 3 | 6 (rotated) | 47 | 37 | **4** | 19 | 13 | 1 |
 
-Round 2 raised severity rather than lowering it, so **the loop has not converged**. That
-is the expected behaviour of the protocol, not a failure of it: round 2's targets — the
-construct-and-break experiment and the entire rewritten document — did not exist when
-round 1 ran. §8 states what remains.
+**Severity has not decreased across rounds, so the loop has not converged.** The protocol
+requires two consecutive rounds of cosmetic-only findings; we are not close to that. Two
+observations about *why*, neither of which excuses it:
+
+- Each round's targets largely did not exist when the previous round ran. Round 2 audited
+  the construct-and-break experiment and the rewritten document; round 3 audited the
+  matched arms, the BH implementation and the retraction — all created in response to
+  round 2.
+- Round 3's four blockers share **one root cause**: corrections were applied to
+  `TIER1_FINDINGS.md` but not propagated to `paper/tier1_sections.tex`, which continued
+  to assert the retracted natural-experiment claim and the superseded counts. That is a
+  process failure (two documents, one edited), not four independent defects.
+
+Both point the same way: a fourth round is required, and it should run against a frozen
+state with no concurrent edits.
 
 ### 7.1 Round-1 corrections
 
@@ -474,7 +504,7 @@ round 1 ran. §8 states what remains.
 | 23 | **Benjamini–Hochberg was announced in a comment and never performed**; `bh()` was dead code. Now computed, with p-values and post-BH verdicts recorded per pair |
 | 24 | **Both manipulations were confounded by class balance and size.** Matched arms added and made primary; effects are *larger* under matching |
 | 25 | "each of 40,934 intervals shipped exactly twice" was arithmetically impossible (81,868 ≠ 77,421); corrected to 36,487 twice + 4,447 once |
-| 26 | `enhancers` / `enhancers_types` are byte-identical; leaky-task count corrected 4/13 → **3/12 independent** |
+| 26 | `enhancers` / `enhancers_types` carry identical sequence sets (labels differ); leaky-task count corrected 4/13 → **3/12 independent** |
 | 27 | P4 quoted 2 of 4 held-out cells and the wrong maximum error; corrected to 4 cells, max 0.0049 |
 | 28 | Manipulation A's duplication rate mis-derived: 0.9426 is the target *share on duplicated coordinates*, requiring a duplication rate of 0.8914 |
 | 29 | certify C1 warned but could not move the verdict; now yields `provisional-clean`. C2 was a hardcoded constant; now a real check |
@@ -483,6 +513,24 @@ round 1 ran. §8 states what remains.
 | 32 | superseded `certify_report.json` from the pre-fix run removed |
 | 33 | audit findings themselves committed to `results/audit_findings.csv` |
 
+### 7.3 Round-3 corrections (4 blockers, 19 majors)
+
+| # | correction |
+|---|---|
+| 34 | **The retraction had not reached the paper's Results section**, which still asserted the "controlled comparison … changing only how the split was built removes the leakage" claim on the exact splice tasks the retraction disqualifies, contradicting its own Methods paragraph 25 lines earlier. Rewritten. |
+| 35 | Paper still reported 4-of-13 leaky tasks and presented `enhancers`/`enhancers_types` as two findings; corrected to 3-of-12 independent with the duplication disclosed |
+| 36 | Paper still quoted 2 of 4 held-out injection cells, the "each interval shipped exactly twice" arithmetic, and the uncorrected post-selection interval; all propagated |
+| 37 | §1.1's summary table still carried the flattering P4 numbers while §1.5 carried the corrected ones — the document contradicted itself |
+| 38 | "the arms differ **solely** in whether near-duplicates are present" was true of break-a-clean only; fix-a-leaky also differs by 47 % in size |
+| 39 | The size-confound was argued away with a non-sequitur ("less data depresses accuracy"): the estimand is a *difference*, so both terms move. Now simply acknowledged |
+| 40 | "Both effects are larger under matching" was true only of break-a-clean; the fix-a-leaky arms differ by 0.0120, which is not read as a difference |
+| 41 | BH disclosed as two families of 12 rather than one of 24; δ and m_inv disclosed as non-independent; p = 0.0001 disclosed as censored at the 1/B floor |
+| 42 | certify's `provisional-clean` was unreachable — no caller passed `full_scale_n`. A `--cap` flag now exercises it, and C1 fires |
+| 43 | `enhancers`/`enhancers_types` described as "byte-identical FASTA files"; the *sequences* are identical, the files differ in the label field |
+| 44 | Manipulation A's row increase is 44.6 %, not 47 % (the 47 % was carried over from B's row *loss*) |
+| 45 | Disclosed that A's size-matching downsample halves the imposed defect (leak 0.498 → 0.204), making the resulting effect conservative |
+| 46 | Manipulation deltas disclosed as carrying no uncertainty interval, so only order-of-magnitude contrasts are read |
+
 ---
 
 ## 8. Open items — what is NOT closed
@@ -490,9 +538,10 @@ round 1 ran. §8 states what remains.
 Stated because the convergence protocol requires a third round and has not had one.
 
 1. **The loop has not converged.** §5.2 of EXECUTION_PLAN.md requires two consecutive
-   rounds with only cosmetic findings. Round 2 produced 3 blockers. A round 3 must run
-   against the current state, and its targets should be the matched manipulation arms,
-   the BH implementation and the retracted §4 — all new since round 2.
+   rounds with only cosmetic findings. Rounds 1–3 produced 0, 3 and 4 blockers. A round 4
+   is required, run against a frozen state with no concurrent edits, targeting what
+   rounds 1–3 created: the propagated paper text, the C1/`--cap` path, the BH
+   disclosures, and this document's own §7.3.
 2. ~~A pre-existing manuscript claim is unsupported.~~ **RESOLVED — the claim was true
    but had no artifact.** `paper/main.tex:146` states that Benjamini–Hochberg at q = 0.05
    leaves the two leaky random-forest drops and the nonTATA logistic-regression drop

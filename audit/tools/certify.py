@@ -359,6 +359,9 @@ def main():
     ap.add_argument("--out", default=os.path.join(R, "certify_report.json"))
     ap.add_argument("--boot", type=int, default=2000)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--cap", type=int,
+                    help="certify a subsample of --dataset; C1 then reports the run as "
+                         "not full scale and any clean verdict becomes provisional")
     a = ap.parse_args()
 
     if a.self_validate:
@@ -367,9 +370,16 @@ def main():
 
     if a.dataset:
         from audit.core import expkit as E
-        seqs, y, tr, te, _ = E.load(a.dataset, full=True)
+        if a.cap:
+            # Certifying a subsample: record the TRUE size so C1 can fail. Without this
+            # the check compares len(seqs) to itself and can never fire.
+            full_n = len(E.load(a.dataset, full=True)[0])
+            seqs, y, tr, te, _ = E.load(a.dataset, full=False, cap=a.cap)
+        else:
+            seqs, y, tr, te, _ = E.load(a.dataset, full=True)
+            full_n = len(seqs)
         rep = certify_dataset(seqs, y, tr, te, name=a.dataset,
-                              boot=a.boot, seed=a.seed)
+                              boot=a.boot, seed=a.seed, full_scale_n=full_n)
     elif a.fasta and a.labels:
         _ids, seqs = _read_fasta(a.fasta)
         y = np.array([int(x) for x in open(a.labels).read().split()])
