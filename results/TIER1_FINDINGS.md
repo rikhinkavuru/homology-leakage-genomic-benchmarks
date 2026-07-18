@@ -235,9 +235,17 @@ coordinates**, so both interventions shift class balance and dataset size unless
 explicitly corrected — collapsing duplicates takes ensembl from 50/50 to 34.6 % positive
 (majority baseline 0.500 → 0.654), and duplicating positives takes ocr to 65.4 % positive
 and 47 % more rows. A first version of this section reported only the uncorrected arms
-and was confounded on both counts. We therefore report **matched** arms as primary, in
-which the intervention and its control have the **same size and the same class balance**,
-and the unmatched arms alongside for transparency.
+and was confounded on both counts. We therefore report **matched** arms as primary and the unmatched arms alongside. The two
+manipulations are matched to different degrees, and the difference matters:
+
+- **Manipulation A is matched on both size and balance** (20,000 rows, 50 % positive in
+  both arms), so its arms differ only in whether near-duplicates are present.
+- **Manipulation B is matched on balance only** (50 % positive in both), *not* on size:
+  81,868 rows against a 154,842-row control. Size cannot be matched here without
+  discarding data the intervention is defined to keep, so the residual confound is
+  acknowledged rather than removed. Its direction is against us — the manipulated arm has
+  less training data, which should *depress* accuracy — so it cannot manufacture the
+  observed collapse of the drop toward zero.
 
 | condition | n | pos % | leak@0.7 | RF acc orig→corr | RF drop | RF rank | inverts |
 |---|---|---|---|---|---|---|---|
@@ -262,9 +270,14 @@ near-duplicates are present:
   exact syndrome the paper documents on `human_enhancers_ensembl`.
 
 Both effects are *larger* under matching than without it, so the confounds were
-suppressing the result rather than creating it. Editing coordinates alone — no change to
-sequences, labels, model code, split ratio, dataset size, or class balance — both creates
-and cures the pathology.
+suppressing the result rather than creating it.
+
+**No uncertainty interval is attached to these manipulation drops.** Each condition is a
+single fit at a single split seed, so the contrast between −0.0080 and +0.0040 in the two
+fix-a-leaky arms should not be read as a difference; what is read is the contrast against
++0.1650, which is an order of magnitude larger than anything else in the table. Putting
+cluster-bootstrap intervals on the manipulation deltas is a straightforward extension and
+is not done here.
 
 **Remaining caveat, stated plainly.** Manipulation A duplicates rows, and duplicated rows
 scattered across a random split are leaky by construction; that part is not a discovery.

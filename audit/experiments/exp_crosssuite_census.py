@@ -6,18 +6,27 @@ Ports the paper's leak-census step, UNCHANGED, onto benchmark suites built indep
 of Genomic Benchmarks, to test whether near-duplicate contamination is a property of one
 suite or of the field's construction habits.
 
-THE NATURAL EXPERIMENT
-----------------------
-The Nucleotide Transformer downstream tasks exist in two versions by the same authors:
+WHAT THIS MEASURES -- AND A FRAMING WE RETRACTED
+------------------------------------------------
+The Nucleotide Transformer downstream tasks exist in two releases:
   ORIGINAL  InstaDeepAI/nucleotide_transformer_downstream_tasks
   REVISED   InstaDeepAI/nucleotide_transformer_downstream_tasks_revised
-whose dataset card states the revision "replaced randomly generated negative samples by
-existing chunks of genomes" and gave "all datasets proper chromosome held-out test sets".
-The two ship the SAME TASK NAMES, so the pair isolates CURATION from BIOLOGY: any change
-in leak fraction between them is attributable to how the split was built, not to what is
-being predicted. `promoter_no_tata` is the direct analogue of the paper's
-`human_nontata_promoters`, so this is a near-replication of the paper's own anchor on an
-independently constructed suite.
+whose card states the revision "replaced randomly generated negative samples by existing
+chunks of genomes" and gave "all datasets proper chromosome held-out test sets".
+
+An earlier version of this module described the pair as a CONTROLLED NATURAL EXPERIMENT
+that "isolates curation from biology" because the releases share task names. THAT IS
+FALSE and the framing is withdrawn. Shared task names do not imply shared data: original
+`splice_sites_acceptors` is a multi-species set keyed by UniProt accession
+(A0A096MK15_RAT, A0A087YFW7_POEFO, H0WJU9_OTOGA) while the revised task is human genomic
+windows keyed by coordinate (chr20:46541626-46542226), and sequence length differs on 8
+of 13 tasks. The two releases are different data, not the same data recurated, so NO
+causal attribution to curation can be drawn from a before/after comparison here.
+
+What this module legitimately establishes needs no comparison at all: whether the
+as-shipped split of each task, taken on its own terms, contains near-duplicate leakage.
+That is the census the paper's ranking claim presupposes, applied to a second,
+independently constructed, widely used suite.
 
 ESTIMATOR -- identical to the paper's: for each TEST sequence, the maximum 8-mer Jaccard
 (length-blind) and containment (length-robust) similarity to ANY TRAIN sequence, on the
@@ -58,11 +67,14 @@ SHARED_TASKS = ["promoter_no_tata", "promoter_all", "promoter_tata", "enhancers"
                 "splice_sites_donors", "H3K4me1", "H3K4me2", "H3K4me3", "H3K9ac",
                 "H3K36me3"]
 
-# Pre-registered predictions (see results/tier1_preregistration.md). Recorded here so the
-# code itself carries the prediction that the census then tests.
+# Pre-registered expectations (results/tier1_preregistration.md), recorded so the code
+# carries the prediction the census then tests. BOTH are suite-level labels, and the
+# NT-original one was REFUTED: only 3 of 12 independent tasks leak, and all three
+# promoter tasks are clean. Leakage is a property of particular task constructions, not
+# of suites. Retained here as the registered claim, not as a finding.
 PREREGISTERED = {
-    "NT-original": "LEAKY",     # random-draw negatives + non-chromosome-aware split
-    "NT-revised": "CLEAN",      # genomic-chunk negatives + chromosome held-out test
+    "NT-original": "LEAKY",     # REFUTED at task level: 3/12 independent tasks leak
+    "NT-revised": "CLEAN",      # held: 13/13 clean
 }
 LEAK_CUT = 0.1
 
