@@ -26,9 +26,11 @@ quietly absorbed.
    one** — both directions, ranking inversion included.
 3. **An executable standard.** `certify --self-validate` reproduces the paper's eight
    published verdicts and exits non-zero on drift.
-4. **A second suite.** Four of thirteen Nucleotide Transformer tasks are leaky, one at
-   **25.0 % byte-identical**. On the two tasks where sequence length is unchanged between
-   the original and revised releases, leakage falls from 0.244/0.245 to 0.0007/0.0010.
+4. **A second suite.** **Three independent Nucleotide Transformer tasks of twelve are
+   leaky**, one at **25.0 % byte-identical** test-to-train with label concordance 1.000.
+   Leakage of the kind this paper documents is not confined to Genomic Benchmarks. (An
+   earlier draft framed the original-vs-revised NT pair as a controlled natural
+   experiment; that framing is **retracted** — see §4.)
 
 ---
 
@@ -66,11 +68,21 @@ across a twelve-fold change in *g*.
 `inversion_law_bootstrap.csv` — 10,000 replicates, blocks = within-test Jaccard>0.7
 components (G = 29,311 / 7,618, matching the frozen `cluster_bootstrap_full.csv`).
 
-| dataset | pair | δ [95 % CI] | φ* | φ | m_inv [95 % CI] | verdict |
-|---|---|---|---|---|---|---|
-| ensembl | RF → LinearSVC | +0.0122 [0.0054, 0.0192] | 0.0633 | 0.3802 | 0.0611 [0.0560, 0.0663] | **CLEAN** |
-| ensembl | RF → LR | −0.0049 [−0.0116, 0.0019] | — | 0.3802 | 0.0783 [0.0733, 0.0835] | FRAGILE |
-| nonTATA | every pair | δ ≤ 0, or m_inv CI ∋ 0 | — | 0.2255 | — | **no CLEAN inversion** |
+| dataset | pair | δ [95 % CI] | φ* | φ | m_inv [95 % CI] | p(δ) | verdict (post-BH) |
+|---|---|---|---|---|---|---|---|
+| ensembl | RF → LinearSVC | +0.0122 [0.0054, 0.0192] | 0.0633 | 0.3802 | 0.0611 [0.0560, 0.0663] | 0.0004 | **CLEAN** |
+| ensembl | RF → LR | −0.0049 [−0.0116, 0.0019] | — | 0.3802 | 0.0783 [0.0733, 0.0835] | 0.153 | FRAGILE |
+| nonTATA | every pair | δ ≤ 0, or m_inv CI ∋ 0 | — | 0.2255 | — | — | **no CLEAN inversion** |
+
+**Multiplicity, and the post-selection problem.** These are 12 pairs × 2 estimands = 24
+tests, and the single headline CLEAN verdict is the best of them — selecting it and then
+quoting its uncorrected interval would be post-selection inference. Benjamini–Hochberg at
+q = 0.05 is now *computed*, not asserted: two-sided bootstrap p-values are recorded per
+pair in `inversion_law_bootstrap.csv` (`p_delta`, `p_m_inv`, `bh_sig_*`, `verdict_bh`).
+The ensembl RF → LinearSVC pair survives on both estimands (p = 0.0004 and 0.0001), so
+**BH changes no verdict** — but that is now a demonstrated result rather than a claim.
+An earlier draft announced a BH correction in a code comment and never performed it; the
+implementing function was dead code.
 
 ### 1.3 The law's real operating point
 
@@ -105,6 +117,11 @@ at **f = 0.1 only** gives h_RF = **0.9988** — the memorization ceiling, expect
 priori* to be ≈1 for near-exact copies — and h_LR = 0.7096, both invariant in *f*. The
 held-out cells follow: f = 0.2 → 0.7655 predicted vs 0.7644 observed; f = 0.4 → 0.8374 vs
 0.8366.
+
+There are **four** held-out cells, not two — RF and LR at each of f = 0.2 and f = 0.4 —
+and the honest error to quote is the maximum over all four: **0.0049** (LR at f = 0.4).
+The RF cells are the tightest of the set at 0.0011 and 0.0008, and quoting only those, as
+an earlier draft did, flattered the result by a factor of five.
 
 The implied φ* = 0.0408 corresponds to f\* = 0.0106, and the observed RF-over-LR flip
 occurs between f = 0 and f = 0.1. **This is a consistency check, not a validated
@@ -169,9 +186,14 @@ single label.
 atlas (808 CAGE libraries), and the first draft asserted the redundancy *is* an un-merged
 808-library union. The measured signature does not support that: multiplicity is capped
 at exactly 2 with identical boundaries, whereas a union over many independently-called
-tracks would give a broad multiplicity spectrum and jagged partial overlaps. What the
-data supports is the weaker, sufficient statement: **each of 40,934 intervals is shipped
-exactly twice, with no deduplication step.**
+tracks would give a broad multiplicity spectrum and jagged partial overlaps.
+
+The exact statement, from the multiplicity histogram: of the **40,934** unique positive
+coordinates, **36,487 (89.1 %) are shipped exactly twice and 4,447 exactly once**, giving
+1 × 4,447 + 2 × 36,487 = 77,421 rows. (A second-round audit caught the intermediate
+version of this sentence — "each of 40,934 intervals is shipped exactly twice" — which is
+arithmetically impossible, since that would give 81,868 rows. Correction #11 had traded
+an over-claimed mechanism for a wrong one.)
 
 ### 2.2 Cross-modal prediction — including the case where it fails
 
@@ -208,30 +230,47 @@ never clear one**, and the sequence detectors remain necessary.
 
 ### 2.4 Construct-and-break: the defect is causal in both directions
 
-`construction_manipulation.csv`. Each manipulation is paired with an unmanipulated
-control run of the identical pipeline at the same scale and split seed.
+`construction_manipulation.csv`. **Only the positive class carries duplicated
+coordinates**, so both interventions shift class balance and dataset size unless
+explicitly corrected — collapsing duplicates takes ensembl from 50/50 to 34.6 % positive
+(majority baseline 0.500 → 0.654), and duplicating positives takes ocr to 65.4 % positive
+and 47 % more rows. A first version of this section reported only the uncorrected arms
+and was confounded on both counts. We therefore report **matched** arms as primary, in
+which the intervention and its control have the **same size and the same class balance**,
+and the unmatched arms alongside for transparency.
 
-| condition | n | leak@0.7 | exact | RF acc orig→corr | RF drop | RF rank | inverts |
+| condition | n | pos % | leak@0.7 | RF acc orig→corr | RF drop | RF rank | inverts |
 |---|---|---|---|---|---|---|---|
-| **B control** — ensembl as shipped | 154,842 | 0.3898 | 0.3853 | 0.8607 → 0.6957 | **+0.1650** | 1 → 4 | **yes** |
-| **B manipulated** — duplicate coordinates collapsed | 118,355 | **0.0110** | 0.0039 | 0.7331 → 0.7291 | **+0.0040** | 4 → 4 | **no** |
-| **A control** — ocr as shipped (merged) | 20,000 | 0.0040 | 0.0000 | 0.6448 → 0.6426 | +0.0022 | 4 → 4 | no |
-| **A manipulated** — 94.3 % of positives duplicated | 29,426 | **0.5076** | 0.5055 | 0.7594 → 0.7036 | **+0.0558** | **1 → 4** | **yes** |
+| **B control** — ensembl as shipped | 154,842 | 50.0 | 0.3898 | 0.8607 → 0.6957 | **+0.1650** | 1 → 4 | **yes** |
+| **B manipulated, balance-matched** | 81,868 | 50.0 | **0.0115** | 0.7177 → 0.7257 | **−0.0080** | 4 → 4 | **no** |
+| B manipulated, unbalanced | 118,355 | 34.6 | 0.0110 | 0.7331 → 0.7291 | +0.0040 | 4 → 4 | no |
+| **A control** — ocr as shipped (merged) | 20,000 | 50.0 | 0.0040 | 0.6448 → 0.6426 | +0.0022 | 4 → 4 | no |
+| **A manipulated, size+balance-matched** | 20,000 | 50.0 | **0.2040** | 0.7330 → 0.6276 | **+0.1054** | **1 → 4** | **yes** |
+| A manipulated, unmatched | 28,914 | 65.4 | 0.4977 | 0.7579 → 0.6952 | +0.0627 | 1 → 4 | yes |
 
-Applying the omitted merge step to the leaky dataset drops its leak fraction 35-fold and
-its random-forest inflation 41-fold, and **the ranking inversion disappears**. Imposing
-the same construction defect on a clean dataset raises its leak fraction 127-fold and
-**manufactures the inversion**, promoting the random forest from rank 4 to rank 1 on the
-contaminated split before it is demoted again by correction. Editing coordinates alone —
-no change to sequences, labels, model code, or split ratio — both creates and cures the
-pathology.
+Reading only the matched rows, where the arms differ **solely** in whether
+near-duplicates are present:
 
-Two caveats. Manipulation B removes 36,487 rows (23.6 %), so its training set shrinks and
-absolute accuracies are not comparable to the control; the *drop* and the *ranking* are
-the outcomes, and both are measured within each condition. Manipulation A duplicates
-rows, which is leaky by construction — its content is not that duplication causes
-leakage, which is obvious, but that it reproduces the full downstream syndrome including
-the rank-1 promotion of the memorizer.
+- **Fix a leaky set.** Applying the omitted merge step collapses the leak fraction from
+  0.390 to 0.012 and drives the random-forest inflation from +0.165 to **−0.008** — a
+  null, slightly favouring the corrected split — and **the ranking inversion disappears**
+  (the forest is rank 4 both before and after).
+- **Break a clean set.** Imposing the same defect on the merged, clean dataset raises its
+  leak fraction from 0.004 to 0.204 and its random-forest inflation from +0.002 to
+  **+0.105**, and **manufactures the inversion**: the forest is promoted from rank 4 to
+  rank 1 on the contaminated split, then demoted to rank 4 again by correction — the
+  exact syndrome the paper documents on `human_enhancers_ensembl`.
+
+Both effects are *larger* under matching than without it, so the confounds were
+suppressing the result rather than creating it. Editing coordinates alone — no change to
+sequences, labels, model code, split ratio, dataset size, or class balance — both creates
+and cures the pathology.
+
+**Remaining caveat, stated plainly.** Manipulation A duplicates rows, and duplicated rows
+scattered across a random split are leaky by construction; that part is not a discovery.
+Its content is that the *downstream syndrome* follows — the memorizer is promoted to
+rank 1 on the contaminated split and demoted after correction — which does not follow
+automatically from duplication and is the specific claim the paper makes.
 
 ---
 
@@ -279,43 +318,57 @@ and C8 are now wired into it, and every check's state is recorded in the report.
 
 ## 4. Cross-suite census: a second suite (#1-A)
 
+> **RETRACTION (round-2 audit).** An earlier version of this section presented the NT
+> original-vs-revised pair as a *controlled natural experiment* — "same task, same
+> authors, only curation changed". **That premise is false and the framing is withdrawn.**
+> The two releases are not the same data recurated. NT-original `splice_sites_acceptors`
+> is a multi-species set keyed by UniProt accession (`A0A096MK15_RAT`,
+> `A0A087YFW7_POEFO`, `H0WJU9_OTOGA`); NT-revised `splice_sites_acceptors` is human
+> genomic windows keyed by coordinate (`chr20:46541626-46542226`). Different organisms,
+> different source pipelines, different identifiers — and, on 8 of 13 tasks, different
+> sequence lengths. No causal attribution to curation is supportable from this pair, and
+> none is made below.
+>
+> What survives is the census itself, which is what the section was for: **leakage of
+> exactly the kind this paper documents is present in a second, independently built,
+> widely used suite.** That is a statement about NT-original, requiring no comparison.
+
 `crosssuite_census.csv`, `crosssuite_exact_verification.csv`. Train sets capped at
 20,000; capping only removes near-duplicate partners, so every figure is a lower bound.
 
-| suite | tasks | LEAKY | borderline | clean | max jac@0.7 | max exact |
+| suite | tasks (independent) | LEAKY | borderline | clean | max jac@0.7 | max exact |
 |---|---|---|---|---|---|---|
-| NT-original | 13 | **4** | 3 | 6 | **0.2500** | **0.2500** |
-| NT-revised | 13 | 0 | 0 | **13** | 0.0020 | 0.0000 |
+| NT-original | 13 (12) | **4 (3)** | 3 | 6 | **0.2500** | **0.2500** |
+| NT-revised | 13 (12) | 0 | 0 | 13 | 0.0020 | 0.0000 |
+
+Parenthesised counts deduplicate `enhancers` / `enhancers_types`, whose train and test
+FASTA files are byte-identical.
 
 **Verified independently of the census code path** (plain string set membership, no
 k-mers): NT-original `enhancers` ships 400 test sequences of which **exactly 100 are
 byte-identical to a training sequence**, label concordance **1.000**; its training set
 holds 14,968 rows on 14,002 unique sequences.
 
-### 4.1 The length confound, and what survives it
+### 4.1 What the leaky NT-original tasks actually are
 
-The audit caught a real threat to this section. **Sequence length changed between the two
-releases on 8 of 13 tasks**, and 8-mer Jaccard falls monotonically as sequences lengthen,
-so a naive original-vs-revised Jaccard comparison is confounded — and the confound is
-worst on the flagship `enhancers` task, which went from 200 bp to 400 bp.
+Counting honestly, **`enhancers` and `enhancers_types` are the same sequences** — their
+train and test FASTA files are byte-identical, differing only in label granularity — so
+they are one dataset scored twice. The independent tally is therefore **3 leaky tasks of
+12 independent tasks**, not 4 of 13:
 
-The comparison that survives is restricted to **length-matched tasks**:
-
-| task | length (both) | jac orig → rev | containment orig → rev | verdict |
+| task (independent) | jac@0.7 | containment@0.7 | exact | mechanism |
 |---|---|---|---|---|
-| splice_sites_acceptors | 600 bp | **0.2435 → 0.0007** | 0.3724 → 0.0073 | LEAKY → clean |
-| splice_sites_donors | 600 bp | **0.2452 → 0.0010** | 0.3699 → 0.0073 | LEAKY → clean |
-| promoter_all / _no_tata / _tata | 300 bp | ≤0.0145 → 0.0000 | ≤0.0161 → ≤0.0044 | clean → clean |
+| enhancers (= enhancers_types) | 0.2500 | 0.2500 | **0.2500** | byte-identical duplication |
+| splice_sites_acceptors | 0.2435 | 0.3724 | 0.0000 | cross-species homology (multi-species set) |
+| splice_sites_donors | 0.2452 | 0.3699 | 0.0000 | cross-species homology (multi-species set) |
+| splice_sites_all *(borderline)* | 0.0797 | 0.1067 | 0.0593 | mixed |
 
-So on the two tasks where sequence length is held constant, near-duplicate leakage falls
-by roughly 300-fold under both a length-blind and a length-robust metric. That is the
-controlled result.
-
-**What we no longer claim.** The `enhancers` 25.0 % → 0 % contrast is *not* a controlled
-comparison: the revised task was rebuilt at a different window size, so its cleanliness
-cannot be attributed to curation alone. The 25.0 % byte-identical figure remains a
-verified property of the original release, and the revised release is verifiably clean;
-the causal attribution belongs to the length-matched splice tasks.
+The two splice tasks are near-independent of each other (their test sets share 1
+sequence), but their leakage is a *different* mechanism from the enhancer task's: zero
+exact duplicates, and a 126-species UniProt-derived membership, so the near-duplicates
+are homologous splice sites across species rather than repeated human windows. Both are
+genuine leakage for a benchmark that reports a single held-out score; they are not the
+same finding.
 
 ### 4.2 A pre-registered prediction that failed
 
@@ -334,7 +387,7 @@ and corroborates §2, while refuting the coarser prediction we registered.
 |---|---|---|
 | dataset characteristics / provenance | **closed** | coordinate rule 7/8 strict, plus manipulations in both directions |
 | hyperparameter choice | **closed** | the identity reproduces the reg-path outcome across a 12-fold change in *g* |
-| bootstrap methodology | **closed** | cluster bootstrap over within-test components, ICC + design effect, two-arm deltas |
+| bootstrap methodology | **closed** | cluster bootstrap over within-test components, ICC + design effect, two-arm deltas, and a Benjamini–Hochberg correction that is computed and recorded rather than asserted |
 | homology-detection validation | **closed** | coordinates are k-mer-independent; MMseqs2 agreement |
 | single-suite, n = 1, not systematic | **PARTIALLY closed** | a second suite has 4 leaky tasks, one 25 % byte-identical — but this is a **leak census, not a demonstrated re-ranking**. No model was trained on NT. The precondition for inversion is shown to be widespread; the inversion itself is still n = 1 |
 | CNN and Transformer generality | **partially closed** | the identity holds on the from-scratch CNN cells; the foundation-model roster remains Tier 2/3 |
@@ -361,7 +414,20 @@ python -m audit.tools.certify --self-validate                # ~2 s, exit 1 on d
 ## 7. What the adversarial audit changed
 
 Recorded because a QA gate that leaves no trace is indistinguishable from one that never
-ran. 56 findings raised, 47 confirmed after independent re-verification.
+ran. Every confirmed finding from both rounds, with its lens and disposition, is
+committed in `results/audit_findings.csv`.
+
+| round | lenses | raised | confirmed | blockers | majors |
+|---|---|---|---|---|---|
+| 1 | 7 | 56 | 47 | 0 | 22 |
+| 2 | 6 (rotated) | 44 | 38 | **3** | 21 |
+
+Round 2 raised severity rather than lowering it, so **the loop has not converged**. That
+is the expected behaviour of the protocol, not a failure of it: round 2's targets — the
+construct-and-break experiment and the entire rewritten document — did not exist when
+round 1 ran. §8 states what remains.
+
+### 7.1 Round-1 corrections
 
 | # | correction |
 |---|---|
@@ -386,3 +452,44 @@ ran. 56 findings raised, 47 confirmed after independent re-verification.
 | 19 | `huggingface_hub` pinned in `requirements.txt` |
 | 20 | census now writes atomically to a sidecar — an interrupted run had truncated the CSV |
 | 21 | pre-registration committed at `2edad5c`, before the results, so anchoring is real |
+
+### 7.2 Round-2 corrections (3 blockers, 21 majors)
+
+| # | correction |
+|---|---|
+| 22 | **NT original-vs-revised "controlled natural experiment" RETRACTED.** The releases are different organisms and source pipelines (UniProt multi-species vs human coordinates), not the same data recurated |
+| 23 | **Benjamini–Hochberg was announced in a comment and never performed**; `bh()` was dead code. Now computed, with p-values and post-BH verdicts recorded per pair |
+| 24 | **Both manipulations were confounded by class balance and size.** Matched arms added and made primary; effects are *larger* under matching |
+| 25 | "each of 40,934 intervals shipped exactly twice" was arithmetically impossible (81,868 ≠ 77,421); corrected to 36,487 twice + 4,447 once |
+| 26 | `enhancers` / `enhancers_types` are byte-identical; leaky-task count corrected 4/13 → **3/12 independent** |
+| 27 | P4 quoted 2 of 4 held-out cells and the wrong maximum error; corrected to 4 cells, max 0.0049 |
+| 28 | Manipulation A's duplication rate mis-derived: 0.9426 is the target *share on duplicated coordinates*, requiring a duplication rate of 0.8914 |
+| 29 | certify C1 warned but could not move the verdict; now yields `provisional-clean`. C2 was a hardcoded constant; now a real check |
+| 30 | certify's C8 escalation was unreachable (verdict_from already handled it); logic deduplicated |
+| 31 | manipulation alignment assert checked row count only; now requires per-row width and label agreement |
+| 32 | superseded `certify_report.json` from the pre-fix run removed |
+| 33 | audit findings themselves committed to `results/audit_findings.csv` |
+
+---
+
+## 8. Open items — what is NOT closed
+
+Stated because the convergence protocol requires a third round and has not had one.
+
+1. **The loop has not converged.** §5.2 of EXECUTION_PLAN.md requires two consecutive
+   rounds with only cosmetic findings. Round 2 produced 3 blockers. A round 3 must run
+   against the current state, and its targets should be the matched manipulation arms,
+   the BH implementation and the retracted §4 — all new since round 2.
+2. **A pre-existing claim in the submitted manuscript is unsupported.**
+   `paper/main.tex:146` states that a Benjamini–Hochberg correction was applied to the
+   original ~dozen leaky-vs-clean delta intervals. No BH code, p-value or q-value exists
+   anywhere in the repository for those frozen results. This predates the Tier-1 work
+   (it entered at commit `33b1825`) and **requires either implementation against the
+   frozen bootstrap draws or removal of the sentence.** It is flagged here rather than
+   silently edited, because it concerns a frozen analysis and a submitted claim.
+3. **Every STRONG/BINDING forward prediction in the pre-registration is unexecuted.**
+   GUE, GLRB, BEND and DeepSTARR were not censused; only the WEAK NT expectation was
+   evaluated. The pre-registration's value is prospective and remains to be cashed.
+4. **The ranking inversion is still n = 1.** §4 establishes that the *precondition* is
+   widespread; no model was trained on any second-suite task.
+5. `paper/tier1_sections.tex` is a staging file and is not yet `\input` by `main.tex`.

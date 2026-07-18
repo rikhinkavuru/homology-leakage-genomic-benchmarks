@@ -287,9 +287,15 @@ def certify_dataset(seqs, y, tr, te, name="dataset", boot=2000, seed=0,
         and excess > 0
         and rep["RF_drop_excl0"])
 
+    # C2 is a genuine check, not a constant: a dataset whose length-robust containment
+    # exceeds its length-blind Jaccard by more than the cut is one where reporting only
+    # the length-blind metric would have under-called it (the demo_coding case).
+    c2 = ("DISAGREE_containment_higher"
+          if rep["leak_containment_0p7"] > LEAK_CUT >= rep["leak_jaccard_0p7"]
+          else "pass")
     checks = {
         "C1_full_scale": "pass" if rep["n"] >= full_scale_n else "NOT_FULL_SCALE",
-        "C2_two_metrics": "pass",
+        "C2_two_metrics": c2,
         "C3_alignment_engine": ("not_applicable" if rep["engine_agreement"] is None
                                 else "pass" if rep["engine_agreement"] else "DISAGREE"),
         "C4_C5_tripwire": ("low_confidence" if rep["graded_gap_low_confidence"]
@@ -301,16 +307,24 @@ def certify_dataset(seqs, y, tr, te, name="dataset", boot=2000, seed=0,
     }
     rep["checks"] = checks
 
+    # verdict_from already folds in C2 (containment) and C8 (coordinates), so those two
+    # cannot escalate again here; the remaining checks each get one chance to do so.
     v = verdict_from(rep["leak_jaccard_0p7"], rep["leak_containment_0p7"], coord)
     escalations = []
+    if checks["C8_coordinates"] == "LEAKY" and coord is not None and coord > LEAK_CUT:
+        escalations.append("C8 coordinate geometry")
     if v == "clean" and rep["tripwire_fired"]:
-        v, _ = "borderline", escalations.append("C4/C5 memorizer tripwire, confirmed by C6+C7")
-    if v == "clean" and checks["C8_coordinates"] == "LEAKY":
-        v, _ = "borderline", escalations.append("C8 coordinate geometry")
+        v = "borderline"
+        escalations.append("C4/C5 memorizer tripwire, confirmed by C6+C7")
     if v == "clean" and checks["C3_alignment_engine"] == "DISAGREE":
-        v, _ = "borderline", escalations.append("C3 alignment engine disagrees")
+        v = "borderline"
+        escalations.append("C3 alignment engine disagrees")
+    # C1 must be able to MOVE the verdict, not merely warn: a clean badge earned on a
+    # subsample is not a clean badge, because subsampling removes near-duplicate
+    # partners and can only under-report leakage.
     if v == "clean" and checks["C1_full_scale"] == "NOT_FULL_SCALE":
-        escalations.append("C1 WARNING: not full scale; a clean verdict here is provisional")
+        v = "provisional-clean"
+        escalations.append("C1: not full scale; clean verdict is provisional")
     rep["verdict"] = v
     rep["escalated_by"] = escalations or None
     rep["seconds"] = round(time.time() - t0, 1)

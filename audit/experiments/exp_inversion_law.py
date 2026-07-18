@@ -427,6 +427,9 @@ def part_bootstrap(S, boot=BOOT, seed=BSEED):
             minv_d = draws["phi"] * Dg_d - delta_d
             dlo, dhi = np.percentile(delta_d, [2.5, 97.5])
             mlo, mhi = np.percentile(minv_d, [2.5, 97.5])
+            # two-sided bootstrap p-values, floored at 1/boot (a p of 0 is not a p)
+            p_delta = max(1.0 / boot, 2 * min((delta_d <= 0).mean(), (delta_d >= 0).mean()))
+            p_minv = max(1.0 / boot, 2 * min((minv_d <= 0).mean(), (minv_d >= 0).mean()))
             clean = bool(mlo > 0 and dlo > 0)
             fragile = bool(dlo <= 0 <= dhi)
             rows.append(dict(
@@ -436,11 +439,22 @@ def part_bootstrap(S, boot=BOOT, seed=BSEED):
                 m_inv=_r(phi_pt * (gA - gB) - (nB - nA)),
                 delta_ci=f"[{dlo:.4f}, {dhi:.4f}]", delta_excl0=bool(dlo > 0 or dhi < 0),
                 m_inv_ci=f"[{mlo:.4f}, {mhi:.4f}]", m_inv_excl0=bool(mlo > 0 or mhi < 0),
+                p_delta=round(float(p_delta), 5), p_m_inv=round(float(p_minv), 5),
                 verdict="CLEAN" if clean else ("FRAGILE" if fragile else "no-inversion")))
         print(f"  [{d}] cluster bootstrap G={G} boot={boot} done "
               f"({time.time()-t0:.0f}s)", flush=True)
     df = pd.DataFrame(rows)
-    # Benjamini-Hochberg over the pairwise delta tests (bootstrap p = 2*min tail)
+    # MULTIPLICITY. 12 pairs x 2 estimands = 24 tests, and the single headline CLEAN
+    # verdict is the best of them -- that is post-selection inference and must be
+    # corrected, not just mentioned. Benjamini-Hochberg at q=0.05, applied over all
+    # pairwise delta tests and separately over the m_inv tests.
+    for col in ("p_delta", "p_m_inv"):
+        keep = bh(df[col].to_numpy(), q=0.05)
+        df[col.replace("p_", "bh_sig_")] = keep
+    # A pair only keeps its CLEAN badge if BOTH estimands survive BH.
+    df["verdict_bh"] = np.where(
+        (df.verdict == "CLEAN") & df.bh_sig_delta & df.bh_sig_m_inv, "CLEAN",
+        np.where(df.verdict == "CLEAN", "CLEAN_fails_BH", df.verdict))
     return df
 
 
