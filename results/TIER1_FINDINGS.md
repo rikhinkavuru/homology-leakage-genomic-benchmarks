@@ -493,13 +493,20 @@ Stated because the convergence protocol requires a third round and has not had o
    rounds with only cosmetic findings. Round 2 produced 3 blockers. A round 3 must run
    against the current state, and its targets should be the matched manipulation arms,
    the BH implementation and the retracted §4 — all new since round 2.
-2. **A pre-existing claim in the submitted manuscript is unsupported.**
-   `paper/main.tex:146` states that a Benjamini–Hochberg correction was applied to the
-   original ~dozen leaky-vs-clean delta intervals. No BH code, p-value or q-value exists
-   anywhere in the repository for those frozen results. This predates the Tier-1 work
-   (it entered at commit `33b1825`) and **requires either implementation against the
-   frozen bootstrap draws or removal of the sentence.** It is flagged here rather than
-   silently edited, because it concerns a frozen analysis and a submitted claim.
+2. ~~A pre-existing manuscript claim is unsupported.~~ **RESOLVED — the claim was true
+   but had no artifact.** `paper/main.tex:146` states that Benjamini–Hochberg at q = 0.05
+   leaves the two leaky random-forest drops and the nonTATA logistic-regression drop
+   significant and no clean or three-class delta significant. The round-2 audit correctly
+   found that no BH computation existed anywhere in the repository. It has now been
+   performed (`audit/experiments/exp_bh_correction.py` →
+   `results/bh_correction_frozen.csv`) over all 15 frozen delta tests, and the
+   manuscript's sentence is **exactly right**: those three survive, nothing else does,
+   and BH changes zero verdicts. One caveat is recorded in the module: the frozen
+   artifact retains percentile intervals rather than bootstrap draws, so p-values are
+   recovered under a normal reference. That approximation cannot flip any verdict here —
+   the surviving deltas sit at |z| = 5.0–36.7 and every null at |z| < 1.6 — but exact
+   bootstrap p-values would require re-running the cluster bootstrap with draw retention,
+   which remains the correct long-term fix.
 3. **Every STRONG/BINDING forward prediction in the pre-registration is unexecuted.**
    GUE, GLRB, BEND and DeepSTARR were not censused; only the WEAK NT expectation was
    evaluated. The pre-registration's value is prospective and remains to be cashed.
