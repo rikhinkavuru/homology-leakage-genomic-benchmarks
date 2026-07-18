@@ -13,8 +13,11 @@ pip install -r results/requirements.txt
 # (equivalently: pip install genomic-benchmarks scikit-learn pandas numpy scipy matplotlib)
 ```
 
-Datasets are fetched by `genomic_benchmarks.loc2seq.download_dataset` on first use
-and cached in `~/.genomic_benchmarks/` (a few minutes total, one-time).
+Datasets are fetched by `genomic_benchmarks.loc2seq.download_dataset`. Under the pinned
+`genomic_benchmarks==1.0.0`, `download_dataset` re-extracts the dataset on every call, so
+run `python -m audit.tools.prefetch` **once** to build a stable local `datacache/` (pickled
+sequences) that every experiment then reads — this avoids repeated downloads/re-extraction
+and the races they cause. Raw sequences are cached under `~/.genomic_benchmarks/`.
 
 ## Pipeline (run from the project root as modules; each script writes into `results/`)
 

@@ -5,7 +5,7 @@ Durable evidence log for the resubmission. Each entry: finding, key numbers, sou
 ## Confirmed (locked)
 
 ### R3.3 cluster/block bootstrap — `cluster_bootstrap.py` → `results/cluster_bootstrap.csv` [RAN]
-Cluster bootstrap over within-test 8-mer-Jaccard>0.7 components. Both leaky datasets: CIs widen ×1.0–1.5, **no verdict flips**. RF drops still exclude 0 (nontata delta CI [0.093,0.126]; ensembl [0.156,0.172]); ensembl-LR stays null both ways. Design effect small because test-internal clustering ≈1.06–1.19 seq/cluster (near-dups are test-to-**train**, not test-to-test). → R3.3 answered; the correct tool changes nothing. (Full grid + ICC/deff/CRVE/combined-source CI: `exp_clusterboot_full.py`, pending.)
+Cluster bootstrap over within-test 8-mer-Jaccard>0.7 components. Both leaky datasets: CIs widen ×1.0–1.8, **no verdict flips**. RF drops still exclude 0 (nontata delta CI [0.092,0.126]; ensembl [0.156,0.172]); ensembl-LR stays null both ways. Design effect small because test-internal clustering ≈1.06–1.19 seq/cluster (near-dups are test-to-**train**, not test-to-test). → R3.3 answered; the correct tool changes nothing. (Full grid + ICC/deff/CRVE/combined-source CI: `exp_clusterboot_full.py`, pending.)
 
 ### R2.a1 balance provenance [RAN]
 All GB datasets curated to 0.500 pos-fraction (positive/negative subfolders, train+test); nontata natural mild 0.544; 3-class 0.37/0.30/0.33. → "preprocessed-balanced, not natural"; imbalanced test warranted.

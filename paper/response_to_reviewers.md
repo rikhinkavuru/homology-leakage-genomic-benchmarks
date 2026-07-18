@@ -190,7 +190,7 @@ Methods **§3.7**. The graded memorization gap is used as the confound-immune he
 
 Implemented and run: resampling whole within-test near-duplicate components widens CIs
 by 1.0–1.5× but **flips no verdict** — the RF drop still excludes zero on both datasets
-(ensembl [0.156, 0.172]; nontata [0.093, 0.126]) and the ensembl-LR drop stays null.
+(ensembl [0.156, 0.172]; nontata [0.092, 0.126]) and the ensembl-LR drop stays null.
 The design effect is small because the correlated near-duplicates are test-to-**train**,
 not test-to-test (within-test clustering only 1.06–1.19 sequences/component). New
 **§4.9**; Methods **§3.9**. Every deep-model drop CI (§4.6) already uses this cluster
