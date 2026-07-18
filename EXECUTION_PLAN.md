@@ -267,7 +267,44 @@ Three tiers by impact-per-effort and compute prerequisites. Tier 1 ships first b
 
 ---
 
-## 5. Citations (verified against source, 2023–2026)
+## 5. Pre-submission audit-to-convergence protocol (mandatory QA gate)
+
+No deepener — and no resubmission — ships until it passes this gate. The rule: **audit from many independent hostile lenses, verify every finding against source, fix only what survives, then re-audit with fresh lenses, and repeat until a full pass returns only cosmetic nits — held for two consecutive rounds.** Fixes themselves introduce new errors (observed repeatedly), so a single clean-looking pass is never sufficient; **convergence, not one clean run, is the bar.** Run this many times — cost is irrelevant; accuracy is the only acceptance criterion.
+
+### 5.1 The lens battery (run every round, in parallel; each lens is an independent adversarial agent told to REJECT)
+| Lens | Hunts for |
+|---|---|
+| Hostile statistician / reproducibility | every number vs its source CSV; bootstrap correctness (cluster/block for correlated data); multiplicity; CI↔estimator consistency; internal contradictions |
+| Genomics / biological validity | homology-detection soundness; strand; length/containment; coordinate/provenance claims; over-claimed "clean" verdicts |
+| ML / deep-model rigor | model scope; tuned-vs-default hyperparameters; CNN **and** Transformer coverage; fair baselines; pretraining contamination |
+| Editor + novelty + reviewer-simulation | the three reviewers + AE **in character** deciding accept/reject; is the contribution deep enough; positioning vs prior art; over-claiming |
+| References / cross-refs / citations | every `\ref` resolves to the *right* float; every `\cite` exists in the bib; bib entries correct; no orphan labels |
+| Exhaustive number cross-check | abstract ↔ body ↔ tables ↔ CSVs match to the last digit; signs, rounding, units |
+| Full visual pass (**rendered**, not source) | every page for text-on-figure/bar overlap, table overrun/shrink, caption placement, margin clipping, spacing, missing glyphs |
+| Repo integrity | the code actually **runs end-to-end** (not just imports); README/REPRODUCE/ARCHITECTURE commands resolve; pre-registration + data-availability real |
+| Regression | did the previous round's fixes break a neighbor or introduce a new inconsistency — the single most common failure mode |
+
+### 5.2 The convergence loop
+1. Run the full lens battery in parallel.
+2. **Adversarially verify each finding against source**; discard any that don't survive (this is what prevents hallucinated "fixes").
+3. Apply only CONFIRMED fixes; recompile, regenerate figures + letters, re-run any touched code.
+4. **Re-audit with fresh, orthogonal lenses** — rotate emphasis so successive passes don't share a blind spot.
+5. Repeat until a full round yields **zero blocker/major and only cosmetic nits**, and hold that for **two consecutive rounds**. Track the severity trend — it must monotonically shrink (major → minor → nit → clean); if a round re-introduces a major, the loop is not done.
+
+### 5.3 Anti-hallucination / anti-drift invariants (enforced every round)
+- **Every numeric claim traces to a committed source** (a `results/` CSV row). A number with no source is a bug, not a value.
+- **Every citation is verified against the actual source** (title/venue/year/URL, via Exa) before it enters the paper; future-dated or unverifiable refs are removed or flagged non-load-bearing.
+- **Visual claims come from the rendered artifact** — render the PDF and look, never infer from the LaTeX/markdown.
+- **Code/reproducibility claims come from actually executing the code**, with a frozen-number smoke test (a known result reproduced byte-identically) after any refactor or move.
+- **One estimator per quantity, one decision rule, one convention** — declared once, applied everywhere (the recurring bug this project hit was mixing seed-0 vs 5-seed-mean and predict-proba vs argmax).
+
+### 5.4 The irreducible residual (state it, never hide it)
+Consistency audits certify internal correctness and presentation; they **cannot** certify (a) that the underlying experiment has no bug — mitigate by an independent re-implementation or a second re-run of each headline number; or (b) a reviewer's subjective judgment of novelty/sufficiency. Name both honestly in the limitations/cover letter rather than pretend the loop closes them.
+
+### 5.5 Per-deepener gate
+Apply §5.1–5.3 to (i) each new experiment's numbers + code, (ii) the manuscript deltas, (iii) the response letter, (iv) every new/changed figure, and (v) the repo — **before merging that deepener** — then one final whole-paper convergence loop before resubmission.
+
+## 6. Citations (verified against source, 2023–2026)
 
 **Suites, datasets, benchmarks**
 - Grešová, Martinek, Čechák, Šimeček, Alexiou. *Genomic benchmarks: a collection of datasets for genomic sequence classification.* BMC Genomic Data 24:25 (2023). https://doi.org/10.1186/s12863-023-01123-8
