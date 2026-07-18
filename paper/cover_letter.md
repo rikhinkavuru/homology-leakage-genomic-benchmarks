@@ -1,6 +1,6 @@
 # Cover letter — resubmission
 
-To: Dr. Lina Ma, Editor-in-Chief, and the Editorial Office
+To: Dr. Lina Ma, Editor-in-Chief, and the Editorial Office\
 Bioinformatics Advances
 
 Dear Dr. Ma and Editors,
@@ -23,7 +23,7 @@ The study remains fully reproducible; all code, the report card, and the near-du
 
 We are grateful to the reviewers and the Associate Editor — their comments materially improved the paper — and we hope the revised manuscript now meets the standard for publication.
 
-Sincerely,
-Rikhin Kavuru
-Independent Researcher
+Sincerely,\
+Rikhin Kavuru\
+Independent Researcher\
 rikhinkavuru@gmail.com

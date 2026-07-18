@@ -20,7 +20,7 @@ pip install numpy scipy scikit-learn pandas matplotlib genomic-benchmarks
 # deep-model checks additionally need:      pip install torch
 # alignment validation additionally needs:  brew install mmseqs2 blast   (dustmasker ships with blast)
 
-python prefetch.py    # build the local data cache once (serial; avoids download races)
+python -m audit.tools.prefetch    # build the local data cache once (serial; avoids download races)
 ```
 
 Datasets download on demand via the `genomic-benchmarks` package (cached under
@@ -28,25 +28,28 @@ Datasets download on demand via the `genomic-benchmarks` package (cached under
 (git-ignored, **not** redistributed). See [`REPRODUCE.md`](REPRODUCE.md) for exact
 commands and runtimes; seeds are in [`results/seeds.txt`](results/seeds.txt).
 
-Each experiment writes CSVs to `results/` and prints a summary:
+The code is packaged under `audit/` (see [`ARCHITECTURE.md`](ARCHITECTURE.md)). Run
+every script **as a module from the repo root**: `python -m audit.<subpackage>.<module>`
+(e.g. `python -m audit.pipeline.run_suite`). Each experiment writes CSVs to `results/`
+and prints a summary:
 
 | Script | Produces | Reviewer point |
 |---|---|---|
-| `expkit.py` | shared verified helper (loaders, features, splits, similarity, bootstrap) — imported by all `exp_*` | — |
-| `measure_leakage_full.py`, `run_suite.py`, `run_fullscale.py` | leakage fractions + main results | — |
-| `homology_split.py` | the drop-in near-duplicate-aware splitter (numpy/scipy; `--fasta` CLI) | R3.4 |
-| `cluster_bootstrap.py`, `exp_clusterboot_full.py` | cluster/block bootstrap + ICC / design-effect / CRVE | R3.3 |
-| `exp_regpath.py` | random-forest regularization path + graded memorization gap | R3.2 |
-| `exp_stats.py` | AUROC/F1 rankings, P(model rank-1) bootstrap, clean-set CIs, short-seq census | R3, central claim |
-| `exp_alignment.py` | MMseqs2 alignment re-cluster + refit | R2.a2 |
-| `chromosome_holdout.py` | leave-chromosomes-out control (recovers hg38 coordinates) | genomics-standard |
-| `exp_geometry.py`, `full_scale_containment.py` | length-cap + containment index, GC-shift, cluster cohesion | R1.3, R3.4 |
-| `exp_canonical.py` | reverse-complement-canonical k-mers (metric + features) | strand |
-| `exp_imbalance.py` | balance provenance + prevalence-aware imbalanced panel | R2.a1 |
-| `exp_inject3class.py` | injected-leakage multiclass construction | R2.a3 |
-| `exp_deep.py` | from-scratch 1D CNN dropout×weight-decay dose-response (MPS/CPU) | R1.1, R3.1(i) |
-| `exact_dup_count.py` | exact byte-identical train/test duplicate census | terminology |
-| `make_paper_figures.py`, `make_part_b_figures.py`, `make_graded_figure.py` | Figures 1–3 | — |
+| `audit/core/expkit.py` | shared verified helper (loaders, features, splits, similarity, bootstrap) — imported by all `exp_*` | — |
+| `audit/pipeline/measure_leakage_full.py`, `audit/pipeline/run_suite.py`, `audit/pipeline/run_fullscale.py` | leakage fractions + main results | — |
+| `audit/core/homology_split.py` | the drop-in near-duplicate-aware splitter (numpy/scipy; `--fasta` CLI) | R3.4 |
+| `audit/experiments/cluster_bootstrap.py`, `audit/experiments/exp_clusterboot_full.py` | cluster/block bootstrap + ICC / design-effect / CRVE | R3.3 |
+| `audit/experiments/exp_regpath.py` | random-forest regularization path + graded memorization gap | R3.2 |
+| `audit/experiments/exp_stats.py` | AUROC/F1 rankings, P(model rank-1) bootstrap, clean-set CIs, short-seq census | R3, central claim |
+| `audit/experiments/exp_alignment.py` | MMseqs2 alignment re-cluster + refit | R2.a2 |
+| `audit/experiments/chromosome_holdout.py` | leave-chromosomes-out control (recovers hg38 coordinates) | genomics-standard |
+| `audit/experiments/exp_geometry.py`, `audit/experiments/full_scale_containment.py` | length-cap + containment index, GC-shift, cluster cohesion | R1.3, R3.4 |
+| `audit/experiments/exp_canonical.py` | reverse-complement-canonical k-mers (metric + features) | strand |
+| `audit/experiments/exp_imbalance.py` | balance provenance + prevalence-aware imbalanced panel | R2.a1 |
+| `audit/experiments/exp_inject3class.py` | injected-leakage multiclass construction | R2.a3 |
+| `audit/experiments/exp_deep.py` | from-scratch 1D CNN dropout×weight-decay dose-response (MPS/CPU) | R1.1, R3.1(i) |
+| `audit/experiments/exact_dup_count.py` | exact byte-identical train/test duplicate census | terminology |
+| `audit/figures/make_paper_figures.py`, `audit/figures/make_part_b_figures.py`, `audit/figures/make_graded_figure.py` | Figures 1–3 | — |
 
 Deep-model pre-registration (claim, dose-response grid, binding refutation condition):
 [`results/deep_preregistration.md`](results/deep_preregistration.md).

@@ -6,8 +6,8 @@ individual comments:
 
 1. **Title and terminology.** The paper is retitled *"Near-duplicate leakage can
    reorder model rankings on a genomic benchmark suite: an audit of Genomic
-   Benchmarks."* We adopt **near-duplicate leakage** as the primary term (an exact-
-   duplicate census shows the strongest dataset, `human_enhancers_ensembl`, is
+   Benchmarks."* We adopt **near-duplicate leakage** as the primary term (an
+   exact-duplicate census shows the strongest dataset, `human_enhancers_ensembl`, is
    38.0% *byte-identical* train/test copies), reserve *homology* for where
    alignment/containment evidence earns it, and rename the splitter
    **near-duplicate-aware** (addresses R3.4).
@@ -76,11 +76,11 @@ the corrected and novel-only rankings diverge (τ = −0.67): the random forest 
 demoted under the corrected split yet remains the best model on truly novel
 sequences (accuracy 0.879, <0.5 similarity), so its advantage is partly genuine
 generalization. We reframe both the corrected split and novel-only accuracy as
-explicit near-duplicate-bounded proxies (Methods §3.6/§3.7), name leave-one-
-chromosome-out as the functional ground truth (§4.8), and single-linkage cohesion
-(0.083 for nontata vs 0.96 for ensembl, §4.10) supplies the biological reason
-correction over-removes signal on nontata. This is the core of the nontata-as-
-cautionary-case framing (§4.3, Discussion).
+explicit near-duplicate-bounded proxies (Methods §3.4/§3.7), name
+leave-one-chromosome-out as the functional ground truth (§4.8), and single-linkage
+cohesion (0.083 for nontata vs 0.96 for ensembl, §4.10) supplies the biological
+reason correction over-removes signal on nontata. This is the core of the
+nontata-as-cautionary-case framing (§4.3, Discussion).
 
 ### R1.3 — "Validate leakage with an alignment-based measure and give threshold recommendations."
 
@@ -138,8 +138,8 @@ multiclass set.
 The verdict is robust to the clustering threshold (0.5/0.7/0.9 sweep, no change;
 Methods §3.4), and we now report the geometry that drives the recommendation: the
 length-robust containment index (§4.1/§4.10) as the metric to prefer when lengths
-vary, and single-linkage cohesion as the diagnostic that separates a clean discrete-
-duplication case (ensembl, treat with one threshold) from a transitive-chaining case
+vary, and single-linkage cohesion as the diagnostic that separates a clean
+discrete-duplication case (ensembl, treat with one threshold) from a transitive-chaining case
 (nontata, treat as partial-scope and avoid over-removal). Report-card guidance and
 the length-cap disclosure are in Table 2.
 
@@ -175,8 +175,8 @@ open** (Discussion, Limitations) rather than answer it with a contaminated numbe
 ### R3.2 — "The random forest runs at memorization-maximizing defaults; is the result just an untuned-RF artifact?"
 
 We added a full **regularization path** (min_samples_leaf ∈ {1…500}, max_depth ∈
-{None…4}, at full scale, with the largest settings exceeding the largest near-
-duplicate cluster). At the default the forest scores 1.000 on the ≥0.9-similarity bin
+{None…4}, at full scale, with the largest settings exceeding the largest
+near-duplicate cluster). At the default the forest scores 1.000 on the ≥0.9-similarity bin
 with the full drop (0.164/0.108) and graded gap (0.230/0.121); regularizing collapses
 the drop to ≈0 (0.164→−0.001; 0.108→0.000) and the graded gap, and the "RF wins on the
 leaky split" phenomenon **requires** the unregularized forest (rf_rank_orig flips 1→4
@@ -201,8 +201,8 @@ finalized in §3.9/§4.9.)
 
 Agreed and adopted throughout: **near-duplicate leakage** is the primary term, the
 splitter is **near-duplicate-aware**, and the title is changed. An exact-duplicate
-census settles this metric-independently (`human_enhancers_ensembl` = 38.0% byte-
-identical copies; `human_nontata_promoters` = 0 exact but 22.5% near-duplicates at
+census settles this metric-independently (`human_enhancers_ensembl` = 38.0%
+byte-identical copies; `human_nontata_promoters` = 0 exact but 22.5% near-duplicates at
 Jaccard ≥0.9). We keep "homology" only where the alignment/containment re-measure
 earns it (Methods §3.3), and we downgrade the report card's green verdicts to "no
 forward-strand near-duplicate leakage detected (length-cap disclosed)" (Table 2,
