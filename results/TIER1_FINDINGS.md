@@ -10,8 +10,9 @@ hostile lenses, with every finding re-verified against source by a separate agen
 (179 raised, 144 confirmed across the four rounds). §7 lists what each round changed and
 §8 states what is still open. Several headline claims are weaker here than in the first
 draft and **one was retracted outright**; corrections are marked in place rather than
-quietly absorbed. The loop has **not** converged to the two-consecutive-clean-rounds bar
-the protocol sets.
+quietly absorbed. Severity fell sharply in round 4 (blockers 4 → 0, majors 19 → 3), but
+the loop has **not** formally met the two-consecutive-cosmetic-rounds bar the protocol
+sets — one further round is required.
 
 ---
 
