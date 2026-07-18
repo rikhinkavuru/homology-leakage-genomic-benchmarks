@@ -1,0 +1,11 @@
+dataset,model,delta,ci_lo,ci_hi,excludes0
+human_enhancers_cohn,RF_k6,-0.0052,-0.0222,0.0128,False
+human_enhancers_cohn,RF_k4,-0.0026,-0.0202,0.0144,False
+human_ocr_ensembl,RF_k6,0.0139,-0.0066,0.0334,False
+human_ocr_ensembl,RF_k4,0.0069,-0.0146,0.0279,False
+demo_human_or_worm,RF_k6,-0.0044,-0.0142,0.0068,False
+demo_human_or_worm,RF_k4,-0.0058,-0.0148,0.0042,False
+demo_coding_vs_intergenomic_seqs,RF_k6,0.0006,-0.0138,0.0146,False
+demo_coding_vs_intergenomic_seqs,RF_k4,0.0048,-0.0096,0.0192,False
+drosophila_enhancers_stark,RF_k6,0.0235,-0.0083,0.0576,False
+drosophila_enhancers_stark,RF_k4,0.0004,-0.0302,0.0322,False

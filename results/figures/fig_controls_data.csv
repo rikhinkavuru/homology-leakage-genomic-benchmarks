@@ -3,5 +3,5 @@ human_nontata_promoters,original split,93.17,RF_k6
 human_enhancers_ensembl,original split,85.56,RF_k6
 human_nontata_promoters,random re-split (control),93.24,RF_k6
 human_enhancers_ensembl,random re-split (control),85.77,RF_k6
-human_nontata_promoters,homology-aware split,81.05,RF_k6
-human_enhancers_ensembl,homology-aware split,69.99,RF_k6
+human_nontata_promoters,near-duplicate-aware split,81.05,RF_k6
+human_enhancers_ensembl,near-duplicate-aware split,69.99,RF_k6

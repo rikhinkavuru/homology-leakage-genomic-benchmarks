@@ -1,0 +1,16 @@
+dataset,model,delta,icc,deff,n_clusters,delta_ci_sample,excl0_sample,delta_ci_cluster,excl0_cluster,seed_sd,delta_ci_combined,excl0_combined,orig_acc_CRVE_ci
+human_nontata_promoters,RF_k6,0.1083,0.9071,1.169,7618.0,"[0.0987, 0.1177]",True,"[0.0915, 0.1256]",True,0.0062,"[np.float64(0.0875), np.float64(0.1292)]",True,"[np.float64(0.9227), np.float64(0.9341)]"
+human_nontata_promoters,LR_k6,0.0407,0.7794,1.145,7618.0,"[0.0304, 0.0511]",True,"[0.0253, 0.0569]",True,0.009,"[np.float64(0.017), np.float64(0.0644)]",True,"[np.float64(0.8621), np.float64(0.8782)]"
+human_enhancers_ensembl,RF_k6,0.1639,0.9925,1.056,29311.0,"[0.1575, 0.1705]",True,"[0.1552, 0.1727]",True,0.0021,"[np.float64(0.1543), np.float64(0.1735)]",True,"[np.float64(0.8552), np.float64(0.8639)]"
+human_enhancers_ensembl,LR_k6,0.0004,0.993,1.056,29311.0,"[-0.006, 0.0068]",False,"[-0.0075, 0.0081]",False,0.0037,"[np.float64(-0.0103), np.float64(0.0111)]",False,"[np.float64(0.7761), np.float64(0.7858)]"
+human_enhancers_cohn,RF_k6,-0.0052,,,,,,"[-0.023, 0.0132]",False,,,,
+human_enhancers_cohn,LR_k6,-0.0016,,,,,,"[-0.0188, 0.016]",False,,,,
+human_ocr_ensembl,RF_k6,0.0139,,,,,,"[-0.0071, 0.0349]",False,,,,
+human_ocr_ensembl,LR_k6,0.0059,,,,,,"[-0.015, 0.0266]",False,,,,
+demo_human_or_worm,RF_k6,-0.0044,,,,,,"[-0.0151, 0.0062]",False,,,,
+demo_human_or_worm,LR_k6,-0.0034,,,,,,"[-0.013, 0.0061]",False,,,,
+demo_coding_vs_intergenomic_seqs,RF_k6,0.0006,,,,,,"[-0.0136, 0.0149]",False,,,,
+demo_coding_vs_intergenomic_seqs,LR_k6,0.0056,,,,,,"[-0.0069, 0.0182]",False,,,,
+drosophila_enhancers_stark,RF_k6,0.0235,,,,,,"[-0.0067, 0.0539]",False,,,,
+drosophila_enhancers_stark,LR_k6,0.0229,,,,,,"[-0.0075, 0.0532]",False,,,,
+human_ensembl_regulatory,RF_k6,0.0008,,,,,,"[-0.0048, 0.0063]",False,,,,

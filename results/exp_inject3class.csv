@@ -1,0 +1,9 @@
+dataset,inject_frac,model,n_injected,acc_orig,acc_corr,drop
+human_ensembl_regulatory,0.0,RF,0,0.5785,0.5781,0.0004
+human_ensembl_regulatory,0.0,LR,0,0.5908,0.6169,-0.0261
+human_ensembl_regulatory,0.1,RF,1601,0.6988,0.5811,0.1177
+human_ensembl_regulatory,0.1,LR,1601,0.6248,0.6089,0.0158
+human_ensembl_regulatory,0.2,RF,3201,0.7644,0.5852,0.1791
+human_ensembl_regulatory,0.2,LR,3201,0.6428,0.6105,0.0323
+human_ensembl_regulatory,0.4,RF,6403,0.8366,0.5785,0.2581
+human_ensembl_regulatory,0.4,LR,6403,0.6689,0.6028,0.0661

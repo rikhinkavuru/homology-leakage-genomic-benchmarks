@@ -1,0 +1,3 @@
+dataset,n_leaked,n_novel,leaked_lowcomplex_frac,novel_lowcomplex_frac,leaked_frac_mostly_masked
+human_nontata_promoters,2037,4971,0.0335,0.1061,0.0054
+human_enhancers_ensembl,11774,18770,0.0533,0.0433,0.0327

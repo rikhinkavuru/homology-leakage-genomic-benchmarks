@@ -6,6 +6,11 @@ __pycache__/
 # ---- Logs & scratch ----
 *.log
 *.out
+
+# ---- Internal working docs (not for the public release / reviewers) ----
+REVIEWER_RESPONSE_PLAN.md
+# exploratory from-scratch transformer; underfits short DNA, not used in the paper
+exp_transformer.py
 pg-*.png
 *.synctex.gz
 
@@ -15,6 +20,9 @@ template_src/
 # ---- Genomic Benchmarks RAW SEQUENCE DATA -- NOT redistributed here ----
 # (downloaded on demand via the genomic-benchmarks package; cached outside this tree)
 .genomic_benchmarks/
+# on-disk pickle/npy cache of the sequence data (built by prefetch.py)
+datacache/
+.DS_Store
 human_nontata_promoters/
 human_enhancers_ensembl/
 human_enhancers_cohn/

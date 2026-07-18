@@ -1,0 +1,9 @@
+dataset,model,acc_orig,acc_corr_jaccard,acc_corr_mmseqs,drop_jaccard,drop_mmseqs
+human_nontata_promoters,LR,0.8702,0.8294,0.844,0.0407,0.0262
+human_nontata_promoters,LinearSVC,0.8876,0.8083,0.8283,0.0793,0.0594
+human_nontata_promoters,RF,0.9284,0.82,0.8644,0.1083,0.064
+human_nontata_promoters,HGB,0.8905,0.827,0.8449,0.0635,0.0456
+human_enhancers_ensembl,LR,0.7809,0.7806,0.7796,0.0004,0.0013
+human_enhancers_ensembl,LinearSVC,0.798,0.7975,0.7955,0.0005,0.0025
+human_enhancers_ensembl,RF,0.8596,0.6957,0.6978,0.1639,0.1618
+human_enhancers_ensembl,HGB,0.7636,0.7608,0.7624,0.0028,0.0012

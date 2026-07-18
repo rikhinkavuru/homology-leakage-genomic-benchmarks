@@ -1,0 +1,3 @@
+dataset,gc_corr_train,gc_corr_test,gc_gap,len_corr_train,len_corr_test,gc_clustered,gc_singleton,gc_clust_gap,frac_clustered
+human_nontata_promoters,0.5604,0.5608,-0.0004,251.0,251.0,0.4817,0.6205,-0.1388,0.4326
+human_enhancers_ensembl,0.4346,0.4314,0.0032,269.2,267.5,0.4625,0.408,0.0545,0.4767

@@ -1,0 +1,17 @@
+dataset,split,model,p_rank1_sample,p_rank1_cluster
+human_nontata_promoters,original,LR,0.0,0.0
+human_nontata_promoters,original,LinearSVC,0.0,0.0
+human_nontata_promoters,original,RF,1.0,1.0
+human_nontata_promoters,original,HGB,0.0,0.0
+human_nontata_promoters,corrected,LR,0.729,0.631
+human_nontata_promoters,corrected,LinearSVC,0.0,0.0
+human_nontata_promoters,corrected,RF,0.004,0.059
+human_nontata_promoters,corrected,HGB,0.268,0.31
+human_enhancers_ensembl,original,LR,0.0,0.0
+human_enhancers_ensembl,original,LinearSVC,0.0,0.0
+human_enhancers_ensembl,original,RF,1.0,1.0
+human_enhancers_ensembl,original,HGB,0.0,0.0
+human_enhancers_ensembl,corrected,LR,0.0,0.0
+human_enhancers_ensembl,corrected,LinearSVC,1.0,1.0
+human_enhancers_ensembl,corrected,RF,0.0,0.0
+human_enhancers_ensembl,corrected,HGB,0.0,0.0

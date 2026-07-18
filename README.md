@@ -1,25 +1,73 @@
-# Homology leakage selectively inverts model rankings on genomic sequence-classification benchmarks
+# Near-duplicate leakage can reorder model rankings on a genomic benchmark suite
 
-Standard train/test splits of DNA sequence-classification benchmarks often leave near-identical (homologous) sequences on both sides, letting models score well by memorizing near-duplicates rather than generalizing. We audit the seven binary Genomic Benchmarks datasets with an exact $k$-mer Jaccard homology measure and a homology-aware re-split, and find that two datasets are materially leaky --- correcting the split removes up to **15.6 accuracy points** and, crucially, **inverts which model looks best** (a random forest falls from first to last), while the clean datasets are unaffected. We provide a per-dataset leakage report card and a drop-in homology-aware splitter so any dataset can be certified before use.
+Code and data for the paper *"Near-duplicate leakage can reorder model rankings on a
+genomic benchmark suite: an audit of Genomic Benchmarks"* (Kavuru; resubmission of
+BIOADV-2026-296, Bioinformatics Advances).
+
+**Claim.** On the Genomic Benchmarks binary suite, near-duplicate sequences that span
+the train/test split inflate the apparent performance of memorization-prone models and
+can **reorder which model appears best** — demonstrated cleanly on `human_enhancers_ensembl`
+(airtight across accuracy/AUROC/F1, a chromosome-holdout control, a winner-probability
+bootstrap, and MMseqs2 alignment) and as an explicit cautionary partial case on
+`human_nontata_promoters`. We ship a per-dataset leakage **report card** and a drop-in,
+dependency-free **near-duplicate-aware splitter** so any dataset can be certified before use.
 
 ## Reproduce
 
-All experiments are CPU-only, deterministic, and reproducible. See **[REPRODUCE.md](REPRODUCE.md)** for the exact commands and expected runtimes. Seeds are logged in [`results/seeds.txt`](results/seeds.txt) and the Python environment is pinned in [`results/requirements.txt`](results/requirements.txt). Every figure quoted in the manuscript is traced to its source script and output file in [`results/PAPER_NUMBERS.md`](results/PAPER_NUMBERS.md).
+```bash
+python -m venv venv && source venv/bin/activate
+pip install numpy scipy scikit-learn pandas matplotlib genomic-benchmarks
+# deep-model checks additionally need:      pip install torch
+# alignment validation additionally needs:  brew install mmseqs2 blast   (dustmasker ships with blast)
 
-## Splitter tool
+python prefetch.py    # build the local data cache once (serial; avoids download races)
+```
 
-The homology-aware splitter is a standalone, dependency-light module: **[`homology_split.py`](homology_split.py)** (pure `numpy`/`scipy`, CPU-only). It exposes `homology_aware_split(...)` and a `--fasta` command-line interface, and guarantees zero residual cross-split similarity above the chosen threshold. Inputs, outputs, the guarantee, and runtime are documented in **[results/TOOL_README.md](results/TOOL_README.md)**.
+Datasets download on demand via the `genomic-benchmarks` package (cached under
+`~/.genomic_benchmarks`); a local pickle/npy cache is built lazily under `datacache/`
+(git-ignored, **not** redistributed). See [`REPRODUCE.md`](REPRODUCE.md) for exact
+commands and runtimes; seeds are in [`results/seeds.txt`](results/seeds.txt).
 
-## Data
+Each experiment writes CSVs to `results/` and prints a summary:
 
-This repository does **not** redistribute the Genomic Benchmarks sequence data. The datasets are downloaded on demand via the [`genomic-benchmarks`](https://pypi.org/project/genomic-benchmarks/) package (`genomic_benchmarks.loc2seq.download_dataset`) and cached locally outside this tree. Please cite the original dataset paper:
+| Script | Produces | Reviewer point |
+|---|---|---|
+| `expkit.py` | shared verified helper (loaders, features, splits, similarity, bootstrap) — imported by all `exp_*` | — |
+| `measure_leakage_full.py`, `run_suite.py`, `run_fullscale.py` | leakage fractions + main results | — |
+| `homology_split.py` | the drop-in near-duplicate-aware splitter (numpy/scipy; `--fasta` CLI) | R3.4 |
+| `cluster_bootstrap.py`, `exp_clusterboot_full.py` | cluster/block bootstrap + ICC / design-effect / CRVE | R3.3 |
+| `exp_regpath.py` | random-forest regularization path + graded memorization gap | R3.2 |
+| `exp_stats.py` | AUROC/F1 rankings, P(model rank-1) bootstrap, clean-set CIs, short-seq census | R3, central claim |
+| `exp_alignment.py` | MMseqs2 alignment re-cluster + refit | R2.a2 |
+| `chromosome_holdout.py` | leave-chromosomes-out control (recovers hg38 coordinates) | genomics-standard |
+| `exp_geometry.py`, `full_scale_containment.py` | length-cap + containment index, GC-shift, cluster cohesion | R1.3, R3.4 |
+| `exp_canonical.py` | reverse-complement-canonical k-mers (metric + features) | strand |
+| `exp_imbalance.py` | balance provenance + prevalence-aware imbalanced panel | R2.a1 |
+| `exp_inject3class.py` | injected-leakage multiclass construction | R2.a3 |
+| `exp_deep.py` | from-scratch 1D CNN dropout×weight-decay dose-response (MPS/CPU) | R1.1, R3.1(i) |
+| `exact_dup_count.py` | exact byte-identical train/test duplicate census | terminology |
+| `make_paper_figures.py`, `make_part_b_figures.py`, `make_graded_figure.py` | Figures 1–3 | — |
 
-> Grešová, K., Martinek, V., Čechák, D., Šimeček, P., Alexiou, P. (2023). Genomic benchmarks: a collection of datasets for genomic sequence classification. *BMC Genomic Data* 24:25. doi:[10.1186/s12863-023-01123-8](https://doi.org/10.1186/s12863-023-01123-8)
+Deep-model pre-registration (claim, dose-response grid, binding refutation condition):
+[`results/deep_preregistration.md`](results/deep_preregistration.md).
+
+## Key results
+- Consolidated numbers with provenance: [`results/NEW_FINDINGS.md`](results/NEW_FINDINGS.md)
+- Decision-rule / headline-number reconciliation: [`results/reconciled_numbers.md`](results/reconciled_numbers.md)
+- Per-dataset leakage report card: [`results/leakage_report_card.csv`](results/leakage_report_card.csv) (Table 2 of the paper)
 
 ## Manuscript
+`paper/main.tex` (compiles with `tectonic main.tex`), `paper/response_to_reviewers.md`,
+`paper/cover_letter.md`.
 
-The manuscript source (OUP Bioinformatics Advances *modern, large* template) and the compiled PDF are in [`paper/`](paper/).
+## Data
+This repository does **not** redistribute the Genomic Benchmarks sequence data; it is
+obtained via the [`genomic-benchmarks`](https://pypi.org/project/genomic-benchmarks/)
+package. Please cite the original dataset paper:
+
+> Grešová, K., Martinek, V., Čechák, D., Šimeček, P., Alexiou, P. (2023). Genomic
+> benchmarks: a collection of datasets for genomic sequence classification.
+> *BMC Genomic Data* 24:25. doi:[10.1186/s12863-023-01123-8](https://doi.org/10.1186/s12863-023-01123-8)
 
 ## License
-
-MIT --- see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).

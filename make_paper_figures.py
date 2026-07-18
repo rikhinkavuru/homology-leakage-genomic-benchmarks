@@ -103,7 +103,7 @@ xs = np.arange(len(LEAKY))
 w = 0.26
 specs = [("original_acc", "original split", BLUE, None),
          ("random_acc", "random re-split (control)", "#8a8a8a", None),
-         ("homology_acc", "homology-aware split", VERM, "homology_acc_std")]
+         ("homology_acc", "near-duplicate-aware split", VERM, "homology_acc_std")]
 for i, (col, lab, color, errcol) in enumerate(specs):
     vals = [summ.loc[d, col] * 100 for d in LEAKY]
     errs = [summ.loc[d, errcol] * 100 if errcol else 0 for d in LEAKY]
@@ -115,10 +115,9 @@ for i, (col, lab, color, errcol) in enumerate(specs):
 ax.set_xticks(xs)
 ax.set_xticklabels([f"{NICE[d]}\n({summ.loc[d,'best_model'].replace('_k',' ($k$=')+')'}, leak@0.7={summ.loc[d,'leak_full_0p7']:.2f})" for d in LEAKY])
 ax.set_ylabel("test accuracy (%)")
-ax.set_ylim(50, 100)
-# Headroom + title pad so the title and the top (100) tick label do not crowd
-# against the top of the plot. y-floor intentionally kept at 50 (see caption).
-ax.set_title("Negative control: only the homology-aware split removes the inflation",
+ax.set_ylim(0, 100)
+# y-floor at 0 (honest scale; the earlier truncation at 50 visually exaggerated the drop).
+ax.set_title("Negative control: only the near-duplicate-aware split removes the inflation",
              pad=14)
 ax.legend(fontsize=9, frameon=False, loc="upper right")
 savefig(fig, "fig_controls")

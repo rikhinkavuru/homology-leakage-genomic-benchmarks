@@ -1,0 +1,3 @@
+dataset,leak_fwd_0p7,leak_canon_0p7,leak_fwd_0p9,leak_canon_0p9
+human_nontata_promoters,0.4064,0.416,0.2254,0.2308
+human_enhancers_ensembl,0.3839,0.3845,0.3802,0.3803

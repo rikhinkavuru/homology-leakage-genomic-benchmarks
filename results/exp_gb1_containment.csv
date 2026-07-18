@@ -1,0 +1,8 @@
+dataset,n,Lmin,Lmed,Lmax,jaccard_lenpair_cap,leak_jaccard_0p7,leak_contain_0p7,leak_contain_0p9,verdict_jac,verdict_con
+human_nontata_promoters,36131,251,251,251,1.0,0.4064,0.4452,0.3361,LEAKY,LEAKY
+human_enhancers_ensembl,154842,2,269,573,0.0035,0.3839,0.8454,0.816,LEAKY,LEAKY
+human_enhancers_cohn,20000,500,500,500,1.0,0.0012,0.0042,0.0004,clean,clean
+human_ocr_ensembl,20000,71,315,593,0.1197,0.0015,0.0325,0.0063,clean,clean
+demo_human_or_worm,20000,200,200,200,1.0,0.0032,0.008,0.0024,clean,clean
+demo_coding_vs_intergenomic_seqs,20000,200,200,200,1.0,0.0224,0.0434,0.012,clean,clean
+drosophila_enhancers_stark,6914,236,2142,3237,0.0729,0.0156,0.0329,0.0168,clean,clean

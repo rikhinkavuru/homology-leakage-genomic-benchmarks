@@ -1,0 +1,9 @@
+dataset,split,model,acc,ci_lo,ci_hi
+human_nontata_promoters,corrected,LR,0.8294,0.8214,0.837
+human_nontata_promoters,corrected,LinearSVC,0.8083,0.7996,0.8162
+human_nontata_promoters,corrected,RF,0.82,0.8119,0.8279
+human_nontata_promoters,corrected,HGB,0.827,0.8197,0.8345
+human_enhancers_ensembl,corrected,LR,0.7806,0.776,0.785
+human_enhancers_ensembl,corrected,LinearSVC,0.7975,0.7928,0.8018
+human_enhancers_ensembl,corrected,RF,0.6957,0.6902,0.7006
+human_enhancers_ensembl,corrected,HGB,0.7608,0.7556,0.7656

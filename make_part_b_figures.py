@@ -76,7 +76,7 @@ for d in ORDER:
 ax.axhline(0, color="#444", lw=0.8)
 ax.set_xticks(xs); ax.set_xticklabels([f"{m}\nk{k}" for (m, k) in POINTS], fontsize=9)
 ax.set_xlabel("model x feature-k  (capacity: low → high)")
-ax.set_ylabel("accuracy drop under homology re-split (points)")
+ax.set_ylabel("accuracy drop under near-duplicate-aware re-split (points)")
 ax.set_title("Capacity curve with 4 classical models (LR, LinearSVC, RF, HGB)")
 ax.legend(fontsize=8, frameon=False, loc="upper left")
 for ext in ("png", "svg", "pdf"):
@@ -101,13 +101,13 @@ for ax, d in zip(axes, PANELS):
         ax.text(-0.04, y0, m, ha="right", va="center", fontsize=8.5, color=MCOL[m])
         ax.text(1.04, y1, m, ha="left", va="center", fontsize=8.5, color=MCOL[m])
     ax.set_xlim(-0.5, 1.5); ax.set_ylim(4.5, 0.5)
-    ax.set_xticks([0, 1]); ax.set_xticklabels(["original\n(leaky)", "homology-\naware"])
+    ax.set_xticks([0, 1]); ax.set_xticklabels(["original\n(leaky)", "near-dup.-\naware"])
     ax.set_yticks([1, 2, 3, 4]); ax.set_yticklabels(["1st", "2nd", "3rd", "4th"] if d == PANELS[0] else [])
     tau = float(rank[(rank.dataset == d) & (rank.k == 6) & (rank.metric == "accuracy")]["kendall_tau"].iloc[0])
     ax.set_title(f"{NICE[d]}\n{'LEAKY' if d in LEAKY else 'clean'}  (τ={tau:+.2f})", fontsize=10)
     for s in ("top", "right", "left"):
         ax.spines[s].set_visible(False)
-fig.suptitle("Model ranking: original (leaky) vs homology-aware split  ($k$=6, accuracy)", fontsize=12)
+fig.suptitle("Model ranking: original (leaky) vs near-duplicate-aware split  ($k$=6, accuracy)", fontsize=12)
 fig.tight_layout(rect=[0, 0, 1, 0.96])
 for ext in ("png", "svg", "pdf"):
     fig.savefig(os.path.join(FIG, f"fig_ranking_inversion.{ext}"), bbox_inches="tight")

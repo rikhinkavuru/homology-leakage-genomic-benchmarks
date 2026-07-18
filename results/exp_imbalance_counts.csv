@@ -1,0 +1,17 @@
+dataset,split,counts,pos_frac
+human_nontata_promoters,train,"{0: 12355, 1: 14742}",0.544
+human_nontata_promoters,test,"{0: 4119, 1: 4915}",0.5441
+human_enhancers_ensembl,train,"{0: 61936, 1: 61936}",0.5
+human_enhancers_ensembl,test,"{0: 15485, 1: 15485}",0.5
+human_enhancers_cohn,train,"{0: 7500, 1: 7500}",0.5
+human_enhancers_cohn,test,"{0: 2500, 1: 2500}",0.5
+human_ocr_ensembl,train,"{0: 8000, 1: 8000}",0.5
+human_ocr_ensembl,test,"{0: 2000, 1: 2000}",0.5
+demo_human_or_worm,train,"{0: 7500, 1: 7500}",0.5
+demo_human_or_worm,test,"{0: 2500, 1: 2500}",0.5
+demo_coding_vs_intergenomic_seqs,train,"{0: 7500, 1: 7500}",0.5
+demo_coding_vs_intergenomic_seqs,test,"{0: 2500, 1: 2500}",0.5
+drosophila_enhancers_stark,train,"{0: 2592, 1: 2592}",0.5
+drosophila_enhancers_stark,test,"{0: 865, 1: 865}",0.5
+human_ensembl_regulatory,train,"{0: 85512, 1: 69902, 2: 75934}",
+human_ensembl_regulatory,test,"{0: 21378, 1: 17476, 2: 18859}",

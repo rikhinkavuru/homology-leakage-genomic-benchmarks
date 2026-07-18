@@ -1,0 +1,6 @@
+dataset,scale,n,leak_jac_0p7,leak_con_0p7,leak_con_0p9,verdict_con
+demo_coding_vs_intergenomic_seqs,full,100000,0.0784,0.1305,0.0448,LEAKY
+human_ocr_ensembl,full,174756,0.0104,0.0681,0.0262,clean
+demo_human_or_worm,full,100000,0.0124,0.0421,0.0216,clean
+human_enhancers_cohn,full,27791,0.0012,0.0047,0.0004,clean
+drosophila_enhancers_stark,full,6914,0.0156,0.0329,0.0168,clean

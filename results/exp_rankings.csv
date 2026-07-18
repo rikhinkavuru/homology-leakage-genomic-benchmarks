@@ -1,0 +1,13 @@
+dataset,metric,split,rf_rank,best,order,LR,LinearSVC,RF,HGB
+human_nontata_promoters,acc,original,1,RF,RF>HGB>LinearSVC>LR,0.8702,0.8876,0.9284,0.8905
+human_nontata_promoters,acc,corrected,3,LR,LR>HGB>RF>LinearSVC,0.8294,0.8083,0.82,0.827
+human_nontata_promoters,auroc,original,1,RF,RF>HGB>LinearSVC>LR,0.9381,0.945,0.9938,0.957
+human_nontata_promoters,auroc,corrected,1,RF,RF>HGB>LR>LinearSVC,0.912,0.9033,0.9294,0.9146
+human_nontata_promoters,f1,original,1,RF,RF>HGB>LinearSVC>LR,0.8747,0.8925,0.9307,0.8929
+human_nontata_promoters,f1,corrected,1,RF,RF>LR>HGB>LinearSVC,0.8421,0.8313,0.8451,0.8421
+human_enhancers_ensembl,acc,original,1,RF,RF>LinearSVC>LR>HGB,0.7809,0.798,0.8596,0.7636
+human_enhancers_ensembl,acc,corrected,4,LinearSVC,LinearSVC>LR>HGB>RF,0.7806,0.7975,0.6957,0.7608
+human_enhancers_ensembl,auroc,original,1,RF,RF>LinearSVC>LR>HGB,0.8573,0.8745,0.9428,0.8406
+human_enhancers_ensembl,auroc,corrected,4,LinearSVC,LinearSVC>LR>HGB>RF,0.8549,0.8705,0.8047,0.8353
+human_enhancers_ensembl,f1,original,1,RF,RF>LinearSVC>LR>HGB,0.7812,0.7985,0.8635,0.7633
+human_enhancers_ensembl,f1,corrected,4,LinearSVC,LinearSVC>LR>HGB>RF,0.7792,0.7956,0.6354,0.7575
