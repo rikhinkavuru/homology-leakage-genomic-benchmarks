@@ -609,7 +609,27 @@ and corroborates §2, while refuting the coarser prediction we registered.
 `gue_census.csv`. §4.1 of the pre-registration registered these before any GUE data was
 touched, and called them the document's strongest-risk claims. They are now run.
 
-**Score: 3 of 15 registered tasks. Every one of the 11 LEAKY predictions failed.**
+**Score: 3 of 15 registered tasks, at full scale. Every one of the 11 LEAKY predictions failed.**
+
+> **Full-scale re-run (round 8).** The first census capped training sets at 20,000 rows,
+> discarding 35-58% of train on seven tasks. Truncating train can only lower a
+> max-similarity-to-train statistic, so those clean verdicts were lower bounds, not
+> measurements -- the same C1 objection this paper raises against other people's audits.
+> All fifteen registered tasks were re-censused at full scale. The leak fractions rose
+> roughly threefold (`prom_core_all` 0.0054 -> 0.0149) exactly as C1 predicts, **and the
+> conclusion is unchanged**: all eleven predicted-LEAKY tasks remain clean, the largest
+> at 0.0408, still under half the 0.1 cut, under both metrics. The GUE null is now
+> established at full scale rather than provisionally.
+>
+> One verdict did flip: **`emp_H3K4me3` containment went 0.0929 -> 0.1375 and it is now
+> `borderline`**, not clean. Under the pre-committed binary scoring rule (LEAKY vs not)
+> it still counts as a correct CLEAN prediction, and we keep that rule rather than
+> retro-fit it; but under a three-way rule it would be a miss, making the score 2/15. We
+> report both rather than choose the flattering one.
+>
+> The eleven are also not eleven independent benchmarks: `prom_core_all` is the exact
+> union of `prom_core_notata` and `prom_core_tata` (symmetric difference zero), and
+> likewise at 300 bp, so the independent count is **nine** test partitions.
 
 > Correction (round 8). An earlier version of this section reported 5 of 17. That tally
 > included `mouse_0` and `mouse_1`, which the pre-registration never names -- it registers
@@ -639,7 +659,7 @@ measures **jac@0.7 = 1.0000, φ = 0.999** — every test sequence has a near-dup
 train, the largest leak fraction anywhere in this project. It is not a curation defect.
 The task is 9-way SARS-CoV-2 variant classification over 999 bp windows of a ~30 kb genome
 whose variants differ by a handful of mutations; the test→train Jaccard has **minimum
-0.777** and median 0.982, i.e. the entire corpus is near-identical by biology. A
+0.824** and median 0.987 (full scale), i.e. the entire corpus is near-identical by biology. A
 near-duplicate leak fraction is meaningless there, and the metric cannot tell "the curator
 forgot to deduplicate" from "the organism is conserved". This is a real limitation of the
 paper's primary detector, found by the paper's own pre-registered test, and it belongs in
