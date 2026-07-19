@@ -1,7 +1,7 @@
 # Reproducing the homology-leakage audit
 
 CPU-only, deterministic. Python 3.13. ~16 GB RAM recommended (the full-scale
-`human_enhancers_ensembl` step peaks around 6-7 GB). No GPU, no deep learning,
+`human_enhancers_ensembl` step peaks around 6-7 GB). The classical pipeline is CPU-only; the section 4.9 CNN grid (T16) is the one deep-learning step and needs PyTorch,
 no network except the one-time dataset download.
 
 ## Setup
@@ -95,6 +95,19 @@ cross-suite modules, which download the Nucleotide Transformer task files.
 | T13 | `python -m audit.experiments.exp_estimator_sensitivity` | `estimator_sensitivity.csv`, `estimator_specificity.csv`, `estimator_specificity_real.csv` | ~3 min |
 | T14 | `python -m audit.experiments.exp_dose_response` | `dose_response.csv` (all ten doses in one invocation) | ~20 min |
 | T15 | `python -m audit.tools.check_numbers` | none; **exit 1 if a manuscript number disagrees with its source CSV** | < 5 s |
+| T16 | `python -m audit.experiments.exp_deep` | `exp_deep_cnn.csv` (the §4.9 CNN grid) | ~2 h; **needs `torch==2.13.0`**, pinned separately at the foot of `results/requirements.txt` |
+| T17 | `python -m audit.experiments.exp_regpath` | `exp_regpath.csv` — the §4.8 regularization path | ~30 min |
+| T18 | `python -m audit.experiments.exp_geometry` | `exp_gb4_matched.csv, exp_g11_cohesion.csv` — §4.13 GC/length matching and cluster cohesion | ~20 min |
+| T19 | `python -m audit.experiments.chromosome_holdout` | `chromosome_holdout.csv` — the §4.12 chromosome control | ~25 min |
+| T20 | `python -m audit.experiments.cluster_bootstrap` | `cluster_bootstrap.csv` — the block bootstrap | ~10 min |
+| T21 | `python -m audit.experiments.exp_clusterboot_full` | `cluster_bootstrap_full.csv` — the full grid with ICC and design effect | ~40 min |
+| T22 | `python -m audit.experiments.exp_imbalance` | `exp_imbalance_panel.csv` — the §4.13 prevalence stress test | ~20 min |
+| T23 | `python -m audit.experiments.exp_inject3class` | `exp_inject3class.csv` — the §4.13 injected-multiclass control | ~15 min |
+| T24 | `python -m audit.experiments.exp_canonical` | `reconciled_numbers.md inputs` — the decision-rule reconciliation | ~15 min |
+| T25 | `python -m audit.experiments.exp_stats` | `exp_clean_rf_ci.csv` — clean-dataset RF intervals | ~20 min |
+| T26 | `python -m audit.experiments.exact_dup_count` | `exact_dup_counts.csv` — byte-identical duplicate counts | ~5 min |
+| T27 | `python -m audit.experiments.full_scale_containment` | `full_scale_containment.csv` — full-scale containment for the clean sets | ~30 min |
+| T28 | `python -m audit.experiments.exp_transformer` | `exp_transformer.csv` — the from-scratch attention probe (not used in the paper) | ~2 h; needs torch |
 
 `certify` also runs end to end on a dataset (`--dataset NAME [--cap N]`) or on arbitrary
 input (`--fasta X.fa --labels y.txt [--full-n N]`). Without `--full-n` the C1 full-scale

@@ -330,7 +330,7 @@ Delta (original - corrected) with 95% CI; "excludes 0" => the drop is significan
 | demo_coding_vs_intergenomic_seqs | clean | LR_k6 | +0.0056 | [-0.0074, +0.0182] | no |
 | drosophila_enhancers_stark | clean | LR_k6 | +0.0229 | [-0.0048, +0.0553] | no |
 
-Bootstrap deltas use the seed-0 corrected split, so point estimates differ slightly from the frozen 3-seed-mean deltas in sections 3-5 (unchanged); the sign/significance is the result of interest. **Reading:** the high-capacity (RF) drop is significant on both leaky datasets (CIs exclude 0); the linear (LR) drop is significant on nonTATA but **null on enhancers_ensembl** (CI includes 0) -- only the memorizer inflates there. All five clean-dataset deltas are not significant (CIs include 0), which replaces 'within noise' with a tested statement. Clean per-model original-split CIs are in `step3_accuracy_ci.csv`. *Source: `step_variance_ci.py` -> `step3_accuracy_ci.csv`, `step3_delta_ci.csv`.*
+Bootstrap deltas use the seed-0 corrected split, so point estimates differ slightly from the frozen 3-seed-mean deltas in sections 3-5 (unchanged); the sign/significance is the result of interest. **Reading:** the high-capacity (RF) drop is significant on both leaky datasets (CIs exclude 0); the linear (LR) drop is significant on nonTATA but **null on enhancers_ensembl** (CI includes 0) -- only the memorizer inflates there. All five non-leaky deltas are not significant (CIs include 0), which replaces 'within noise' with a tested statement. Clean per-model original-split CIs are in `step3_accuracy_ci.csv`. *Source: `step_variance_ci.py` -> `step3_accuracy_ci.csv`, `step3_delta_ci.csv`.*
 
 ### 16.3 "Statistically tied": clean-dataset rank swaps
 
