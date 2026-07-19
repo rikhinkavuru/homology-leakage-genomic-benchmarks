@@ -127,3 +127,49 @@ Numbers: `results/tuning_selection.csv` (4 rows, both datasets).
 | 1 — Table 2 intervals | **yes** | yes |
 | 2 — §4.7 disclosure | **yes** | yes |
 | 3 — §5 tuning | **yes** | yes — the current limitation text is now false |
+
+---
+
+## EDIT 4 — NEW: GUE results (scope narrowing + a detector false positive)
+
+The pre-registration's binding forward predictions on GUE are now executed
+(`results/gue_census.csv`). They mostly **failed**, and the failure narrows the paper's
+scope claim in a way that must be reflected. Two changes.
+
+**(a) Add to §4.9 (cross-suite), after the NT paragraphs:**
+
+```latex
+The pre-registration also carried binding predictions for GUE \citep{zhou2023dnabert2},
+registered before any of that suite was examined: that its short fixed-length human
+regulatory tasks---core promoter at $70$\,bp, promoter at $300$\,bp, transcription-factor
+binding at $101$\,bp---would be leaky, and its multi-species tasks clean. Executed, the
+predictions score $5$ of $17$, and \textbf{all eleven predicted-leaky tasks are clean},
+with near-duplicate fractions spanning $0.005$--$0.041$ (median $0.009$). This refutes the
+scope hypothesis the prediction encoded. Leakage does not track task type: eleven
+independently built benchmarks in precisely the regime we flagged carry none of it. What
+it tracks is the construction step of \S\ref{sec:r-coord}, and Genomic Benchmarks' two
+leaky datasets have an un-deduplicated assembly where GUE's comparable tasks do not.
+```
+
+**(b) Add to the Discussion limitations, and this one is important:**
+
+```latex
+The pre-registered GUE run also exposed a limitation of our primary detector. The
+\textit{virus\_covid} task, which we registered as clean, measures a near-duplicate
+fraction of $1.000$---every test sequence has a near-duplicate in training, the largest
+value we observed anywhere. It is not a curation defect. The task is nine-way SARS-CoV-2
+variant classification over $999$\,bp windows of a ${\sim}30$\,kb genome whose variants
+differ by a handful of mutations, so the test-to-train similarity has a \emph{minimum} of
+$0.707$ and a median of $0.968$: the corpus is near-identical by biology. A near-duplicate
+leak fraction carries no information there, and our detector cannot distinguish a curator
+who omitted deduplication from an organism that is simply conserved. Any application of
+this audit to viral, organellar, or other highly conserved sequence sets must establish
+that distinction by other means---the coordinate-space signature of \S\ref{sec:m-coord} is
+one, since biological conservation does not produce duplicated interval coordinates.
+```
+
+**(c) Scope sentence.** Wherever the paper says Claim II "requires short, fixed- or
+near-fixed-length human regulatory DNA" (Introduction, and the Discussion scope
+paragraph), that condition is now **refuted** and should be replaced by the construction
+condition: an un-deduplicated assembly step, plus a memorization-prone model in the
+comparison set.

@@ -603,6 +603,42 @@ and corroborates §2, while refuting the coarser prediction we registered.
 
 ---
 
+
+### 4.3 GUE: the binding pre-registered predictions, executed — and mostly WRONG
+
+`gue_census.csv`. §4.1 of the pre-registration registered these before any GUE data was
+touched, and called them the document's strongest-risk claims. They are now run.
+
+**Score: 5 of 17. Every one of the 11 LEAKY predictions failed.**
+
+| registered | tasks | outcome |
+|---|---|---|
+| **LEAKY** — GUE short human regulatory (core-promoter 70 bp, promoter 300 bp, TF-binding 101 bp) | 11 | **0/11.** All clean; jac@0.7 spans 0.005–0.041, median 0.009 |
+| CLEAN — yeast EMP, mouse | 5 | 5/5 |
+| CLEAN — virus CVC | 1 | 0/1, but see below |
+
+**What this refutes.** The registered hypothesis was that *short fixed-length human
+regulatory DNA* is the leakage-prone regime — the scope condition the paper states for
+Claim II. On GUE, a suite built independently for exactly that regime, it is false: eleven
+such tasks are clean. **Leakage does not track task type.** It tracks construction, which
+is what §2's coordinate rule already said and what this now confirms from the opposite
+direction. The honest consequence is that the paper's scope sentence should not name short
+human regulatory DNA as a risk factor; the risk factor is an un-deduplicated assembly
+step, and Genomic Benchmarks' two leaky datasets have one while GUE's eleven comparable
+tasks do not.
+
+**A documented false positive of our own detector.** `virus_covid` was registered CLEAN and
+measures **jac@0.7 = 1.0000, φ = 0.999** — every test sequence has a near-duplicate in
+train, the largest leak fraction anywhere in this project. It is not a curation defect.
+The task is 9-way SARS-CoV-2 variant classification over 999 bp windows of a ~30 kb genome
+whose variants differ by a handful of mutations; the test→train Jaccard has **minimum
+0.707** and median 0.968, i.e. the entire corpus is near-identical by biology. A
+near-duplicate leak fraction is meaningless there, and the metric cannot tell "the curator
+forgot to deduplicate" from "the organism is conserved". This is a real limitation of the
+paper's primary detector, found by the paper's own pre-registered test, and it belongs in
+the manuscript's limitations rather than being quietly dropped.
+
+
 ## 5. Reviewer wires: closed, and partially closed
 
 | wire | status | evidence |

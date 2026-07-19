@@ -1,0 +1,202 @@
+#!/usr/bin/env python3
+"""
+GUE: the pre-registration's binding forward predictions, finally executed.
+
+results/tier1_preregistration.md §4.1 registered these BEFORE any GUE data was touched:
+
+    GUE core-promoter (70 bp), TF-binding (100 bp), promoter (300 bp), human  -> LEAKY
+    GUE yeast EMP, virus CVC (multi-species)                                  -> CLEAN
+
+They were the strongest-risk claims in the document and they went unexecuted. This runs
+them. Two stages:
+
+  STAGE 1 (census)  leak fraction on the as-shipped split, same estimator as the paper.
+  STAGE 2 (screen)  for every task the census flags, compute the diagnostic condition of
+                    eq. (1) from AS-SHIPPED measurements only -- phi, per-model novel
+                    accuracy n and graded gap g -- and record where an inversion is even
+                    POSSIBLE (some challenger with delta = n_B - n_A > 0) and where the
+                    condition predicts one (phi > phi* = delta/Dg).
+
+Stage 2 matters because the paper's open question is whether a second, independent leaky
+dataset shows a ranking inversion. The Nucleotide Transformer suite did not, and the
+condition explained why: delta <= 0 almost everywhere, so no inversion was possible at any
+leak fraction. GUE is the remaining registered candidate pool. Any task with delta > 0 AND
+phi > phi* is a genuine candidate and is worth the full ranking run; tasks without it are
+predicted null in advance, which is the screen doing its job.
+
+Counting note: GUE ships train/dev/test. We use train as train and test as test, and
+ignore dev, so the split we audit is the one the leaderboard reports on.
+
+Run:  python -m audit.experiments.exp_gue [--tasks ...] [--cap N]
+Out:  results/gue_census.csv, results/gue_screen.csv
+"""
+from __future__ import annotations
+import argparse, io, itertools, os, sys, time
+import numpy as np
+import pandas as pd
+
+HERE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, HERE)
+from audit.core import expkit as E
+
+R = os.path.join(HERE, "results")
+CACHE = os.path.join(HERE, "datacache", "gue")
+REPO = "leannmlindsey/GUE"
+MODELS = ["LR", "LinearSVC", "RF", "HGB"]
+SIM_K, FEAT_K = 8, 6
+LEAK_CUT = 0.1
+
+# Pre-registered, from results/tier1_preregistration.md 4.1. Recorded here so the code
+# carries the prediction it tests.
+PREREG = {
+    "prom_core_all": "LEAKY", "prom_core_notata": "LEAKY", "prom_core_tata": "LEAKY",
+    "prom_300_all": "LEAKY", "prom_300_notata": "LEAKY", "prom_300_tata": "LEAKY",
+    "human_tf_0": "LEAKY", "human_tf_1": "LEAKY", "human_tf_2": "LEAKY",
+    "human_tf_3": "LEAKY", "human_tf_4": "LEAKY",
+    "emp_H3": "CLEAN", "emp_H3K4me3": "CLEAN", "emp_H4": "CLEAN",
+    "virus_covid": "CLEAN", "mouse_0": "CLEAN", "mouse_1": "CLEAN",
+}
+DEFAULT = list(PREREG)
+
+
+def load_task(task, cap=None, seed=0):
+    from huggingface_hub import hf_hub_download
+    frames = {}
+    for split in ("train", "test"):
+        p = hf_hub_download(REPO, f"GUE/{task}/{split}.csv", repo_type="dataset",
+                            cache_dir=CACHE)
+        frames[split] = pd.read_csv(p)
+    seq_col = next(c for c in frames["train"].columns if c.lower() in ("sequence", "seq"))
+    lab_col = next(c for c in frames["train"].columns if c.lower() in ("label", "labels"))
+    tr_s = frames["train"][seq_col].astype(str).str.upper().tolist()
+    te_s = frames["test"][seq_col].astype(str).str.upper().tolist()
+    tr_y = frames["train"][lab_col].to_numpy()
+    te_y = frames["test"][lab_col].to_numpy()
+    rng = np.random.RandomState(seed)
+    sub = False
+    if cap and len(tr_s) > cap:
+        k = rng.choice(len(tr_s), cap, replace=False)
+        tr_s = [tr_s[i] for i in k]; tr_y = tr_y[k]; sub = True
+    if cap and len(te_s) > cap:
+        k = rng.choice(len(te_s), cap, replace=False)
+        te_s = [te_s[i] for i in k]; te_y = te_y[k]; sub = True
+    return tr_s, tr_y, te_s, te_y, sub
+
+
+def run_task(task, cap, do_screen=True):
+    t0 = time.time()
+    try:
+        tr_s, tr_y, te_s, te_y, sub = load_task(task, cap=cap)
+    except Exception as ex:                                        # noqa: BLE001
+        print(f"  [{task}] unavailable: {type(ex).__name__}", flush=True)
+        return None, []
+    seqs = tr_s + te_s
+    y = np.concatenate([tr_y, te_y]).astype(int)
+    tr = np.arange(len(tr_s)); te = np.arange(len(tr_s), len(seqs))
+    L = np.array([len(s) for s in seqs])
+
+    sim_j = E.max_sim_to_train(seqs, tr, te, k=SIM_K, mode="jaccard")
+    sim_c = E.max_sim_to_train(seqs, tr, te, k=SIM_K, mode="containment")
+    trset = set(tr_s)
+    exact = float(np.mean([s in trset for s in te_s]))
+    jac07 = float((sim_j > 0.7).mean())
+    con07 = float((sim_c > 0.7).mean())
+    phi = float((sim_j >= 0.9).mean())
+    verdict = ("LEAKY" if jac07 > LEAK_CUT else
+               "borderline" if con07 > LEAK_CUT else "clean")
+    row = dict(suite="GUE", task=task, preregistered=PREREG.get(task),
+               n_train=len(tr_s), n_test=len(te_s), subsampled=sub,
+               len_med=int(np.median(L)), n_classes=int(len(np.unique(y))),
+               exact_dup_test_in_train=round(exact, 4),
+               leak_jaccard_0p7=round(jac07, 4), leak_containment_0p7=round(con07, 4),
+               phi_ge0p9=round(phi, 4), verdict=verdict,
+               prereg_correct=bool(PREREG.get(task) ==
+                                   ("LEAKY" if verdict == "LEAKY" else "CLEAN")),
+               seconds=round(time.time() - t0, 1))
+    print(f"  [{task:18s}] n={len(tr_s)}/{len(te_s)} len={row['len_med']} "
+          f"jac@0.7={jac07:.4f} con@0.7={con07:.4f} exact={exact:.4f} phi={phi:.4f} "
+          f"-> {verdict} (prereg {PREREG.get(task)}, "
+          f"{'OK' if row['prereg_correct'] else 'WRONG'}) [{row['seconds']}s]", flush=True)
+
+    screens = []
+    if do_screen and verdict != "clean" and len(np.unique(y)) == 2:
+        X = E.featurize(seqs, FEAT_K)
+        novel, high = sim_j < 0.5, sim_j >= 0.9
+        if novel.any() and high.any():
+            acc, strat = {}, {}
+            for m in MODELS:
+                c = E.correctness(E.models()[m], X, y, tr, te)
+                acc[m] = float(c.mean())
+                n_m = float(c[novel].mean()); h_m = float(c[high].mean())
+                strat[m] = dict(n=n_m, g=h_m - n_m)
+            for A, B in itertools.permutations(MODELS, 2):
+                if acc[A] <= acc[B]:
+                    continue
+                delta = strat[B]["n"] - strat[A]["n"]
+                Dg = strat[A]["g"] - strat[B]["g"]
+                phis = delta / Dg if Dg > 0 else np.nan
+                screens.append(dict(
+                    suite="GUE", task=task, leader_A=A, challenger_B=B,
+                    phi=round(phi, 4), delta=round(delta, 4), Dg=round(Dg, 4),
+                    phi_star=(round(phis, 4) if np.isfinite(phis) else None),
+                    informative=bool(delta > 0),
+                    PREDICTED_swap=bool(delta > 0 and phi * Dg > delta)))
+            cand = [s for s in screens if s["PREDICTED_swap"]]
+            print(f"      screen: {sum(s['informative'] for s in screens)}/{len(screens)} "
+                  f"informative (delta>0); {len(cand)} predicted to swap"
+                  f"{' <-- CANDIDATE' if cand else ''}", flush=True)
+    return row, screens
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--tasks", nargs="*", default=DEFAULT)
+    ap.add_argument("--cap", type=int, default=20000)
+    ap.add_argument("--no-screen", action="store_true")
+    a = ap.parse_args()
+    os.makedirs(R, exist_ok=True); os.makedirs(CACHE, exist_ok=True)
+    rows, screens = [], []
+    for t in a.tasks:
+        r, s = run_task(t, a.cap, do_screen=not a.no_screen)
+        if r:
+            rows.append(r); screens += s
+            pd.DataFrame(rows).to_csv(f"{R}/gue_census.csv.partial", index=False)
+    if not rows:
+        print("nothing censused"); return
+    for frame, name in ((pd.DataFrame(rows), "gue_census"),
+                        (pd.DataFrame(screens), "gue_screen")):
+        if frame.empty:
+            continue
+        tmp = f"{R}/{name}.csv.tmp"; frame.to_csv(tmp, index=False)
+        os.replace(tmp, f"{R}/{name}.csv")
+    part = f"{R}/gue_census.csv.partial"
+    if os.path.exists(part):
+        os.remove(part)
+
+    df = pd.DataFrame(rows)
+    print("\n== GUE census vs the pre-registration ==")
+    print(df[["task", "preregistered", "len_med", "leak_jaccard_0p7",
+              "leak_containment_0p7", "exact_dup_test_in_train", "verdict",
+              "prereg_correct"]].to_string(index=False))
+    print(f"\npre-registered predictions correct: "
+          f"{int(df.prereg_correct.sum())}/{len(df)}")
+    for grp in ("LEAKY", "CLEAN"):
+        g = df[df.preregistered == grp]
+        if len(g):
+            print(f"  predicted {grp}: {int(g.prereg_correct.sum())}/{len(g)} "
+                  f"(median jac@0.7 {g.leak_jaccard_0p7.median():.4f})")
+    if screens:
+        s = pd.DataFrame(screens)
+        cand = s[s.PREDICTED_swap]
+        print(f"\n== inversion screen ==\n  informative pairs (delta>0): "
+              f"{int(s.informative.sum())}/{len(s)}")
+        print(f"  pairs predicted to swap: {len(cand)}")
+        if len(cand):
+            print(cand[["task", "leader_A", "challenger_B", "delta", "Dg",
+                        "phi", "phi_star"]].to_string(index=False))
+            print("  ^ these are candidates for a full ranking run")
+    print("\nEXP_GUE_DONE")
+
+
+if __name__ == "__main__":
+    main()
