@@ -2,3 +2,14 @@ suite,task,preregistered,registered,n_train,n_test,subsampled,len_med,n_classes,
 GUE,prom_core_all,LEAKY,True,47356,5920,False,70,2,0.0073,0.0149,0.0228,0.0093,clean,False,5.0
 GUE,prom_core_notata,LEAKY,True,42452,5307,False,70,2,0.0057,0.0136,0.0219,0.007,clean,False,4.3
 GUE,prom_300_all,LEAKY,True,47356,5920,False,300,2,0.0032,0.0152,0.0194,0.0091,clean,False,21.9
+GUE,prom_300_notata,LEAKY,True,42452,5307,False,300,2,0.0021,0.0111,0.0138,0.0064,clean,False,18.7
+GUE,human_tf_0,LEAKY,True,32378,1000,False,101,2,0.0,0.011,0.035,0.003,clean,False,2.6
+GUE,human_tf_1,LEAKY,True,30672,1000,False,101,2,0.001,0.012,0.024,0.004,clean,False,2.3
+GUE,human_tf_3,LEAKY,True,27294,1000,False,101,2,0.001,0.025,0.031,0.01,clean,False,2.4
+GUE,emp_H3K4me3,CLEAN,True,29439,3680,False,500,2,0.0,0.0171,0.1375,0.0,borderline,True,15.8
+GUE,prom_core_tata,LEAKY,True,4904,613,False,70,2,0.0261,0.0408,0.0424,0.0359,clean,False,0.5
+GUE,prom_300_tata,LEAKY,True,4904,613,False,300,2,0.0098,0.0277,0.031,0.0228,clean,False,0.9
+GUE,human_tf_2,LEAKY,True,19000,1000,False,101,2,0.0,0.01,0.026,0.002,clean,False,1.5
+GUE,human_tf_4,LEAKY,True,19000,1000,False,101,2,0.0,0.009,0.025,0.004,clean,False,1.4
+GUE,emp_H3,CLEAN,True,11971,1497,False,500,2,0.0,0.0087,0.0922,0.0,clean,True,4.0
+GUE,emp_H4,CLEAN,True,11679,1461,False,500,2,0.0,0.011,0.0821,0.0,clean,True,3.6

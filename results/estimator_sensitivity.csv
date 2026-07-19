@@ -1,0 +1,67 @@
+length,regime,relationship,magnitude,jaccard_median,jaccard_detect_rate,containment_median,containment_detect_rate
+70,GUE core-promoter,exact copy,0,1.0,1.0,1.0,1.0
+70,GUE core-promoter,1 point mutation,1,0.7746,1.0,0.873,1.0
+70,GUE core-promoter,2 point mutations,2,0.6154,0.3,0.746,1.0
+70,GUE core-promoter,3 point mutations,3,0.5366,0.055,0.6825,0.41
+70,GUE core-promoter,5 point mutations,5,0.3548,0.0,0.5238,0.015
+70,GUE core-promoter,10 point mutations,10,0.156,0.0,0.2698,0.0
+70,GUE core-promoter,window shifted 5% (4 bp),4,0.8806,1.0,0.9365,1.0
+70,GUE core-promoter,window shifted 10% (7 bp),7,0.8,1.0,0.8889,1.0
+70,GUE core-promoter,window shifted 20% (14 bp),14,0.6364,0.0,0.7778,1.0
+70,GUE core-promoter,window shifted 30% (21 bp),21,0.5,0.0,0.6667,0.005
+70,GUE core-promoter,window shifted 50% (35 bp),35,0.2857,0.0,0.4444,0.0
+101,GUE TF-binding,exact copy,0,1.0,1.0,1.0,1.0
+101,GUE TF-binding,1 point mutation,1,0.8431,1.0,0.9149,1.0
+101,GUE TF-binding,2 point mutations,2,0.7091,1.0,0.8298,1.0
+101,GUE TF-binding,3 point mutations,3,0.6207,0.1,0.766,1.0
+101,GUE TF-binding,5 point mutations,5,0.4803,0.0,0.6489,0.24
+101,GUE TF-binding,10 point mutations,10,0.2678,0.0,0.4194,0.0
+101,GUE TF-binding,window shifted 5% (5 bp),5,0.899,1.0,0.9468,1.0
+101,GUE TF-binding,window shifted 10% (10 bp),10,0.8077,1.0,0.8936,1.0
+101,GUE TF-binding,window shifted 20% (20 bp),20,0.6491,0.0,0.7872,1.0
+101,GUE TF-binding,window shifted 30% (30 bp),30,0.5161,0.0,0.6809,0.0
+101,GUE TF-binding,window shifted 50% (50 bp),50,0.3056,0.0,0.4681,0.0
+200,Genomic Benchmarks nontata (251 bp),exact copy,0,1.0,1.0,1.0,1.0
+200,Genomic Benchmarks nontata (251 bp),1 point mutation,1,0.9204,1.0,0.9585,1.0
+200,Genomic Benchmarks nontata (251 bp),2 point mutations,2,0.8469,1.0,0.9171,1.0
+200,Genomic Benchmarks nontata (251 bp),3 point mutations,3,0.7788,1.0,0.8756,1.0
+200,Genomic Benchmarks nontata (251 bp),5 point mutations,5,0.6871,0.36,0.8135,1.0
+200,Genomic Benchmarks nontata (251 bp),10 point mutations,10,0.4903,0.0,0.6528,0.09
+200,Genomic Benchmarks nontata (251 bp),window shifted 5% (10 bp),10,0.9015,1.0,0.9482,1.0
+200,Genomic Benchmarks nontata (251 bp),window shifted 10% (20 bp),20,0.8122,1.0,0.8964,1.0
+200,Genomic Benchmarks nontata (251 bp),window shifted 20% (40 bp),40,0.6567,0.0,0.7927,1.0
+200,Genomic Benchmarks nontata (251 bp),window shifted 30% (60 bp),60,0.5257,0.0,0.6891,0.01
+200,Genomic Benchmarks nontata (251 bp),window shifted 50% (100 bp),100,0.3174,0.0,0.4819,0.0
+300,GUE promoter-300,exact copy,0,1.0,1.0,1.0,1.0
+300,GUE promoter-300,1 point mutation,1,0.9468,1.0,0.9727,1.0
+300,GUE promoter-300,2 point mutations,2,0.8964,1.0,0.9454,1.0
+300,GUE promoter-300,3 point mutations,3,0.8486,1.0,0.9181,1.0
+300,GUE promoter-300,5 point mutations,5,0.7705,1.0,0.8699,1.0
+300,GUE promoter-300,10 point mutations,10,0.6102,0.01,0.7568,1.0
+300,GUE promoter-300,window shifted 5% (15 bp),15,0.9026,1.0,0.9488,1.0
+300,GUE promoter-300,window shifted 10% (30 bp),30,0.8142,1.0,0.8976,1.0
+300,GUE promoter-300,window shifted 20% (60 bp),60,0.6601,0.0,0.7952,1.0
+300,GUE promoter-300,window shifted 30% (90 bp),90,0.53,0.0,0.6928,0.035
+300,GUE promoter-300,window shifted 50% (150 bp),150,0.3235,0.0,0.4897,0.0
+500,GUE yeast EMP,exact copy,0,1.0,1.0,1.0,1.0
+500,GUE yeast EMP,1 point mutation,1,0.968,1.0,0.9837,1.0
+500,GUE yeast EMP,2 point mutations,2,0.937,1.0,0.9675,1.0
+500,GUE yeast EMP,3 point mutations,3,0.9072,1.0,0.9513,1.0
+500,GUE yeast EMP,5 point mutations,5,0.8512,1.0,0.9206,1.0
+500,GUE yeast EMP,10 point mutations,10,0.7359,1.0,0.851,1.0
+500,GUE yeast EMP,window shifted 5% (25 bp),25,0.9033,1.0,0.9493,1.0
+500,GUE yeast EMP,window shifted 10% (50 bp),50,0.8158,1.0,0.8986,1.0
+500,GUE yeast EMP,window shifted 20% (100 bp),100,0.6633,0.0,0.7988,1.0
+500,GUE yeast EMP,window shifted 30% (150 bp),150,0.5344,0.0,0.6978,0.18
+500,GUE yeast EMP,window shifted 50% (250 bp),250,0.3288,0.0,0.4969,0.0
+999,GUE virus_covid,exact copy,0,1.0,1.0,1.0,1.0
+999,GUE virus_covid,1 point mutation,1,0.9839,1.0,0.9919,1.0
+999,GUE virus_covid,2 point mutations,2,0.9681,1.0,0.9838,1.0
+999,GUE virus_covid,3 point mutations,3,0.9532,1.0,0.9764,1.0
+999,GUE virus_covid,5 point mutations,5,0.923,1.0,0.9605,1.0
+999,GUE virus_covid,10 point mutations,10,0.8554,1.0,0.9229,1.0
+999,GUE virus_covid,window shifted 5% (50 bp),50,0.9043,1.0,0.9503,1.0
+999,GUE virus_covid,window shifted 10% (100 bp),100,0.818,1.0,0.9006,1.0
+999,GUE virus_covid,window shifted 20% (200 bp),200,0.6667,0.0,0.801,1.0
+999,GUE virus_covid,window shifted 30% (300 bp),300,0.5388,0.0,0.7015,0.77
+999,GUE virus_covid,window shifted 50% (500 bp),500,0.3346,0.0,0.502,0.0

@@ -1,0 +1,7 @@
+length,regime,n_pairs,jaccard_mean,jaccard_max,jaccard_false_positive_rate,containment_max,containment_false_positive_rate
+70,GUE core-promoter,200,0.000683,0.0161,0.0,0.0317,0.0
+101,GUE TF-binding,200,0.000804,0.0108,0.0,0.0215,0.0
+200,Genomic Benchmarks nontata (251 bp),200,0.00133,0.0185,0.0,0.0363,0.0
+300,GUE promoter-300,200,0.002062,0.0104,0.0,0.0207,0.0
+500,GUE yeast EMP,200,0.003437,0.0113,0.0,0.0224,0.0
+999,GUE virus_covid,200,0.00753,0.015,0.0,0.0295,0.0
