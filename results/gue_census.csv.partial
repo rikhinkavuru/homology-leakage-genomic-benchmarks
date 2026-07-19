@@ -1,0 +1,4 @@
+suite,task,preregistered,registered,n_train,n_test,subsampled,len_med,n_classes,exact_dup_test_in_train,leak_jaccard_0p7,leak_containment_0p7,phi_ge0p9,verdict,prereg_correct,seconds
+GUE,prom_core_all,LEAKY,True,47356,5920,False,70,2,0.0073,0.0149,0.0228,0.0093,clean,False,5.0
+GUE,prom_core_notata,LEAKY,True,42452,5307,False,70,2,0.0057,0.0136,0.0219,0.007,clean,False,4.3
+GUE,prom_300_all,LEAKY,True,47356,5920,False,300,2,0.0032,0.0152,0.0194,0.0091,clean,False,21.9

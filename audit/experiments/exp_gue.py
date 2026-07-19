@@ -47,16 +47,30 @@ SIM_K, FEAT_K = 8, 6
 LEAK_CUT = 0.1
 
 # Pre-registered, from results/tier1_preregistration.md 4.1. Recorded here so the code
-# carries the prediction it tests.
+# carries the prediction it tests. These fifteen tasks, and ONLY these, are scored.
+#
+# The registered text names exactly two families: "GUE core-promoter (70 bp), TF-binding
+# (100 bp), promoter (300 bp), human -> LEAKY" and "GUE yeast EMP, virus CVC
+# (multi-species) -> CLEAN".
 PREREG = {
     "prom_core_all": "LEAKY", "prom_core_notata": "LEAKY", "prom_core_tata": "LEAKY",
     "prom_300_all": "LEAKY", "prom_300_notata": "LEAKY", "prom_300_tata": "LEAKY",
     "human_tf_0": "LEAKY", "human_tf_1": "LEAKY", "human_tf_2": "LEAKY",
     "human_tf_3": "LEAKY", "human_tf_4": "LEAKY",
     "emp_H3": "CLEAN", "emp_H3K4me3": "CLEAN", "emp_H4": "CLEAN",
-    "virus_covid": "CLEAN", "mouse_0": "CLEAN", "mouse_1": "CLEAN",
+    "virus_covid": "CLEAN",
 }
-DEFAULT = list(PREREG)
+
+# NOT pre-registered. An earlier version of this module listed mouse_0/mouse_1 inside
+# PREREG under the comment "from tier1_preregistration.md 4.1", but the pre-registration
+# names neither: mouse TF-binding is not human, not yeast EMP, and not virus CVC. Both
+# happened to come out as this module expected, so scoring them inflated the headline
+# from 3/15 to 5/17 -- an unregistered task that agrees with you is not evidence, and
+# quietly adding two of them to a pre-registered tally is the exact failure this whole
+# paper argues against. They are censused and reported, separately and unscored.
+EXPLORATORY = {"mouse_0": "expected CLEAN (multi-species, not registered)",
+               "mouse_1": "expected CLEAN (multi-species, not registered)"}
+DEFAULT = list(PREREG) + list(EXPLORATORY)
 
 
 def load_task(task, cap=None, seed=0):
@@ -104,14 +118,18 @@ def run_task(task, cap, do_screen=True):
     phi = float((sim_j >= 0.9).mean())
     verdict = ("LEAKY" if jac07 > LEAK_CUT else
                "borderline" if con07 > LEAK_CUT else "clean")
-    row = dict(suite="GUE", task=task, preregistered=PREREG.get(task),
+    registered = task in PREREG
+    row = dict(suite="GUE", task=task,
+               preregistered=PREREG.get(task, "not_registered"),
+               registered=registered,
                n_train=len(tr_s), n_test=len(te_s), subsampled=sub,
                len_med=int(np.median(L)), n_classes=int(len(np.unique(y))),
                exact_dup_test_in_train=round(exact, 4),
                leak_jaccard_0p7=round(jac07, 4), leak_containment_0p7=round(con07, 4),
                phi_ge0p9=round(phi, 4), verdict=verdict,
-               prereg_correct=bool(PREREG.get(task) ==
-                                   ("LEAKY" if verdict == "LEAKY" else "CLEAN")),
+               prereg_correct=(bool(PREREG[task] ==
+                                    ("LEAKY" if verdict == "LEAKY" else "CLEAN"))
+                               if registered else None),
                seconds=round(time.time() - t0, 1))
     print(f"  [{task:18s}] n={len(tr_s)}/{len(te_s)} len={row['len_med']} "
           f"jac@0.7={jac07:.4f} con@0.7={con07:.4f} exact={exact:.4f} phi={phi:.4f} "
@@ -178,13 +196,21 @@ def main():
     print(df[["task", "preregistered", "len_med", "leak_jaccard_0p7",
               "leak_containment_0p7", "exact_dup_test_in_train", "verdict",
               "prereg_correct"]].to_string(index=False))
+    reg = df[df.registered]
+    unreg = df[~df.registered]
     print(f"\npre-registered predictions correct: "
-          f"{int(df.prereg_correct.sum())}/{len(df)}")
+          f"{int(reg.prereg_correct.sum())}/{len(reg)}")
     for grp in ("LEAKY", "CLEAN"):
-        g = df[df.preregistered == grp]
+        g = reg[reg.preregistered == grp]
         if len(g):
             print(f"  predicted {grp}: {int(g.prereg_correct.sum())}/{len(g)} "
                   f"(median jac@0.7 {g.leak_jaccard_0p7.median():.4f})")
+    if len(unreg):
+        print(f"\n  [{len(unreg)} exploratory task(s), NOT pre-registered and NOT scored: "
+              f"{', '.join(unreg.task)}] "
+              f"verdicts: {', '.join(f'{t}={v}' for t, v in zip(unreg.task, unreg.verdict))}")
+        print("  These are reported for completeness only. They are not part of the "
+              "registered tally and must not be added to it.")
     if screens:
         s = pd.DataFrame(screens)
         cand = s[s.PREDICTED_swap]

@@ -63,19 +63,6 @@ so we still read the contrast between arms rather than small differences within 
 
 ---
 
-## EDIT 3 — §5 Discussion: the tuning limitation (HOLD until the second job lands)
-
-**Do not apply yet.** The ensembl tuning run is still going. When it finishes I will
-append EDIT 3 here with the outcome. Until then the paragraph currently in §5 beginning
-*"We report this for \textit{human\_nontata\_promoters} only"* is accurate and should
-stay exactly as written.
-
-If you need to ship before it lands, leave §5 untouched — it is honest as-is.
-
----
-
----
-
 ## EDIT 3 — §5 Discussion: the tuning limitation is now RESOLVED (ready to merge)
 
 The ensembl tuning run completed. **Delete** the limitation sentence beginning
@@ -108,14 +95,16 @@ practitioner who does the right thing is penalised by the benchmark for doing it
 
 On \textit{human\_nontata\_promoters} both procedures select
 \texttt{min\_samples\_leaf}$=1$, so our pre-registered expectation P5---that the grouped
-procedure would always select a more regularized forest---holds on one leaky dataset and
-fails on the other, and we report it that way.
+procedure would select a more regularized forest---holds on
+\textit{human\_enhancers\_ensembl} and is a tie, rather than a reversal, on
+\textit{human\_nontata\_promoters}. We report it that way: the prediction is confirmed
+on one leaky dataset and simply not discriminating on the other.
 ```
 
 **Also update the P5 line in Methods §3.3** (currently "P5 fails outright"):
 
 ```latex
-P5 holds on \textit{human\_enhancers\_ensembl} and fails on \textit{human\_nontata\_promoters}
+P5 holds on \textit{human\_enhancers\_ensembl} and ties on \textit{human\_nontata\_promoters}
 ```
 
 Numbers: `results/tuning_selection.csv` (4 rows, both datasets).
@@ -160,7 +149,7 @@ fraction of $1.000$---every test sequence has a near-duplicate in training, the 
 value we observed anywhere. It is not a curation defect. The task is nine-way SARS-CoV-2
 variant classification over $999$\,bp windows of a ${\sim}30$\,kb genome whose variants
 differ by a handful of mutations, so the test-to-train similarity has a \emph{minimum} of
-$0.707$ and a median of $0.968$: the corpus is near-identical by biology. A near-duplicate
+$0.777$ and a median of $0.982$: the corpus is near-identical by biology. A near-duplicate
 leak fraction carries no information there, and our detector cannot distinguish a curator
 who omitted deduplication from an organism that is simply conserved. Any application of
 this audit to viral, organellar, or other highly conserved sequence sets must establish
@@ -168,11 +157,35 @@ that distinction by other means---the coordinate-space signature of \S\ref{sec:m
 one, since biological conservation does not produce duplicated interval coordinates.
 ```
 
-**(c) Scope sentence.** Wherever the paper says Claim II "requires short, fixed- or
-near-fixed-length human regulatory DNA" (Introduction, and the Discussion scope
-paragraph), that condition is now **refuted** and should be replaced by the construction
-condition: an un-deduplicated assembly step, plus a memorization-prone model in the
-comparison set.
+**(c) Scope sentence — corrected in round 8, please read this version and not the one
+that was here before.** My first draft of this item said the scope condition was
+"refuted". That was a logic error and would have introduced a false statement into the
+paper. Stating it precisely:
+
+- `main.tex:62` says Claim II "**requires** short, fixed- or near-fixed-length human
+  regulatory DNA *and* a memorization-prone model" — a **necessary** condition
+  (reordering ⇒ regime).
+- The pre-registration predicted the same regime **implies** leakage (regime ⇒ leakage) —
+  a **sufficient** condition.
+
+GUE refutes the second, not the first. Eleven clean tasks cannot exhibit
+leakage-driven reordering, so they are silent on necessity. The sentence at line 62 is
+therefore **not** contradicted by these data and must not be described as refuted.
+
+What GUE does undermine is the *rationale*: the paper motivates its scope condition by
+the same regime reasoning the pre-registration used, and that reasoning has now failed a
+direct test on eleven independent benchmarks. So the honest revision keeps the necessary
+condition and demotes the regime from explanation to correlate:
+
+```latex
+Claim~II is scoped: it requires a memorization-prone model in the comparison set and a
+split whose construction leaves near-duplicates spanning it. Both datasets on which we
+demonstrate reordering are short, fixed-length human regulatory sets, so we cannot rule
+that regime out as a further necessary condition---but it is certainly not a sufficient
+one. Eleven GUE tasks in precisely that regime, pre-registered by us as leaky, are clean.
+What separates them from Genomic Benchmarks' two leaky sets is the assembly step of
+\S\ref{sec:r-coord}, not the sequence type.
+```
 
 ---
 
@@ -222,7 +235,7 @@ we defined after P1 was committed, in response to the confound described there--
 does have the largest gap on \textit{human\_enhancers\_ensembl}, though still not on
 \textit{human\_nontata\_promoters}; we do not count this as a confirmation. P2 holds on
 one leaky dataset and fails on the other, P3 and P4 hold, and P5 holds on
-\textit{human\_enhancers\_ensembl} and fails on \textit{human\_nontata\_promoters}.
+\textit{human\_enhancers\_ensembl} and ties on \textit{human\_nontata\_promoters}.
 ```
 
 Note the P5 clause also needs the update from EDIT 3 ("fails outright" is now stale).
@@ -292,3 +305,48 @@ read `{train, test}`, so certifying the repo's own `demo_splits.json` died on a 
 writes back the corrected partition it already computed (in both spellings), so
 "certify then retrain" no longer requires a second run with independently chosen
 parameters.
+
+---
+
+## EDIT 7 — Figure 1's clean panel says "unmoved by either re-split" and the data disagree
+
+Round 8 flagged this and I reproduced it from `results/summary_final.csv`. The new clean
+panel is a real improvement, but its caption now claims something the plotted points
+contradict.
+
+**Current caption (line 219):** "Only the near-duplicate-aware split lowers accuracy, and
+only on the two leaky datasets (left); the borderline and clean datasets (right) are
+unmoved by either re-split."
+
+On three of the five clean/borderline datasets the **random control moves accuracy more
+than the near-duplicate-aware split does**, in the same direction:
+
+| dataset | Δ homology-aware | Δ random control |
+|---|---|---|
+| `drosophila_enhancers_stark` | +0.0118 | **+0.0245** |
+| `demo_human_or_worm` | −0.0040 | **−0.0061** |
+| `demo_coding_vs_intergenomic_seqs` | −0.0008 | **−0.0022** |
+
+So "only the near-duplicate-aware split lowers accuracy" is false as a statement about
+the right-hand panel, and a referee who reads the numbers off the figure will see it.
+
+**This does not weaken the paper — it is the negative control working.** The right
+reading is that on clean datasets the two re-splits are indistinguishable, both null,
+which is exactly what a working control should show. Only the *wording* overclaims.
+
+**Suggested replacement:**
+
+```latex
+On the two leaky datasets (left) the near-duplicate-aware split costs substantial
+accuracy while the matched random re-split does not. On the borderline and clean
+datasets (right) the two re-splits are indistinguishable and both deltas are null---the
+largest, \textit{drosophila\_enhancers\_stark}, moves $+0.012$ under the
+near-duplicate-aware split against $+0.025$ under the random control, with intervals
+covering zero in both cases. That the control sometimes moves a clean dataset slightly
+further than the homology-aware split is the expected behaviour of a null: on these
+datasets the re-split costs nothing beyond repartitioning noise.
+```
+
+The added clause is worth its space. A caption that volunteers "our control sometimes
+moves further than our treatment, and here is why that is fine" is much harder to attack
+than one that claims the clean panel is flat when it visibly is not.
