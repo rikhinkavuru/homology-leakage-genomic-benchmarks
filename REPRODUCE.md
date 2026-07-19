@@ -94,6 +94,7 @@ cross-suite modules, which download the Nucleotide Transformer task files.
 | T12 | `python -m audit.experiments.exp_gue --cap 100000` | `gue_census.csv` (and `gue_screen.csv` only if a task is non-clean) | ~40 min + download |
 | T13 | `python -m audit.experiments.exp_estimator_sensitivity` | `estimator_sensitivity.csv`, `estimator_specificity.csv`, `estimator_specificity_real.csv` | ~3 min |
 | T14 | `python -m audit.experiments.exp_dose_response` | `dose_response.csv` (all ten doses in one invocation) | ~20 min |
+| T15 | `python -m audit.tools.check_numbers` | none; **exit 1 if a manuscript number disagrees with its source CSV** | < 5 s |
 
 `certify` also runs end to end on a dataset (`--dataset NAME [--cap N]`) or on arbitrary
 input (`--fasta X.fa --labels y.txt [--full-n N]`). Without `--full-n` the C1 full-scale
