@@ -279,18 +279,24 @@ Second, and this is the direct answer: **a practitioner does not know the split 
 leaky, and tuning does not rescue them.** We cross-validated the forest over
 min_samples_leaf ∈ {1…500} on the as-shipped *training* set under two schemes —
 ordinary stratified 5-fold (what a practitioner would actually run) and 5-fold
-holding whole near-duplicate clusters out together (the honest version). **Both
-select min_samples_leaf = 1**, the memorizing default, with cross-validated accuracy
-falling monotonically as leaf size grows (0.914 → 0.786 naive, 0.823 → 0.783 grouped).
-Our own pre-registered expectation P5 — that the grouped procedure would select a more
-regularized forest — was **wrong**, and the outcome answers the objection more
-forcefully than the expectation would have: the untuned default is not a careless
-choice a tuner would correct, it is *what tuning selects*. Discussion §5.
+holding whole near-duplicate clusters out together (the honest version). We ran both
+schemes on **both** leaky datasets.
 
-We flag one scope limit squarely: this run is reported for `human_nontata_promoters`
-only, because the corresponding ensembl run exceeded our compute budget. It therefore
-establishes that leaky cross-validation selects the memorizing configuration on *a*
-leaky dataset, not yet on the specific dataset carrying the reordering claim.
+On `human_enhancers_ensembl`, the dataset carrying the reordering claim, the two
+procedures diverge and the consequence is stark. Ordinary cross-validation selects
+**min_samples_leaf = 1**, the memorizing default, and the model it selects scores 0.860
+as shipped but 0.696 once the leakage is removed — a loss of 16.4 points. Cluster-grouped
+cross-validation selects **min_samples_leaf = 20**, and that model loses only 2.2 points
+(0.751 → 0.729). So tuning does not rescue the practitioner: ordinary tuning actively
+selects the configuration whose apparent advantage is almost entirely leakage. Worse, the
+benchmark **punishes the correct methodology** — the leakage-aware tuner's model looks
+10.8 points *worse* as shipped while being 3.3 points *better* corrected. On
+`human_nontata_promoters` both procedures select leaf = 1, so our pre-registered
+expectation P5 holds on `human_enhancers_ensembl` and ties, rather than reverses, on
+`human_nontata_promoters`. Discussion §5.
+
+The objection is therefore answered on the dataset where it matters: the untuned default
+is not a careless choice a tuner would correct, it is *what ordinary tuning selects*.
 
 Finally, we note the objection does not reach the core finding in any case, because
 §4.7 shows the defect is a property of the **data**: editing coordinates alone, with
@@ -354,6 +360,8 @@ We also closed three internal issues a careful reviewer would have flagged:
   "thread-nondeterminism" wording — the true causes were a decision-rule
   inconsistency and a point-vs-mean estimator choice, and we say so;
 - every pre-registered prediction is now scored in the text whether or not it held.
-  Of the five, P1 holds under the corrected gap and fails under the raw one, P2 holds
-  on one leaky dataset and fails on the other, P3 and P4 hold, and P5 fails outright.
-  We report the failures as prominently as the successes.
+  Of the six, P1 **fails as registered** — the corrected-gap result that favours it was
+  defined after P1 was committed and we label it post hoc rather than count it — P2 holds
+  on one leaky dataset and fails on the other, P3 and P4 hold, P5 holds on
+  `human_enhancers_ensembl` and ties on `human_nontata_promoters`, and P6 holds on all ten
+  doses. We report the failures as prominently as the successes.

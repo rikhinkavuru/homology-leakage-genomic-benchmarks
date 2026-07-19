@@ -438,9 +438,12 @@ splice tasks, LR on `enhancers`, LR on the control.
 
 **This is the inversion law's first genuinely out-of-sample test, and it passed.** Every
 pairwise prediction was emitted from as-shipped measurements *before* any corrected split
-existed, and recorded in the same CSV row as the outcome: **23 of 24 pairs correct**, with
-one false positive (`enhancers` RF→HGB, φ* = 0.0727 against φ = 0.0992, a margin of
-0.027). The law's account of the null is specific and checkable: **δ ≤ 0 for essentially
+existed, and recorded in the same CSV row as the outcome: **24 of 24 pairs correct** in
+the committed run (`crosssuite_ranking_pairs.csv`, `agree=True` on every row) — 23
+predicted no-swap and observed none, and the single positive prediction, `enhancers`
+RF→HGB at φ* = 0.0727 against φ = 0.0992, observed. **Read §4.1c before taking that as a
+result**: 22 of the 24 pairs have δ ≤ 0, so the aggregate is close to vacuous and a
+constant "nothing swaps" predictor scores 23/24 on the same data. The law's account of the null is specific and checkable: **δ ≤ 0 for essentially
 every pair** — on the splice tasks the random forest is not merely the leaky winner but
 the genuinely better model on novel sequences too, so there is nothing to invert. Leakage
 inflates every model's score without changing their order.
@@ -681,7 +684,7 @@ the manuscript's limitations rather than being quietly dropped.
 | hyperparameter choice | **closed** | the identity reproduces the reg-path outcome across a 12-fold change in *g* |
 | bootstrap methodology | **closed** | cluster bootstrap over within-test components, ICC + design effect, two-arm deltas, and a Benjamini–Hochberg correction that is computed and recorded rather than asserted |
 | homology-detection validation | **closed** | coordinates are k-mer-independent; MMseqs2 agreement |
-| single-suite, n = 1, not systematic | **PARTIALLY closed, and now tested** | a second suite has 3 independent leaky tasks, one 25 % byte-identical, with score inflation confirmed by cluster bootstrap (§4.1b). **Models were trained there and the ranking did NOT invert.** The inversion remains n = 1. What the second suite establishes is that the *precondition* is widespread and that the mechanism predicts where inversion will and will not occur (23/24 pairs out of sample) |
+| single-suite, n = 1, not systematic | **PARTIALLY closed, and now tested** | a second suite has 3 independent leaky tasks, one 25 % byte-identical, with score inflation confirmed by cluster bootstrap (§4.1b). **Models were trained there and the ranking did NOT invert.** The inversion remains n = 1. What the second suite establishes is that the *precondition* is widespread and that the mechanism agrees with the outcome on all 24 pairs out of sample, though 22 of them are vacuous by construction (§4.1c) |
 | CNN and Transformer generality | **partially closed** | the identity holds on the from-scratch CNN cells; the foundation-model roster remains Tier 2/3 |
 | protein / long-range reach | **open** | Tier 2/3 |
 

@@ -40,10 +40,17 @@ import pandas as pd
 
 HERE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 R = os.path.join(HERE, "results")
+# Every document a reader can receive. The letters were outside this map until round 17,
+# and that is exactly how a retired claim survived into the submission packet: the guard
+# reported "absent everywhere" while "exceeded our compute budget" was live in the
+# response to reviewers, describing a run that had completed. A guard is only as wide as
+# its document list, so anything a referee or editor reads belongs here.
 DOCS = {
     "paper": os.path.join(HERE, "paper", "main.tex"),
     "findings": os.path.join(R, "TIER1_FINDINGS.md"),
     "reproduce": os.path.join(HERE, "REPRODUCE.md"),
+    "response": os.path.join(HERE, "paper", "response_to_reviewers.md"),
+    "cover": os.path.join(HERE, "paper", "cover_letter.md"),
 }
 
 _cache = {}
@@ -376,6 +383,11 @@ def check_retired_claims():
         ("no interval attached",    "the manipulation disclosure, obsolete since 5d2b5dd"),
         ("exceeded our compute budget",
                                     "the ensembl tuning run that in fact completed"),
+        ("Both select min_samples_leaf = 1",
+                                    "true of nontata only; ensembl grouped CV selects 20"),
+        ("P5 fails outright",       "P5 holds on ensembl and ties on nontata"),
+        ("P5) failing outright",    "the same, in the cover letter's phrasing"),
+        ("Of the five,",            "there are six pre-registered predictions, not five"),
     ]
     out = []
     for phrase, why in retired:
