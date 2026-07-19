@@ -378,8 +378,8 @@ and C8 are now wired into it, and every check's state is recorded in the report.
 
 | suite | tasks (independent) | LEAKY | borderline | clean | max jac@0.7 | max exact |
 |---|---|---|---|---|---|---|
-| NT-original | 13 (12) | **4 (3)** | 3 | 6 | **0.2500** | **0.2500** |
-| NT-revised | 13 (12) | 0 | 0 | 13 | 0.0020 | 0.0000 |
+| NT-original | 13 (11) | **4 (3)** | 3 | 6 | **0.2500** | **0.2500** |
+| NT-revised | 13 (11) | 0 | 0 | 13 | 0.0020 | 0.0000 |
 
 Parenthesised counts deduplicate `enhancers` / `enhancers_types`: their train and test
 **sequence sets are identical in content and order**, the two tasks differing only in the
@@ -554,8 +554,8 @@ clean-versus-cautionary split:
 
 | dataset | memorizers (mean) | others (mean) | largest corrected gap |
 |---|---|---|---|
-| ensembl | **+0.292** | +0.147 | **kNN-1, +0.461** (raw: +0.208) |
-| nonTATA | +0.122 | +0.166 | MLP, +0.229 |
+| ensembl | **+0.292** | +0.165 | **kNN-1, +0.461** (raw: +0.208) |
+| nonTATA | +0.122 | +0.179 | MLP, +0.229 |
 
 Consequence for the pre-registered P1 (kNN-1 has the largest gap): it **fails** under the
 raw statistic on ensembl (RF 0.230 vs 0.208) and **holds decisively** under the corrected
@@ -595,7 +595,7 @@ defect `exp_roster.py` had. Both now merge by dataset.*
 ### 4.2 A pre-registered prediction that failed
 
 The registered call `NT-original → LEAKY` was **wrong as a suite-level statement**: only
-3 of 12 independent tasks are leaky and 6 are clean, including all three promoter tasks. The
+3 of 11 independent tasks are leaky and 6 are clean, including all three promoter tasks. The
 informative consequence is that **`human_nontata_promoters`' leak fraction of 0.406 is
 not a property of the promoter task** — NT's equivalent is clean at 0.0059 — but of
 Genomic Benchmarks' construction of it. That separates task effect from curation effect
@@ -795,7 +795,7 @@ has not started. The trend across five rounds is unambiguous, but the bar has no
 | 23 | **Benjamini–Hochberg was announced in a comment and never performed**; `bh()` was dead code. Now computed, with p-values and post-BH verdicts recorded per pair |
 | 24 | **Both manipulations were confounded by class balance and size.** Matched arms added and made primary; effects are *larger* under matching |
 | 25 | "each of 40,934 intervals shipped exactly twice" was arithmetically impossible (81,868 ≠ 77,421); corrected to 36,487 twice + 4,447 once |
-| 26 | `enhancers` / `enhancers_types` carry identical sequence sets (labels differ); leaky-task count corrected 4/13 → **3/12 independent** |
+| 26 | `enhancers` / `enhancers_types` carry identical sequence sets (labels differ); leaky-task count corrected 4/13 → **3/11 independent** (`enhancers_types` and `promoter_all` are both nested) |
 | 27 | P4 quoted 2 of 4 held-out cells and the wrong maximum error; corrected to 4 cells, max 0.0049 |
 | 28 | Manipulation A's duplication rate mis-derived: 0.9426 is the target *share on duplicated coordinates*, requiring a duplication rate of 0.8914 |
 | 29 | certify C1 warned but could not move the verdict; now yields `provisional-clean`. C2 was a hardcoded constant; now a real check |

@@ -69,11 +69,11 @@ SHARED_TASKS = ["promoter_no_tata", "promoter_all", "promoter_tata", "enhancers"
 
 # Pre-registered expectations (results/tier1_preregistration.md), recorded so the code
 # carries the prediction the census then tests. BOTH are suite-level labels, and the
-# NT-original one was REFUTED: only 3 of 12 independent tasks leak, and all three
+# NT-original one was REFUTED: only 3 of 11 independent tasks leak, and all three
 # promoter tasks are clean. Leakage is a property of particular task constructions, not
 # of suites. Retained here as the registered claim, not as a finding.
 PREREGISTERED = {
-    "NT-original": "LEAKY",     # REFUTED at task level: 3/12 independent tasks leak
+    "NT-original": "LEAKY",     # REFUTED at task level: 3/11 independent tasks leak
     "NT-revised": "CLEAN",      # held: 13/13 clean
 }
 LEAK_CUT = 0.1
@@ -184,6 +184,16 @@ def main():
                 pd.DataFrame(rows).to_csv(partial, index=False)
     df = pd.DataFrame(rows)
     if not df.empty:
+        # Merge by (suite, task) rather than overwrite. Running a subset via --tasks
+        # previously replaced the whole census with just that subset; the same clobber
+        # bug exp_roster, exp_tuning, exp_gue and exp_dose_response all had.
+        if os.path.exists(a.out):
+            prev = pd.read_csv(a.out)
+            keys = {c for c in ("suite", "task") if c in prev.columns and c in df.columns}
+            if keys == {"suite", "task"}:
+                seen = set(zip(df.suite, df.task))
+                prev = prev[[t not in seen for t in zip(prev.suite, prev.task)]]
+                df = pd.concat([prev, df], ignore_index=True)
         tmp = a.out + ".tmp"
         df.to_csv(tmp, index=False)
         os.replace(tmp, a.out)

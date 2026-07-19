@@ -1,6 +1,6 @@
 # Homology-leakage audit: `human_nontata_promoters`
 
-Genomic Benchmarks DNA sequence-classification dataset (binary: non-TATA promoter vs. background). CPU-only, pure numpy/pandas/scikit-learn/scipy. Seeds: model=0, cluster splits=[0, 1, 2]. Total runtime 90s.
+Genomic Benchmarks DNA sequence-classification dataset (binary: non-TATA promoter vs. background). CPU-only, pure numpy/pandas/scikit-learn/scipy. Seeds: model=0, cluster splits=[0, 1, 2]. Total runtime 98s.
 
 ## 1. Dataset
 
