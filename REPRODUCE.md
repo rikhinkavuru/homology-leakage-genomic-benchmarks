@@ -100,3 +100,16 @@ because the tool cannot tell a full dataset from a subsample by inspection.
 Modules that shell out to external tools (`exp_alignment` needs MMseqs2, `exp_repeat`
 needs `dustmasker`) write scratch files under `$AUDIT_SCRATCH` if set, otherwise the
 platform temp directory.
+
+### Figure 1 is built outside `audit/figures/`
+
+`audit/figures/make_paper_figures.py` still emits a `fig_controls` image, but it is
+**superseded** and is not the Figure 1 in the manuscript. The shipping figure is a
+two-panel dumbbell plot (it needed a clean-dataset panel, since its caption contrasts
+leaky against clean) built by:
+
+```bash
+./venv/bin/python paper/Fig/make_fig_controls.py     # reads results/summary_final.csv only
+```
+
+Run that, not the `audit/figures/` block, when regenerating Figure 1.

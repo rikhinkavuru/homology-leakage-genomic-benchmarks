@@ -103,7 +103,18 @@ savefig(fig, "fig_capacity_scaling")
 pd.DataFrame(rows_csv).to_csv(os.path.join(FIG, "fig_capacity_scaling_data.csv"), index=False)
 
 
-# ---------------- fig_controls ----------------
+# ---------------- fig_controls (SUPERSEDED) ----------------
+# NOTE: this block no longer produces the Figure 1 that ships in the manuscript.
+# Fig. 1 needed a clean-dataset panel -- its caption claimed "only on leaky datasets"
+# while the image showed only leaky ones -- and the grouped bar chart was replaced by a
+# two-panel dumbbell plot, which also makes the cropped y-axis legitimate. The shipping
+# figure is built by:
+#
+#     ./venv/bin/python paper/Fig/make_fig_controls.py
+#
+# reading results/summary_final.csv only. The block below is retained because its backing
+# CSV (fig_controls_data.csv) is still referenced by the numbers audit, but the PNG/SVG/PDF
+# it writes into results/figures/ are NOT the manuscript figure. Do not use them.
 fig, ax = plt.subplots(figsize=(7.0, 4.8))
 bar_rows = []
 xs = np.arange(len(LEAKY))
@@ -132,3 +143,5 @@ savefig(fig, "fig_controls")
 pd.DataFrame(bar_rows).to_csv(os.path.join(FIG, "fig_controls_data.csv"), index=False)
 
 print("wrote fig_capacity_scaling.{png,svg,pdf} + fig_controls.{png,svg,pdf} and backing CSVs to", FIG)
+print("NOTE: fig_controls here is SUPERSEDED -- the manuscript Figure 1 is built by "
+      "paper/Fig/make_fig_controls.py (two-panel dumbbell with a clean-dataset panel).")
