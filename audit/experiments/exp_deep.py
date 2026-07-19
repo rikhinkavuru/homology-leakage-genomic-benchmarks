@@ -95,14 +95,18 @@ class ResBlock(nn.Module):
 
 
 class ResCNN(nn.Module):
-    def __init__(self, dropout):
+    """n_out=1 is the binary head used by every result in the paper; n_out>1 gives a
+    softmax head for the three-class injected-leakage run (exp_inject3class_deep.py).
+    The default reproduces the committed architecture exactly."""
+
+    def __init__(self, dropout, n_out=1):
         super().__init__()
         self.b1 = ResBlock(4, 64, 9)
         self.b2 = ResBlock(64, 128, 5)
         self.b3 = ResBlock(128, 128, 3)
         self.pool = nn.MaxPool1d(2)
         self.head = nn.Sequential(
-            nn.Linear(128, 128), nn.ReLU(), nn.Dropout(dropout), nn.Linear(128, 1))
+            nn.Linear(128, 128), nn.ReLU(), nn.Dropout(dropout), nn.Linear(128, n_out))
 
     def forward(self, x):
         x = self.pool(self.b1(x))

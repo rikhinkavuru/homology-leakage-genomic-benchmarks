@@ -665,9 +665,97 @@ def check_generated_tables():
     return out
 
 
+def check_no_selective_quotation():
+    """Universal claims must hold on ALL rows of their slice, not the quoted subset.
+
+    This is the second-largest late defect class: 21 confirmed findings, and rounds 25,
+    26 and 27 each surfaced one. The shape is always the same -- a passage quotes the
+    rows of a CSV that agree with it and generalises over the rest. Examples it is built
+    from: four learners were run on the NT `enhancers` task and three were quoted as
+    "all excluding zero" while the omitted fourth was null; and a threshold-robustness
+    claim that is true on human_enhancers_ensembl (drop flat at 0.156/0.156/0.157) and
+    false on human_nontata_promoters (0.205/0.121/0.006).
+
+    Two mechanisms, because the class has two mechanisms:
+
+    DENOMINATOR -- when the manuscript reports a count of rows satisfying some property,
+    the slice's TOTAL must appear near it. "three of four excluded zero" is honest;
+    "three excluded zero" is where the fourth disappears. Asserting the denominator is
+    present is what converts this from a lens someone has to think to write into a gate.
+
+    SCOPE -- when a property holds on one dataset in a slice and not another, any
+    passage asserting it must name the dataset. A bare universal is a defect even if
+    every number it quotes is correct.
+    """
+    out = []
+
+    # -- DENOMINATOR: NT cross-suite per-task drops -------------------------------
+    cs = csv("crosssuite_ranking.csv")
+    for task in ("enhancers",):
+        sl = cs[(cs.suite == "NT-original") & (cs.task == task)]
+        if sl.empty:
+            out.append((False, f"crosssuite slice {task} present", "task missing from CSV"))
+            continue
+        n_tot = len(sl)
+        n_excl = int(sl["drop_excl0"].astype(str).str.lower().eq("true").sum())
+        body = " ".join(doc("paper").split())
+        # find the passage; require BOTH the count and the denominator to be stated
+        anchor = body.find(r"on \textit{" + task + "}")
+        window = body[anchor:anchor + 700] if anchor >= 0 else ""
+        # Require an explicit "<n_excl> of (the) <n_tot>" construction. Testing for the
+        # bare digits is useless -- "4" occurs inside 0.0413 and "3" inside 0.0366, so a
+        # substring test passes on a passage that states no denominator at all. The
+        # self-test caught exactly that and reported this check as BLIND.
+        WORD = {2: "two", 3: "three", 4: "four", 5: "five", 6: "six",
+                7: "seven", 8: "eight", 9: "nine"}
+        a = f"(?:{n_excl}|{WORD.get(n_excl, n_excl)})"
+        b = f"(?:{n_tot}|{WORD.get(n_tot, n_tot)})"
+        stated = re.search(rf"\b{a}\s+of\s+(?:the\s+)?{b}\b", window, re.I) is not None
+        ok = (n_excl == n_tot) or stated
+        out.append((ok,
+                    f"paper: NT {task} drops state the denominator "
+                    f"({n_excl} of {n_tot} exclude zero)",
+                    "" if ok else
+                    f"{n_tot - n_excl} model(s) omitted; no '{n_excl} of {n_tot}' construction"))
+
+    # -- SCOPE: threshold sensitivity is NOT uniform across datasets --------------
+    ts = csv("threshold_sensitivity.csv")
+    rf6 = ts[(ts.model == "RF") & (ts.k == 6)]
+    spread = {}
+    for d, g in rf6.groupby("dataset"):
+        v = g.sort_values("threshold")["delta_acc"].to_numpy()
+        spread[d] = float(v.max() - v.min())
+    # the claim "the sweep changes no verdict" is only safe where the spread is small;
+    # assert the manuscript does not make it unscoped where a dataset disagrees
+    uneven = {d: s for d, s in spread.items() if s > 0.05}
+    body = " ".join(doc("paper").split())
+    if uneven:
+        named = all(tex_dataset(d) in body for d in uneven)
+        out.append((named,
+                    "paper: datasets whose threshold sweep is uneven are named, not "
+                    "absorbed into a blanket robustness claim",
+                    "" if named else f"unnamed: {sorted(uneven)}"))
+        # and the blanket phrasing must not appear without a scope word nearby
+        for phrase in ("changes no verdict", "robust to the clustering threshold"):
+            i = body.lower().find(phrase)
+            if i < 0:
+                continue
+            win = body[max(0, i - 300):i + 300]
+            scoped = any(w in win for w in ("verdict", "leaky", "clean"))
+            out.append((scoped,
+                        f"paper: '{phrase}' is scoped to what the sweep actually preserves",
+                        "" if scoped else "reads as a blanket robustness claim"))
+    return out
+
+
+def tex_dataset(d):
+    return d.replace("_", r"\_")
+
+
 CHECKS = [
     ("retired claims", check_retired_claims),
     ("generated tables", check_generated_tables),
+    ("selective quotation", check_no_selective_quotation),
     ("CNN seed replication / paired interval", check_cnn_seed_replication),
     ("imbalance panel", check_imbalance_panel),
     ("shared numbers across documents", check_shared_numbers),
@@ -742,6 +830,11 @@ def self_test():
         ("cover: the 4-of-5 disclosure summarised away",
          "cover", "one of the five seeds not individually clearing zero",
          "every seed clearing zero"),
+        # the selective-quotation class: drop the denominator and the omitted fourth
+        # learner disappears, which is exactly the round-26 defect
+        ("paper: the NT enhancers denominator removed",
+         "paper", "three of the four learners excluding zero",
+         "all excluding zero"),
     ]
     print("== self-test: each mutation must make the gate FAIL ==\n")
     bad = 0

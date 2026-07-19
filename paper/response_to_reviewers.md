@@ -359,6 +359,17 @@ this is not evasion but the same problem one level up: evaluating those models
 properly requires a pretraining-overlap-aware protocol, which is itself an instance
 of the leakage problem this paper studies.
 
+**This is a refusal on validity grounds, not a compute limitation, and we want to be
+unambiguous about it.** No amount of hardware changes the argument. The pretraining
+corpus has already seen the test sequences, so a fine-tuned DNABERT-2 or HyenaDNA
+number would not measure what this paper measures however it was produced — it would
+carry a confound we can name in advance and cannot remove by re-splitting. Producing
+such a number and captioning it carefully would be worse than declining, because it
+would enter the literature as a measurement and be cited as one. The manuscript now
+makes this findable rather than buried: it has its own titled paragraph, **"Why we do
+not fine-tune the pretrained models"** (§5), so a reader checking our answer to this
+specific comment does not have to hunt for it inside a limitations paragraph.
+
 ### R3.2 — "The random forest runs at memorization-maximizing defaults; is the result just an untuned-RF artifact?"
 
 This was the objection we took most seriously, and we answer it empirically.
