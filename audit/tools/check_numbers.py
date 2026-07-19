@@ -561,14 +561,33 @@ def check_cnn_seed_replication():
                        ("response", r"Across\s+\*\*five training seeds\*\*")):
         out.append(near(where, ctx, lo_acc, places=4, label=f"{where}: CNN corrected min {lo_acc:.4f}"))
         out.append(near(where, ctx, hi_acc, places=4, label=f"{where}: CNN corrected max {hi_acc:.4f}"))
-    for where, ctx in (("paper", r"paired cluster-bootstrap difference is"),
-                       ("response", r"paired\s+cluster-bootstrap difference is")):
+    # The COMBINED-SOURCE interval is the one the documents must quote. The narrow
+    # seed-averaged interval is also asserted, but only as the figure each document
+    # explicitly disowns -- an audit found it reported as the headline, where it
+    # understated uncertainty precisely in the flattering direction, so the guard now
+    # pins which of the two plays which role.
+    for where, ctx in (("paper", r"the paired difference is"),
+                       ("response", r"the paired difference is")):
         out.append(near(where, ctx, float(mean_row["paired_diff"]), places=4,
                         label=f"{where}: paired difference {float(mean_row['paired_diff']):.4f}"))
-        out.append(near(where, ctx, float(mean_row["paired_ci_lo"]), places=4,
-                        label=f"{where}: paired CI lower {float(mean_row['paired_ci_lo']):.4f}"))
-        out.append(near(where, ctx, float(mean_row["paired_ci_hi"]), places=4,
-                        label=f"{where}: paired CI upper {float(mean_row['paired_ci_hi']):.4f}"))
+        out.append(near(where, ctx, float(mean_row["combined_ci_lo"]), places=4,
+                        label=f"{where}: combined CI lower {float(mean_row['combined_ci_lo']):.4f}"))
+        out.append(near(where, ctx, float(mean_row["combined_ci_hi"]), places=4,
+                        label=f"{where}: combined CI upper {float(mean_row['combined_ci_hi']):.4f}"))
+    out.append(near("cover", r"combined-source CI", float(mean_row["combined_ci_lo"]),
+                    places=4, label="cover: combined CI lower"))
+    out.append(near("cover", r"combined-source CI", float(mean_row["combined_ci_hi"]),
+                    places=4, label="cover: combined CI upper"))
+    # the narrow interval must appear ONLY as the disowned alternative, in both docs
+    for where in ("paper", "response"):
+        body = " ".join(doc(where).split())
+        narrow = f"{float(mean_row['paired_ci_lo']):.4f}" in body.replace("$", "")
+        disowned = ("do not quote that as the result" in body
+                    or "do not report that figure as the result" in body)
+        out.append((not narrow or disowned,
+                    f"{where}: the seed-averaged interval is disowned where it appears",
+                    "" if (not narrow or disowned) else
+                    "the narrow interval appears without being disowned"))
     # 4.9: the drop range, which weakens a previously single-valued claim
     out.append(near("paper", r"gives drops of", lo_drop, places=4,
                     label=f"paper: CNN drop min {lo_drop:.4f}"))
@@ -658,8 +677,8 @@ def self_test():
          "paper", "also scores $10/10$", "also scores $7/10$"),
         ("paper: the GUE Jaccard minimum", "paper", "from $0.009$ to $0.041$",
          "from $0.011$ to $0.041$"),
-        ("paper: the CNN paired-interval lower bound",
-         "paper", "$[0.0063,0.0161]$", "$[0.0071,0.0161]$"),
+        ("paper: the CNN combined-source interval lower bound",
+         "paper", "$[0.0019,0.0204]$", "$[0.0031,0.0204]$"),
         ("response: the CNN corrected-accuracy floor, letter side",
          "response", "0.8028–0.8131 corrected", "0.8044–0.8131 corrected"),
         ("cover: the 4-of-5 disclosure summarised away",

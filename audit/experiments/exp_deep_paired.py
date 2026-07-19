@@ -128,11 +128,39 @@ def main():
     diff_mean = cc_mean - svc_correct
     draws = E.cluster_boot(diff_mean, ccl, BOOT, seed=BSEED)
     lo, hi = E.ci(draws)
+
+    # COMBINED-SOURCE interval -- the one to quote.
+    #
+    # The `mean`-row bootstrap above resamples TEST CLUSTERS ONLY, applied to
+    # per-example correctness that has already been averaged over seeds. That averaging
+    # removes training variance from the point estimate, so the resulting interval is
+    # narrower than any single seed's -- it describes a five-model ensemble nobody
+    # trains, not the single CNN a practitioner runs. Quoting it would understate the
+    # uncertainty the seed replication was run to expose.
+    #
+    # So we fold seed variance back in, by the same rule the manuscript already uses for
+    # its other combined-source intervals (exp_clusterboot_full.py): add the raw
+    # seed-to-seed SD in quadrature with the bootstrap SD. seed_sd is NOT divided by
+    # sqrt(n), because the estimand is one run's advantage, not the mean of five.
+    per_seed_diffs = np.array([r["paired_diff"] for r in rows], dtype=float)
+    seed_sd = float(np.std(per_seed_diffs, ddof=1))
+    boot_sd = float(np.std(draws))
+    comb_sd = float(np.sqrt(boot_sd ** 2 + seed_sd ** 2))
+    point = float(diff_mean.mean())
+    clo, chi = point - 1.96 * comb_sd, point + 1.96 * comb_sd
+
     rows.append(dict(
         dataset=DATASET, seed="mean", cnn_acc_corr=round(float(cc_mean.mean()), 4),
-        svc_acc_corr=round(svc_acc, 4), paired_diff=round(float(diff_mean.mean()), 4),
+        svc_acc_corr=round(svc_acc, 4), paired_diff=round(point, 4),
         paired_ci_lo=round(float(lo), 4), paired_ci_hi=round(float(hi), 4),
-        paired_excl0=bool(lo > 0 or hi < 0), epochs=""))
+        paired_excl0=bool(lo > 0 or hi < 0), epochs="",
+        seed_sd=round(seed_sd, 4), boot_sd=round(boot_sd, 4),
+        combined_sd=round(comb_sd, 4),
+        combined_ci_lo=round(clo, 4), combined_ci_hi=round(chi, 4),
+        combined_excl0=bool(clo > 0 or chi < 0)))
+    print(f"\ncombined-source (seed + test variance): {point:+.4f} "
+          f"[{clo:+.4f}, {chi:+.4f}]  seed_sd={seed_sd:.4f} boot_sd={boot_sd:.4f}",
+          flush=True)
     df = pd.DataFrame(rows)
     df.to_csv(OUT, index=False)
 

@@ -140,10 +140,16 @@ replicated, interval-bearing comparison that situation called for (§4.4). Acros
 **five training seeds** the network scores 0.8028–0.8131 corrected (mean 0.8086,
 sd 0.0040) against the SVM's 0.7975, and 0.8119–0.8359 as shipped. **On every seed it
 ranks fifth on the leaky split and first on the corrected one.** Scoring both models
-on the same corrected test set and differencing per example, the paired
-cluster-bootstrap difference is **+0.0111, CI [0.0063, 0.0161]**, excluding zero — so
-the comparison now satisfies the inversion criterion (§3.3) that the earlier draft
-was unwilling to bypass.
+on the same corrected test set and differencing per example, the paired difference is
+**+0.0111, combined-source CI [0.0019, 0.0204]**, excluding zero — so the comparison
+now satisfies the inversion criterion (§3.3) that the earlier draft was unwilling to
+bypass. That interval folds the seed-to-seed SD (0.0040) into the cluster-bootstrap SD
+(0.0026) in quadrature, by the same rule used for the paper's other combined-source
+intervals, because the quantity of interest is the advantage of *one* trained network,
+not of an average over five. We flag that bootstrapping seed-averaged per-example
+correctness instead yields [0.0063, 0.0161] — narrower than any single seed's interval,
+because averaging removes training variance rather than estimating it. We do not report
+that figure as the result.
 
 So leakage does not only promote a memorizer; on this dataset it **demotes the
 architecture family whose baselines this suite publishes**. We attach three
@@ -272,8 +278,10 @@ confirmation, not a restatement. **§4.12**, **§4.6**; Methods §3.4, §3.6, §
 
 ### R2.a3 — "Extend to deep models and to the multiclass setting."
 
-**Deep models:** the CNN (R1.1a, §4.9), now seed-replicated with a paired interval
-and shown to move from rank 5 to rank 1 under correction (R1.1c, §4.4); and the
+**Deep models:** the CNN (R1.1a, §4.9), now seed-replicated with a paired interval and
+shown to move from rank 5 to rank 1 under correction on every seed — a **post hoc**
+comparison, and one in which four of the five seeds' intervals exclude zero while the
+fifth does not (R1.1c, §4.4); and the
 multilayer perceptron in the nine-model roster (§4.4), whose drop also excludes zero
 — the inflation reaches a neural learner that we had not designated
 memorization-prone in advance.
@@ -319,8 +327,12 @@ reaches a trained neural network with no pretraining confound. Since the first
 revision we have strengthened this considerably: the CNN is now seed-replicated with a
 paired cluster-bootstrap interval, and on `human_enhancers_ensembl` it ranks **fifth
 on the leaky split and first on the corrected one, on every one of five seeds**
-(paired difference +0.0111, CI [0.0063, 0.0161]; R1.1c, §4.4). The leaky split does
-not merely fail to detect the deep model — it actively demotes it. We also attempted a
+(R1.1c, §4.4). The leaky split does not merely fail to detect the deep model — it
+actively demotes it. Three qualifications, repeated here rather than left to the
+cross-reference: the rank is uniform across seeds but the *significance* is not — four
+of five seeds' paired intervals exclude zero and the fifth does not; the CNN was not in
+the pre-registered nine-model roster, so this comparison is **post hoc**; and it is one
+dataset. We also attempted a
 from-scratch attention (Transformer) encoder under the same protocol, and mention it
 here only so the record is complete: **it is not in the manuscript and we rest no
 claim on it.** It did not yield a usable comparison — on `human_nontata_promoters`
