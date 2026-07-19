@@ -404,6 +404,9 @@ def check_retired_claims():
         ("P5 fails outright",       "P5 holds on ensembl and ties on nontata"),
         ("P5) failing outright",    "the same, in the cover letter's phrasing"),
         ("Of the five,",            "there are six pre-registered predictions, not five"),
+        ("Three limits bound",      "the Discussion limitations count: the foundation-model "
+                                    "exclusion was split into its own titled paragraph, so "
+                                    "the remaining paragraph carries two, not three"),
     ]
     out = []
     for phrase, why in retired:

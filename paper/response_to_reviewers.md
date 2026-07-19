@@ -138,6 +138,34 @@ reproduced only as a within-suite control; **Claim II** (leakage can *reorder*
 rankings) is our contribution, scoped to short human regulatory DNA plus a
 memorization-prone model in the comparison set. The title carries that scope.
 
+We also tested the reach **empirically**, on two further suites, rather than
+arguing it. Applying the census unchanged to the **Nucleotide Transformer**
+downstream tasks (§4.10) finds **three of eleven independent tasks leaky** and six
+more borderline, leaving two clean — so the defect is not confined to Genomic
+Benchmarks. We then pre-registered predictions for **GUE** before examining it, and
+**they failed** (§4.10): we predicted its short fixed-length human regulatory tasks
+(core promoter 70 bp, promoter 300 bp, TF binding 101 bp) would be leaky, and at
+full scale **all eleven predicted-leaky tasks are clean** — near-duplicate fractions
+0.009–0.041 by Jaccard, the largest under half the verdict cut. We count those
+eleven conservatively as **seven** independent test partitions, since the `_all`
+promoter test sets are exact unions of their own `notata` and `tata` test sets and
+the 70 bp and 300 bp families are the same loci at two window widths.
+
+We report that failure prominently because it is the **stronger** generalization
+result. It refutes the natural reading of our own finding — that short human
+regulatory DNA is inherently at risk — and replaces it with a sharper one:
+**leakage tracks how a dataset was constructed, not what kind of task it is.**
+Genomic Benchmarks' leaky positive class is an un-deduplicated assembly with
+77,421 intervals on 40,934 coordinates; GUE's tasks, matching it on sequence type
+and length, are clean because they were not built that way. That is a claim about
+construction, and it is the one our manipulation experiment (§4.7) directly tests.
+
+Two parts of the reviewer's question we have **not** answered and do not claim to:
+**protein sequence modelling** and **long-range regulatory** modelling. Both are
+outside this study, and we name them as extensions rather than implying coverage
+(§5). We would rather concede those two than stretch DNA-suite evidence to cover
+them.
+
 ### R1.2 — "The corrected ranking is treated as the true generalization ranking, but de-duplicating the training set also removes learnable signal."
 
 Agreed, and we now **measure** rather than assert it. On `human_nontata_promoters`
