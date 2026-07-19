@@ -108,6 +108,8 @@ cross-suite modules, which download the Nucleotide Transformer task files.
 | T26 | `python -m audit.experiments.exact_dup_count` | `exact_dup_counts.csv` — byte-identical duplicate counts | ~5 min |
 | T27 | `python -m audit.experiments.full_scale_containment` | `full_scale_containment.csv` — full-scale containment for the clean sets | ~30 min |
 | T28 | `python -m audit.experiments.exp_transformer` | `exp_transformer.csv` — the from-scratch attention probe (not used in the paper) | ~2 h; needs torch |
+| T29 | `python -m audit.pipeline.rf_seed_variance` | `rf_seed_variance.csv` — the §4.2 RF *training*-seed robustness check (a different axis from step 18's re-split seeds) | ~15 min |
+| — | `audit/pipeline/prep_datasets.py` | none — an earlier cache builder, superseded by `audit.tools.prefetch`; nothing in the paper depends on it |  |
 
 `certify` also runs end to end on a dataset (`--dataset NAME [--cap N]`) or on arbitrary
 input (`--fasta X.fa --labels y.txt [--full-n N]`). Without `--full-n` the C1 full-scale

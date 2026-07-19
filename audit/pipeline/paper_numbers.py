@@ -470,14 +470,14 @@ if s2var is not None and s3acc is not None and s3del is not None and s4tie is no
     L.append("| dataset | group | model | delta | 95% CI | excludes 0 |")
     L.append("|---|---|---|---|---|---|")
     for _, r in s3del.iterrows():
-        L.append(f"| {r['dataset']} | {r['group']} | {r['model']} | {r['delta_orig_minus_corr']:+.4f} "
+        L.append(f"| {r['dataset']} | {_verd.get(r['dataset'], r['group'])} | {r['model']} | {r['delta_orig_minus_corr']:+.4f} "
                  f"| [{r['ci_lo']:+.4f}, {r['ci_hi']:+.4f}] | {'YES' if r['excludes_zero'] else 'no'} |")
     L.append("\nBootstrap deltas use the seed-0 corrected split, so point estimates differ slightly "
              "from the frozen 3-seed-mean deltas in sections 3-5 (unchanged); the sign/significance "
              "is the result of interest. **Reading:** the high-capacity (RF) drop is significant on "
              "both leaky datasets (CIs exclude 0); the linear (LR) drop is significant on nonTATA but "
              "**null on enhancers_ensembl** (CI includes 0) -- only the memorizer inflates there. All "
-             "five clean-dataset deltas are not significant (CIs include 0), which replaces 'within "
+             "five non-leaky deltas are not significant (CIs include 0), which replaces 'within "
              "noise' with a tested statement. Clean per-model original-split CIs are in "
              "`step3_accuracy_ci.csv`. *Source: `step_variance_ci.py` -> `step3_accuracy_ci.csv`, "
              "`step3_delta_ci.csv`.*\n")

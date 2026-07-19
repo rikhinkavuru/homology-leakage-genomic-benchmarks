@@ -320,14 +320,14 @@ Delta (original - corrected) with 95% CI; "excludes 0" => the drop is significan
 
 | dataset | group | model | delta | 95% CI | excludes 0 |
 |---|---|---|---|---|---|
-| human_nontata_promoters | leaky | RF_k6 | +0.1083 | [+0.0993, +0.1183] | YES |
-| human_nontata_promoters | leaky | LR_k6 | +0.0407 | [+0.0305, +0.0517] | YES |
-| human_enhancers_ensembl | leaky | RF_k6 | +0.1639 | [+0.1579, +0.1704] | YES |
-| human_enhancers_ensembl | leaky | LR_k6 | +0.0004 | [-0.0057, +0.0069] | no |
+| human_nontata_promoters | LEAKY | RF_k6 | +0.1083 | [+0.0993, +0.1183] | YES |
+| human_nontata_promoters | LEAKY | LR_k6 | +0.0407 | [+0.0305, +0.0517] | YES |
+| human_enhancers_ensembl | LEAKY | RF_k6 | +0.1639 | [+0.1579, +0.1704] | YES |
+| human_enhancers_ensembl | LEAKY | LR_k6 | +0.0004 | [-0.0057, +0.0069] | no |
 | human_enhancers_cohn | clean | LR_k6 | -0.0016 | [-0.0196, +0.0148] | no |
 | human_ocr_ensembl | clean | LR_k6 | +0.0059 | [-0.0146, +0.0254] | no |
 | demo_human_or_worm | clean | LR_k6 | -0.0034 | [-0.0120, +0.0058] | no |
-| demo_coding_vs_intergenomic_seqs | clean | LR_k6 | +0.0056 | [-0.0074, +0.0182] | no |
+| demo_coding_vs_intergenomic_seqs | borderline | LR_k6 | +0.0056 | [-0.0074, +0.0182] | no |
 | drosophila_enhancers_stark | clean | LR_k6 | +0.0229 | [-0.0048, +0.0553] | no |
 
 Bootstrap deltas use the seed-0 corrected split, so point estimates differ slightly from the frozen 3-seed-mean deltas in sections 3-5 (unchanged); the sign/significance is the result of interest. **Reading:** the high-capacity (RF) drop is significant on both leaky datasets (CIs exclude 0); the linear (LR) drop is significant on nonTATA but **null on enhancers_ensembl** (CI includes 0) -- only the memorizer inflates there. All five non-leaky deltas are not significant (CIs include 0), which replaces 'within noise' with a tested statement. Clean per-model original-split CIs are in `step3_accuracy_ci.csv`. *Source: `step_variance_ci.py` -> `step3_accuracy_ci.csv`, `step3_delta_ci.csv`.*
