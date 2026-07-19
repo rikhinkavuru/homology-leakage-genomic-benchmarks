@@ -373,8 +373,10 @@ and C8 are now wired into it, and every check's state is recorded in the report.
 > exactly the kind this paper documents is present in a second, independently built,
 > widely used suite.** That is a statement about NT-original, requiring no comparison.
 
-`crosssuite_census.csv`, `crosssuite_exact_verification.csv`. Train sets capped at
-20,000; capping only removes near-duplicate partners, so every figure is a lower bound.
+`crosssuite_census.csv`, `crosssuite_exact_verification.csv`. Train sets are **not**
+subsampled: every task is censused at its full shipped size (the CSV records
+`n_train_used == n_train_full` on all 26 rows). An earlier pass capped train at 20,000
+and moved three histone verdicts across the containment cut; see §4.2.
 
 | suite | tasks (independent) | LEAKY | borderline | clean | max jac@0.7 | max exact |
 |---|---|---|---|---|---|---|
@@ -619,7 +621,9 @@ touched, and called them the document's strongest-risk claims. They are now run.
 > max-similarity-to-train statistic, so those clean verdicts were lower bounds, not
 > measurements -- the same C1 objection this paper raises against other people's audits.
 > All fifteen registered tasks were re-censused at full scale. The leak fractions rose
-> roughly threefold (`prom_core_all` 0.0054 -> 0.0149) exactly as C1 predicts, **and the
+> by up to 2.8x on the tasks large enough to have been capped (`prom_core_all` 0.0054 ->
+> 0.0149); the median task moved 1.1x and the six registered tasks below the cap are
+> unchanged -- exactly as C1 predicts, **and the
 > conclusion is unchanged**: all eleven predicted-LEAKY tasks remain clean, the largest
 > at 0.0408, still under half the 0.1 cut, under both metrics. The GUE null is now
 > established at full scale rather than provisionally.

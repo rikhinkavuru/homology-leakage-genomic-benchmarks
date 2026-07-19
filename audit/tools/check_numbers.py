@@ -351,7 +351,43 @@ def check_crosssuite_counts():
     ]
 
 
+def check_retired_claims():
+    """Statements the project has corrected, asserted absent from EVERY document.
+
+    This is the systemic answer to the failure that produced the blocker in rounds 14, 15
+    and 16 and most of the majors in 10 through 13: a claim gets corrected where it was
+    found and survives in its counterpart. Each entry below is a phrase that was true once
+    and is now false; if any of them reappears anywhere, a fix has been half-applied again.
+    Add to this list whenever a claim is retired, not just where it was found.
+    """
+    retired = [
+        ("capped at 20,000",        "the cross-suite census cap, lifted in round 14"),
+        ("capped at $20{,}000$ sequences for the census",
+                                    "the same cap, in the manuscript's phrasing"),
+        ("roughly threefold",       "the overstated GUE capped-to-full ratio (true max 2.8x)"),
+        ("roughly tripled",         "the same overstatement, manuscript phrasing"),
+        ("three of twelve",         "the pre-collapse Nucleotide Transformer task count"),
+        ("of 12 independent",       "the same count, findings phrasing"),
+        ("same duplicated-coordinate defect",
+                                    "an NT mechanism claim unsupported by that release"),
+        ("short, fixed-length human regulatory",
+                                    "false of human_enhancers_ensembl (2-573 bp)"),
+        ("5/17",                    "the GUE tally inflated by two unregistered tasks"),
+        ("no interval attached",    "the manipulation disclosure, obsolete since 5d2b5dd"),
+        ("exceeded our compute budget",
+                                    "the ensembl tuning run that in fact completed"),
+    ]
+    out = []
+    for phrase, why in retired:
+        hits = [w for w in DOCS if " ".join(phrase.split()) in " ".join(doc(w).split())]
+        out.append((not hits, f"retired: {phrase!r} ({why})",
+                    "absent everywhere" if not hits
+                    else f"STILL PRESENT in {', '.join(hits)}"))
+    return out
+
+
 CHECKS = [
+    ("retired claims", check_retired_claims),
     ("corrected graded gaps", check_corrected_gaps),
     ("GUE census and pre-registered score", check_gue),
     ("manipulation intervals", check_manipulation),
