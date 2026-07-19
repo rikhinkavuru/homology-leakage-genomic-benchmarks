@@ -629,7 +629,7 @@ touched, and called them the document's strongest-risk claims. They are now run.
 >
 > The eleven are also not eleven independent benchmarks: `prom_core_all` is the exact
 > union of `prom_core_notata` and `prom_core_tata` (symmetric difference zero), and
-> likewise at 300 bp, so the independent count is **nine** test partitions.
+> likewise at 300 bp, so the independent count is **seven** test partitions.
 
 > Correction (round 8). An earlier version of this section reported 5 of 17. That tally
 > included `mouse_0` and `mouse_1`, which the pre-registration never names -- it registers
@@ -908,6 +908,14 @@ Ten doses on `human_ocr_ensembl` (clean), each size- and balance-matched to the 
 (4 → 3 → 1) while staying last on the corrected split at *every* dose including the
 untouched control. The flip occurs at dose 0.30, and the condition — computed from the
 as-shipped split alone — predicts it.
+
+**A simpler rule does just as well, and we say so.** On these ten doses the rule
+"inverts iff RF leads the as-shipped split" also scores **10/10** — using no novel-stratum
+accuracies, no graded gaps, no φ* at all (`rf_rank_orig==1` matches `ranking_inverts` on
+every row). The manipulation confounds φ with RF's leadership, so this experiment cannot
+separate the two rules. It is causal support for the condition's *form*, not evidence that
+φ* is the minimal correct predictor. Separating them needs a case where a memorizer leads
+as-shipped and the ranking still does not invert.
 
 **Honest bound on what this shows.** The condition predicts "no inversion" two ways:
 no challenger has both δ>0 and Δg>0 (impossible at any φ), or such a pair exists but

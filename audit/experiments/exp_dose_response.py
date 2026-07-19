@@ -61,7 +61,7 @@ CAP = 20000
 # Doses as the TARGET share of positive rows sitting on a multiplicity-2 coordinate.
 # 0.9426 is the value measured on human_enhancers_ensembl and used by the headline
 # manipulation; the rest bracket it from below so the flip point can be located.
-DOSES = [0.0, 0.2, 0.4, 0.6, 0.75, 0.9426]
+DOSES = [0.0, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.60, 0.75, 0.9426]
 
 
 def phi_star_from_as_shipped(seqs, y, tr, te):
@@ -161,9 +161,19 @@ def main():
         rows.append(row)
 
     df = pd.DataFrame(rows)
-    tmp = f"{R}/dose_response.csv"
-    df.to_csv(tmp + ".tmp", index=False)
-    os.replace(tmp + ".tmp", tmp)
+    # Merge by dose rather than overwrite. Running a subset via --doses previously
+    # replaced the whole table with just that subset: an auditor re-running two doses
+    # truncated the committed ten-dose file to two rows. Same bug exp_roster, exp_tuning
+    # and exp_gue all had, and the same fix.
+    out = f"{R}/dose_response.csv"
+    if os.path.exists(out):
+        prev = pd.read_csv(out)
+        if "dose_target_share" in prev.columns:
+            prev = prev[~prev.dose_target_share.isin(set(df.dose_target_share))]
+            df = pd.concat([prev, df], ignore_index=True)
+    df = df.sort_values("dose_target_share").reset_index(drop=True)
+    df.to_csv(out + ".tmp", index=False)
+    os.replace(out + ".tmp", out)
 
     print("\n== dose-response ==")
     print(df[["dose_target_share", "n", "positive_frac", "phi_used", "phi_star",

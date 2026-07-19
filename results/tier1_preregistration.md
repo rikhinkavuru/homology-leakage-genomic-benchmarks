@@ -151,9 +151,10 @@ corresponding experiments were run.
 >   length-blind Jaccard and the length-robust containment index. The reasoning recorded
 >   in the "basis" column — that short fixed-length human regulatory windows are the
 >   regime the construction rule flags — is **refuted as a predictor of leakage**.
-> - Those eleven are not eleven independent benchmarks: `prom_core_all` is the exact
->   union of `prom_core_notata` and `prom_core_tata`, and likewise at 300 bp, so the
->   independent count is **nine** test partitions.
+> - Those eleven are not eleven independent benchmarks. `prom_core_all`'s TEST set is the
+>   exact union of `prom_core_notata`'s and `prom_core_tata`'s (and likewise at 300 bp),
+>   and the 70 bp and 300 bp families are the same loci at two widths — 90% of the 70 bp
+>   windows are the [216:286] slice of a 300 bp one. The independent count is **seven**.
 > - **`virus_covid`, registered CLEAN, measures a leak fraction of 1.000** — the largest
 >   observed anywhere in this project. It is a false positive of our own detector, not a
 >   curation defect: the task classifies SARS-CoV-2 variants that differ by a handful of
