@@ -877,3 +877,43 @@ Stated because the convergence protocol's bar has not been met.
 4. **The ranking inversion is still n = 1.** §4 establishes that the *precondition* is
    widespread; no model was trained on any second-suite task.
 5. `paper/tier1_sections.tex` is a staging file and is not yet `\input` by `main.tex`.
+
+---
+
+## Dose-response: the breakdown condition predicts where the ranking flips (P6)
+
+`audit/experiments/exp_dose_response.py` → `results/dose_response.csv`
+
+The paper carried two results that were argued separately: the condition
+φ* = δ/Δg, computed from as-shipped quantities, and the construct-and-break
+manipulation. Because the manipulation *sets* φ, the two combine into a quantitative
+test — and P6 was committed in the module before it ran.
+
+Ten doses on `human_ocr_ensembl` (clean), each size- and balance-matched to the control:
+
+| dose | φ | φ* | leader | challenger | predict | observed | RF rank orig→corr |
+|---|---|---|---|---|---|---|---|
+| 0.00 | 0.0005 | — | LR | none | no | no | 4→4 |
+| 0.20 | 0.0740 | — | LR | none | no | no | 4→4 |
+| 0.25 | 0.0932 | — | LR | none | no | no | 3→4 |
+| 0.30 | 0.1055 | 0.0602 | RF | LinearSVC | **invert** | **invert** | 1→4 |
+| 0.35 | 0.1160 | 0.0554 | RF | HGB | invert | invert | 1→4 |
+| 0.40 | 0.1305 | 0.0375 | RF | LinearSVC | invert | invert | 1→4 |
+| 0.45 | 0.1447 | 0.0803 | RF | LinearSVC | invert | invert | 1→4 |
+| 0.60 | 0.1638 | 0.0116 | RF | LinearSVC | invert | invert | 1→4 |
+| 0.75 | 0.1792 | 0.0612 | RF | LinearSVC | invert | invert | 1→4 |
+| 0.9426 | 0.2013 | 0.0212 | RF | LR | invert | invert | 1→4 |
+
+**P6 holds on 10/10 doses.** The forest climbs the as-shipped ranking with dose
+(4 → 3 → 1) while staying last on the corrected split at *every* dose including the
+untouched control. The flip occurs at dose 0.30, and the condition — computed from the
+as-shipped split alone — predicts it.
+
+**Honest bound on what this shows.** The condition predicts "no inversion" two ways:
+no challenger has both δ>0 and Δg>0 (impossible at any φ), or such a pair exists but
+φ < φ*. **All three negatives are the first kind; zero are the second.** The
+manipulation moves φ and the forest's leadership together — at the dose where RF first
+leads, φ already exceeds φ* — so the sub-threshold arm is never independently
+exercised. The experiment establishes the positive arm causally at ten doses, and
+nothing more. This is the same structure as the Nucleotide Transformer null, where
+δ≤0 on twenty-two pairs made inversion impossible regardless of φ.
