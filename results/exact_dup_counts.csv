@@ -1,0 +1,8 @@
+dataset,n_test,exact_dup,exact_dup_frac,exact_plus_revcomp,exact_plus_revcomp_frac
+human_nontata_promoters,9034,0,0.0,0,0.0
+human_enhancers_ensembl,30970,11774,0.3802,11784,0.3805
+human_ocr_ensembl,4000,0,0.0,0,0.0
+human_enhancers_cohn,5000,0,0.0,0,0.0
+demo_coding_vs_intergenomic_seqs,5000,2,0.0004,2,0.0004
+demo_human_or_worm,5000,126,0.0252,126,0.0252
+drosophila_enhancers_stark,1730,0,0.0,0,0.0
