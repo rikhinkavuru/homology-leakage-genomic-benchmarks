@@ -1,0 +1,7 @@
+dataset,prediction,expected,observed,holds
+human_enhancers_ensembl,P1 kNN-1 has largest graded gap,kNN-1,RF,False
+human_enhancers_ensembl,P2 kNN-1 has largest drop,kNN-1,kNN-1,True
+human_enhancers_ensembl,"P3 memorizers above linears as-shipped, below after",mem_rank<lin_rank then mem_rank>lin_rank,as-shipped mem=4.50 lin=5.50; corrected mem=7.25 lin=1.50,True
+human_nontata_promoters,P1 kNN-1 has largest graded gap,kNN-1,kNN-15,False
+human_nontata_promoters,P2 kNN-1 has largest drop,kNN-1,ExtraTrees,False
+human_enhancers_cohn,P4 no drop excludes zero on a clean set,none,none,True
