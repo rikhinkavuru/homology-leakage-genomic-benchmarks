@@ -53,6 +53,7 @@ D = E.THREECLASS
 FRACS = [0.0, 0.1, 0.2, 0.4]
 REF_DROPOUT, REF_WD = 0.3, 1e-4
 SEQ_LEN = 401                      # median length of the three-class set (89-802)
+SEEDS = [0, 1, 2]                  # training-seed replicates; the result here is a null
 BASES = np.array(list("ACGT"))
 
 OUT = "results/exp_inject3class_deep.csv"
@@ -137,11 +138,12 @@ def main():
     t0 = time.time()
     max_epochs = 2 if SMOKE else MAX_EPOCHS
     fracs = [0.0, 0.2] if SMOKE else FRACS
+    seeds_used = SEEDS[:1] if SMOKE else SEEDS
 
     seqs, y, otr, ote, tf = E.load(D, full=False, cap=20000)
     classes = sorted(set(int(v) for v in y))
     print(f"device={DEVICE} [{D}] n={len(seqs)} classes={classes} "
-          f"test_frac={tf:.3f}{' [SMOKE]' if SMOKE else ''} ({time.time()-t0:.0f}s)", flush=True)
+          f"test_frac={tf:.3f} seeds={seeds_used}{' [SMOKE]' if SMOKE else ''} ({time.time()-t0:.0f}s)", flush=True)
 
     rows = []
     for f in fracs:
@@ -160,19 +162,25 @@ def main():
 
         X = torch.from_numpy(onehot(all_seqs, SEQ_LEN))
         n_class = len(classes)
-        co, ep_o = train_multiclass(X, all_y, tr2, te2, n_class, REF_DROPOUT, REF_WD,
-                                    max_epochs=max_epochs)
-        cc, ep_c = train_multiclass(X, all_y, ctr, cte, n_class, REF_DROPOUT, REF_WD,
-                                    max_epochs=max_epochs)
-        acc_o, acc_c = float(co.mean()), float(cc.mean())
-        rows.append(dict(dataset=D, inject_frac=f, model="CNN", n_injected=n_inj,
-                         acc_orig=round(acc_o, 4), acc_corr=round(acc_c, 4),
-                         drop=round(acc_o - acc_c, 4),
-                         epochs_orig=ep_o, epochs_corr=ep_c))
-        print(f"  f={f}: CNN drop={acc_o-acc_c:+.4f} "
-              f"(orig {acc_o:.4f} -> corr {acc_c:.4f}) n_inj={n_inj} "
-              f"({time.time()-t0:.0f}s)", flush=True)
-        pd.DataFrame(rows).to_csv(OUT, index=False)
+        # Seed-replicated: the headline here is a NULL, and a single-seed null is not
+        # worth much. The binary work measured per-cell training-seed variance of the
+        # same magnitude as the drops seen here (0.005-0.027), so one run per cell could
+        # not distinguish "no inflation" from "one quiet draw".
+        for s in seeds_used:
+            co, ep_o = train_multiclass(X, all_y, tr2, te2, n_class, REF_DROPOUT, REF_WD,
+                                        seed=s, max_epochs=max_epochs)
+            cc, ep_c = train_multiclass(X, all_y, ctr, cte, n_class, REF_DROPOUT, REF_WD,
+                                        seed=s, max_epochs=max_epochs)
+            acc_o, acc_c = float(co.mean()), float(cc.mean())
+            rows.append(dict(dataset=D, inject_frac=f, model="CNN", seed=s,
+                             n_injected=n_inj,
+                             acc_orig=round(acc_o, 4), acc_corr=round(acc_c, 4),
+                             drop=round(acc_o - acc_c, 4),
+                             epochs_orig=ep_o, epochs_corr=ep_c))
+            print(f"  f={f} seed={s}: CNN drop={acc_o-acc_c:+.4f} "
+                  f"(orig {acc_o:.4f} -> corr {acc_c:.4f}) n_inj={n_inj} "
+                  f"({time.time()-t0:.0f}s)", flush=True)
+            pd.DataFrame(rows).to_csv(OUT, index=False)
 
     df = pd.DataFrame(rows)
     df.to_csv(OUT, index=False)
