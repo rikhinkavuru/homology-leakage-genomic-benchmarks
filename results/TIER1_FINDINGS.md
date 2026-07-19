@@ -474,30 +474,45 @@ baseline gets wrong.** Real, but slender, and now stated that way in the paper.
 same decision rule, all trained from scratch, with two predictions committed before the
 run.
 
-**`human_enhancers_ensembl` (full scale) — the result strengthens:**
+**`human_enhancers_ensembl` (full scale) — the result strengthens.**
+
+> **Superseded numbers.** A first version of this table used a bare
+> `LogisticRegression`, while the frozen pipeline and the paper's Methods specify
+> `Normalizer(l2) + LogisticRegression`. That made the roster's "LR" a different model
+> from the paper's, and produced a corrected winner (LR) contradicting §4.3's LinearSVC.
+> The table below is the re-run with the frozen configurations; kNN and MLP are
+> normalized on the same documented convention.
 
 | model | gap | as-shipped | corrected | drop | rank |
 |---|---|---|---|---|---|
 | MLP | 0.159 | **0.8736** | 0.7684 | 0.105 * | 1→3 |
-| ExtraTrees | 0.210 | 0.8721 | 0.6278 | 0.244 * | 2→7 |
-| RandomForest | 0.230 | 0.8596 | 0.6957 | 0.164 * | 3→5 |
-| LogisticRegression | 0.026 | 0.8189 | **0.8136** | 0.005 | 4→1 |
-| kNN-1 | 0.327 | 0.8007 | 0.5584 | 0.242 * | 5→8 |
-| LinearSVC | 0.037 | 0.7980 | 0.7975 | 0.001 | 6→2 |
+| kNN-1 | 0.208 | 0.8729 | 0.5370 | **0.336** * | **2→9** |
+| ExtraTrees | 0.210 | 0.8721 | 0.6278 | 0.244 * | 3→7 |
+| RandomForest | 0.230 | 0.8596 | 0.6957 | 0.164 * | 4→5 |
+| LinearSVC | 0.037 | 0.7980 | **0.7975** | 0.001 | 5→1 |
+| LogisticRegression | 0.037 | 0.7809 | 0.7806 | 0.000 | 6→2 |
 | HistGB | 0.034 | 0.7636 | 0.7608 | 0.003 | 7→4 |
 | GaussianNB | −0.234 | 0.6482 | 0.6492 | −0.001 | 8→6 |
-| kNN-15 | −0.235 | 0.5557 | 0.5430 | 0.013 * | 9→9 |
+| kNN-15 | −0.684 | 0.5357 | 0.5371 | −0.001 | 9→8 |
 
-*The as-shipped winner is a neural network; the corrected winner is logistic regression.*
-Leader margins exclude zero in both directions under a paired cluster bootstrap
-([0.050, 0.060] as shipped, [0.039, 0.052] corrected). The five drops excluding zero are
-exactly the four memorizers plus the perceptron; all four non-memorizers are null. This
-removes the "sklearn tree defaults" reading of the result.
+*The corrected winner is LinearSVC — the same model the four-model comparison selects,
+so the two analyses now agree.* The sharper finding is the **tie at the top of the leaky
+split**: MLP, kNN-1 and ExtraTrees finish within **0.0015**, with the paired top-two
+margin interval [−0.005, 0.006] including zero, while those same three span **23 points**
+after correction (0.768 / 0.537 / 0.628). The benchmark is blind to enormous real
+differences between models it ranks as equals. Swap margins exclude zero in both
+directions ([0.071, 0.080] as shipped; [0.024, 0.035] corrected). The four drops
+excluding zero are exactly kNN-1, RF, ExtraTrees and MLP; the five null ones include both
+linear models, boosting and naive Bayes. **Clean control: no drop excludes zero for any
+of the nine.**
 
-**Committed predictions:** P1 (kNN-1 largest graded gap) **holds** at 0.327. P2 (kNN-1
-largest drop) **fails** — ExtraTrees 0.2443 against kNN-1 0.2424, a margin of 0.002.
-P3 (memorizers above linears as shipped, below after) **holds** decisively: mean ranks
-4.75 vs 5.00 as shipped, 7.25 vs 1.50 corrected.
+**Committed predictions, reported for both leaky datasets rather than selectively.**
+On ensembl P1 **fails** (RF's gap 0.230 exceeds kNN-1's 0.208) and P2 **holds** (kNN-1
+has the largest drop, 0.336). On nonTATA **both fail** (kNN-15 has the larger gap,
+ExtraTrees the larger drop). P3 **holds** decisively on ensembl: mean rank 4.50 → 7.25
+for memorizers against 5.50 → 1.50 for the linear models. P4 **holds**. Three of six.
+An earlier version of `roster_predictions.csv` was overwritten per invocation and shipped
+only the ensembl rows, hiding the nonTATA failures; the module now merges by dataset.
 
 **`human_nontata_promoters` — a larger scramble that we decline to bank.** ExtraTrees
 falls 1→7 and kNN-1 rises 6→1 with supported margins, but decomposing each drop against
