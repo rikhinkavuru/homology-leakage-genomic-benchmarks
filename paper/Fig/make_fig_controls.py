@@ -79,9 +79,14 @@ CLEAN = ["demo_coding_vs_intergenomic_seqs", "human_ocr_ensembl",
 
 # Reconciled headline values for the two leaky datasets (see the NOTE block at the
 # top of paper/main.tex). Clean datasets have a single convention and need no override.
+# The corrected value and its error bar must come from the SAME seed study. The two
+# leaky datasets' points are the five-seed means of results/step2_seed_variance.csv,
+# so their error bars are that study's sd -- not summary_final's homology_acc_std,
+# which is a three-seed run and was what this script used until an audit caught the
+# mismatch. Clean datasets have a single convention and use the three-seed column.
 RECONCILED = {
-    "human_nontata_promoters": (0.9284, 0.8101),
-    "human_enhancers_ensembl": (0.8596, 0.6951),
+    "human_nontata_promoters": (0.9284, 0.8101, 0.0055),
+    "human_enhancers_ensembl": (0.8596, 0.6951, 0.0019),
 }
 
 summ = pd.read_csv(SUMMARY).set_index("dataset")
@@ -90,7 +95,7 @@ summ = pd.read_csv(SUMMARY).set_index("dataset")
 def points_for(d):
     """(original, random, corrected) accuracies in percent: one baseline + two deltas."""
     if d in RECONCILED:
-        orig, corr = RECONCILED[d]
+        orig, corr = RECONCILED[d][:2]
     else:
         orig = summ.loc[d, "original_acc"]
         corr = orig - summ.loc[d, "delta_homology"]
@@ -121,7 +126,10 @@ for ax, group, title in [(axL, LEAKY, "leaky"), (axR, CLEAN, "borderline + clean
         ax.plot([x, x], [min(orig, rand, corr), max(orig, rand, corr)],
                 color="#bbbbbb", lw=1.4, zorder=1, solid_capstyle="round")
         for i, ((lab, color, marker, ms), val) in enumerate(zip(SPECS, (orig, rand, corr))):
-            yerr = summ.loc[d, "homology_acc_std"] * 100 if i == 2 else None
+            yerr = None
+            if i == 2:
+                yerr = (RECONCILED[d][2] if d in RECONCILED
+                        else summ.loc[d, "homology_acc_std"]) * 100
             ax.errorbar(x + (i - 1) * DX, val, yerr=yerr, fmt=marker, ms=ms,
                         color=color, mec="white", mew=0.8, capsize=2.5,
                         ecolor="#555", elinewidth=1.0, zorder=3,

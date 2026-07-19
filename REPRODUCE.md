@@ -58,7 +58,7 @@ for its built-in self-test (zero residual leakage on synthetic near-duplicates).
 
 `python -m audit.pipeline.run_audit` reproduces the canonical result:
 
-- human_nontata_promoters, **RF k6**: original **0.932** -> homology-aware **0.811** (**-12.1 pts**)
+- human_nontata_promoters, **RF k6**: original **0.9317** -> homology-aware **0.8117** (**-12.0 pts**)
 - LR k4: 0.827 -> 0.818 (-0.9 pts)  (monotone capacity scaling in between)
 
 Full numbers land in `results/results.md`. `audit/pipeline/run_robustness_full.py` independently

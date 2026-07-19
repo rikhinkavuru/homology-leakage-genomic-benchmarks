@@ -30,7 +30,7 @@ wrong in its own favour.
    one** — both directions, ranking inversion included.
 3. **An executable standard.** `certify --self-validate` reproduces the paper's eight
    published verdicts and exits non-zero on drift.
-4. **A second suite.** **Three independent Nucleotide Transformer tasks of twelve are
+4. **A second suite.** **Three independent Nucleotide Transformer tasks of eleven are
    leaky**, one at **25.0 % byte-identical** test-to-train with label concordance 1.000.
    Leakage of the kind this paper documents is not confined to Genomic Benchmarks. (An
    earlier draft framed the original-vs-revised NT pair as a controlled natural

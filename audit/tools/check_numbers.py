@@ -1,23 +1,37 @@
 #!/usr/bin/env python3
 """
-Check the manuscript's numbers against the CSVs they come from.
+Check the documents' numbers against the CSVs they come from.
 
-Twelve adversarial audit rounds found that by far the most common defect in this project
-is not a wrong computation but a wrong TRANSCRIPTION: a value corrected in one place and
-left stale in another. Rounds 10, 11 and 12 were dominated by it -- a gap mean fixed in
-one paragraph and not the next, a task count fixed in the paper and not in the results
-document, an interval labelled as the cluster bootstrap when it was the combined-source
-one. Each was found by an expensive audit agent re-deriving the number by hand.
+Thirteen adversarial audit rounds established that the dominant defect in this project is
+not a wrong computation but a wrong TRANSCRIPTION: a value corrected in one place and left
+stale in another. Rounds 10 through 12 were almost entirely that.
 
-This module makes that class of defect cheap to find. Every check below states a claim
-the manuscript makes, recomputes it from the committed CSV, and fails if they disagree.
-It is a regression gate, not a proof of correctness: it can only check claims someone has
-registered here. Adding a check when a number enters the paper is the point.
+The first version of this module was mutation-tested by round 13 and largely failed. It
+searched the WHOLE of main.tex for each numeral, so a value quoted at four sites still
+passed when one was corrupted -- precisely the failure mode it existed to catch. It also
+contained a check whose predicate could not fail, and a docstring claiming coverage it did
+not have. This version fixes all three, and the design rules that follow exist because
+each was violated once:
 
-Run:  python -m audit.tools.check_numbers
+  1. ANCHOR every check to the passage that makes the claim, never to the document. A
+     check takes a context regex; the value must appear inside the matched window.
+  2. ASSERT OCCURRENCE COUNTS where a value should appear a known number of times, so
+     corrupting one of several sites drops the count and fails.
+  3. NEVER write a predicate that cannot fail. Every check must be shown to fail on a
+     deliberately broken input -- `--self-test` does exactly that and is part of the gate.
+  4. Check the RESULTS DOCUMENTS too, not just the manuscript. Half the round-11 and
+     round-12 findings were paper/results-document divergence, which a manuscript-only
+     gate cannot see by construction.
+
+It remains a gate, not a proof: it checks only claims registered in it. Adding a check
+when a number enters a document is the discipline it is meant to enforce.
+
+Run:  python -m audit.tools.check_numbers [--self-test]
 Exit: 0 if every registered claim matches its source, 1 otherwise.
 """
 from __future__ import annotations
+import argparse
+import math
 import os
 import re
 import sys
@@ -26,33 +40,20 @@ import pandas as pd
 
 HERE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 R = os.path.join(HERE, "results")
-PAPER = os.path.join(HERE, "paper", "main.tex")
+DOCS = {
+    "paper": os.path.join(HERE, "paper", "main.tex"),
+    "findings": os.path.join(R, "TIER1_FINDINGS.md"),
+    "reproduce": os.path.join(HERE, "REPRODUCE.md"),
+}
+
+_cache = {}
 
 
-
-def quoted(s, value, places=3, signed=False):
-    """True if `value` appears in the TeX at the given precision.
-
-    Two tolerances, both necessary and neither a loosening of the check. First we match
-    the bare numeral rather than requiring `$N$`, because the paper legitimately writes
-    it inside a larger math group (`$\\varphi^{*}=0.060$`). Second we accept either
-    neighbouring rounding when the source value sits exactly on a half -- 0.1215 and
-    0.1055 are both exact halves, and round-half-up (0.122, 0.106) and Python's
-    float-repr rounding (0.121, 0.105) disagree there. Anything further from the source
-    than one unit in the last place still fails.
-    """
-    import math
-    cands = set()
-    for v in (value, math.nextafter(value, math.inf), math.nextafter(value, -math.inf)):
-        t = f"{v:+.{places}f}" if signed else f"{v:.{places}f}"
-        cands.add(t)
-        if not signed:
-            cands.add(t.lstrip("0") if t.startswith("0.") else t)
-    return any(c in s for c in cands)
-
-def tex():
-    with open(PAPER) as fh:
-        return fh.read()
+def doc(name):
+    if name not in _cache:
+        with open(DOCS[name]) as fh:
+            _cache[name] = fh.read()
+    return _cache[name]
 
 
 def csv(name):
@@ -60,194 +61,363 @@ def csv(name):
 
 
 # ---------------------------------------------------------------------------
-# Each check returns (ok, label, detail).
+# matching
+# ---------------------------------------------------------------------------
+def _tokens(value, places, signed):
+    """Every rendering of `value` we accept at `places` decimals.
+
+    We accept the two neighbouring roundings only when the source sits on an exact half
+    (0.1215, 0.1055 both do), where round-half-up and float-repr rounding disagree.
+    Anything further from the source than one unit in the last place still fails.
+    """
+    if value is None or (isinstance(value, float) and not math.isfinite(value)):
+        return None                      # non-finite never matches; see rule 3
+    out = set()
+    for v in (value, math.nextafter(value, math.inf), math.nextafter(value, -math.inf)):
+        t = f"{v:+.{places}f}" if signed else f"{v:.{places}f}"
+        out.add(t)
+        if not signed and t.startswith("0."):
+            out.add(t[1:])               # ".009" as well as "0.009"
+    return out
+
+
+def near(where, context, value, places=3, signed=False, label="", span=420):
+    """The value must appear INSIDE the window matched by `context`.
+
+    This is the rule-1 check. `context` is a regex identifying the passage that makes the
+    claim; we take the matched span plus `span` characters after it and look for the value
+    only there, so a correct copy of the number elsewhere in the file cannot rescue a
+    corrupted one here. `span` must be wide enough to reach the value from the anchor and
+    narrow enough to exclude the next claim -- a sentence or two.
+    """
+    s = doc(where)
+    toks = _tokens(value, places, signed)
+    if toks is None:
+        return (False, label or context, "value is not finite")
+    m = re.search(context, s, re.S)
+    if not m:
+        return (False, label or context, f"context not found in {where}")
+    lo = max(0, m.start() - 40)
+    window = s[lo:m.end() + span]
+    ok = any(t in window for t in toks)
+    shown = sorted(toks)[0]
+    return (ok, label or context,
+            f"{where}: {shown} present in the passage" if ok
+            else f"{where}: {shown} NOT in the passage that claims it")
+
+
+def absent(where, value, places=3, signed=False, label="", context=None):
+    """A value the documents must NOT contain -- a specific regression, killed.
+
+    `context` restricts the search to the passage that would carry the regression. Without
+    it a bare numeral collides with unrelated quantities: "0.005" appears in this project
+    as a confidence bound, a grid endpoint and a margin, none of which is the stale GUE
+    minimum we are trying to keep out.
+    """
+    s = doc(where)
+    if context is not None:
+        m = re.search(context, s, re.S)
+        if not m:
+            return (True, label, "context absent, so the regression cannot be present")
+        s = s[m.start():m.end() + 260]
+    toks = _tokens(value, places, signed)
+    if toks is None:
+        return (True, label, "not applicable")
+    hit = [t for t in toks if t in s]
+    return (not hit, label, "absent" if not hit else f"{where}: found {hit[0]}")
+
+
+def occurs(where, text, n, label=""):
+    """`text` must appear exactly `n` times. Rule 2: corrupting one site drops the count."""
+    got = doc(where).count(text)
+    return (got == n, label or f"{text!r} appears {n}x",
+            f"{where}: {got} occurrence(s)" if got == n
+            else f"{where}: expected {n}, found {got}")
+
+
+def says(where, text, label="", want=True):
+    got = text in doc(where)
+    return (got == want, label or f"{where} says {text!r}",
+            "present" if got else "absent")
+
+
+# ---------------------------------------------------------------------------
+# checks
 # ---------------------------------------------------------------------------
 def check_corrected_gaps():
-    """The prevalence-corrected graded gaps quoted in section 4.5."""
     g = csv("graded_gap_corrected.csv")
-    s = tex()
-    out = []
     MEM = {"kNN-1", "kNN-15", "RF", "ExtraTrees"}
+    out = []
     for dset, tag in (("human_enhancers_ensembl", "ensembl"),
                       ("human_nontata_promoters", "nontata")):
         d = g[g.dataset == dset]
         mem = d[d.model.isin(MEM)].graded_gap_balanced.mean()
         rest = d[~d.model.isin(MEM)].graded_gap_balanced.mean()
-        # the paper must quote the mean over ALL non-memorizers, not a subset
-        out.append((quoted(s, mem, signed=True), f"{tag} memorizer mean {mem:+.3f}",
-                    "quoted in main.tex" if quoted(s, mem, signed=True) else "NOT FOUND in main.tex"))
-        out.append((quoted(s, rest, signed=True), f"{tag} non-memorizer mean {rest:+.3f}",
-                    "quoted in main.tex" if quoted(s, rest, signed=True) else "NOT FOUND in main.tex"))
-        # and the subset-excluding-MLP value must NOT appear, since that was the old bug
         bad = d[~d.model.isin(MEM | {"MLP"})].graded_gap_balanced.mean()
-        out.append((not quoted(s, bad, signed=True),
-                    f"{tag} MLP-excluded mean {bad:+.3f} absent",
-                    "absent, correct" if not quoted(s, bad, signed=True)
-                    else "PRESENT -- this is the mean computed by dropping the MLP"))
+        ctx = (r"memorization-prone learners.{0,120}average" if tag == "ensembl"
+               else r"memorizers average")
+        out.append(near("paper", ctx, mem, signed=True,
+                        label=f"{tag} memorizer mean {mem:+.3f}"))
+        out.append(near("paper", ctx, rest, signed=True,
+                        label=f"{tag} non-memorizer mean {rest:+.3f}"))
+        # the MLP-excluded mean is the specific round-10/11 regression: it must be gone
+        out.append(absent("paper", bad, signed=True,
+                          label=f"{tag} MLP-excluded mean {bad:+.3f} absent from paper"))
+        out.append(absent("findings", bad, signed=True,
+                          label=f"{tag} MLP-excluded mean {bad:+.3f} absent from findings"))
+    # 1-NN's corrected gap, the section's headline
+    knn = float(g[(g.dataset == "human_enhancers_ensembl") &
+                  (g.model == "kNN-1")].graded_gap_balanced.iloc[0])
+    out.append(near("paper", r"definitional memorizer", knn, signed=True,
+                    label=f"1-NN corrected gap {knn:+.3f}"))
     return out
 
 
-def check_gue_range():
-    """The GUE leak-fraction range quoted in the cross-suite section."""
-    g = csv("gue_census.csv")
-    r = g[(g.registered) & (g.preregistered == "LEAKY")]
-    lo, hi = r.leak_jaccard_0p7.min(), r.leak_jaccard_0p7.max()
-    clo, chi = r.leak_containment_0p7.min(), r.leak_containment_0p7.max()
-    s = tex()
-    return [
-        (f"${lo:.3f}$" in s, f"GUE Jaccard minimum {lo:.3f}",
-         "quoted" if f"${lo:.3f}$" in s else "NOT FOUND -- an earlier draft quoted 0.011"),
-        (f"${hi:.3f}$" in s, f"GUE Jaccard maximum {hi:.3f}", "quoted"),
-        (f"${clo:.3f}$" in s, f"GUE containment minimum {clo:.3f}", "quoted"),
-        (f"${chi:.3f}$" in s, f"GUE containment maximum {chi:.3f}", "quoted"),
-        (bool(g.train_frac_used.eq(1.0).all()),
-         "GUE census is full scale on every row",
-         "all rows train_frac_used=1.0" if g.train_frac_used.eq(1.0).all()
-         else "SOME ROWS ARE CAPPED -- their verdicts are lower bounds"),
-    ]
-
-
-def check_gue_score():
-    """The pre-registered GUE tally. Unregistered tasks must never enter it."""
+def check_gue():
     g = csv("gue_census.csv")
     reg = g[g.registered]
-    correct = int(reg.prereg_correct.fillna(False).astype(bool).sum())
     leaky = reg[reg.preregistered == "LEAKY"]
-    s = tex()
+    correct = int(reg.prereg_correct.fillna(False).astype(bool).sum())
+    lo, hi = leaky.leak_jaccard_0p7.min(), leaky.leak_jaccard_0p7.max()
+    clo, chi = leaky.leak_containment_0p7.min(), leaky.leak_containment_0p7.max()
+    ctx = r"predicted-leaky tasks are clean"
     return [
         (len(reg) == 15, f"15 registered GUE tasks (found {len(reg)})", ""),
         (correct == 3, f"registered score {correct}/15", "must be 3/15"),
         (int(leaky.prereg_correct.fillna(False).astype(bool).sum()) == 0,
          "0 of 11 predicted-LEAKY correct", ""),
         (bool(g[~g.registered].prereg_correct.isna().all()),
-         "unregistered tasks carry no score",
-         "mouse_0/mouse_1 must have empty prereg_correct"),
-        (f"${correct}$ of ${len(reg)}$" in s or f"{correct} of {len(reg)}" in s,
-         f"main.tex quotes {correct} of {len(reg)}", ""),
+         "unregistered tasks carry no score", "mouse_0/mouse_1 unscored"),
+        (bool(g.train_frac_used.eq(1.0).all()),
+         "GUE census full scale on every row",
+         "all train_frac_used=1.0" if g.train_frac_used.eq(1.0).all()
+         else "SOME ROWS CAPPED -- verdicts are lower bounds"),
+        near("paper", ctx, lo, label=f"GUE Jaccard min {lo:.3f}"),
+        near("paper", ctx, hi, label=f"GUE Jaccard max {hi:.3f}"),
+        near("paper", ctx, clo, label=f"GUE containment min {clo:.3f}"),
+        near("paper", ctx, chi, label=f"GUE containment max {chi:.3f}"),
+        near("paper", r"predictions score", float(correct), places=0,
+             label=f"paper quotes {correct} of 15"),
+        # the capped-run range is the round-12 regression in the findings doc
+        absent("findings", 0.0051, context=r"jac@0\.7 spans",
+               label="capped GUE minimum 0.005 absent from the findings GUE table"),
+        near("findings", r"jac@0\.7 spans", lo, label=f"findings quote full-scale min {lo:.3f}"),
     ]
 
 
-def check_manipulation_intervals():
-    """Table 4's intervals, and the disjointness the text claims."""
+def check_manipulation():
     m = csv("construction_manipulation.csv").set_index("condition")
-    s = tex()
+
+    def ci(cond):
+        return [float(x) for x in
+                re.findall(r"-?\d+\.\d+", str(m.loc[cond, "rf_drop_ci"]))[:2]]
+    b_ctl, b_int = ci("B_control_unmerged_union"), ci("B_manipulated_merged_balanced")
+    a_ctl, a_int = ci("A_control_merged_consensus"), ci("A_manipulated_matched")
+    s = doc("paper").replace(" ", "")
     out = []
-    for cond, label in (("B_control_unmerged_union", "fix-a-leaky control"),
-                        ("B_manipulated_merged_balanced", "fix-a-leaky intervention"),
-                        ("A_control_merged_consensus", "break-a-clean control"),
-                        ("A_manipulated_matched", "break-a-clean intervention")):
-        ci = str(m.loc[cond, "rf_drop_ci"])
-        lo, hi = [float(x) for x in re.findall(r"-?\d+\.\d+", ci)[:2]]
-        out.append((f"[{lo:.3f},{hi:.3f}]" in s.replace(" ", ""),
-                    f"{label} CI [{lo:.3f},{hi:.3f}]",
-                    "quoted" if f"[{lo:.3f},{hi:.3f}]" in s.replace(" ", "") else "NOT FOUND"))
-    b_lo = float(re.findall(r"-?\d+\.\d+",
-                            str(m.loc["B_control_unmerged_union", "rf_drop_ci"]))[0])
-    b_hi = float(re.findall(r"-?\d+\.\d+",
-                            str(m.loc["B_manipulated_merged_balanced", "rf_drop_ci"]))[1])
-    a_hi = float(re.findall(r"-?\d+\.\d+",
-                            str(m.loc["A_control_merged_consensus", "rf_drop_ci"]))[1])
-    a_lo = float(re.findall(r"-?\d+\.\d+",
-                            str(m.loc["A_manipulated_matched", "rf_drop_ci"]))[0])
-    out.append((b_lo > b_hi, "fix-a-leaky intervals disjoint",
-                f"{b_lo:.4f} > {b_hi:.4f}" if b_lo > b_hi else "OVERLAP"))
-    out.append((a_lo > a_hi, "break-a-clean intervals disjoint",
-                f"{a_lo:.4f} > {a_hi:.4f}" if a_lo > a_hi else "OVERLAP"))
+    for lo, hi, label, n in ((b_ctl[0], b_ctl[1], "fix-a-leaky control", 2),
+                             (b_int[0], b_int[1], "fix-a-leaky intervention", 2),
+                             (a_ctl[0], a_ctl[1], "break-a-clean control", 2),
+                             (a_int[0], a_int[1], "break-a-clean intervention", 2)):
+        tok = f"[{lo:.3f},{hi:.3f}]"
+        got = s.count(tok)
+        # each interval appears twice: once in Table 4, once in the section-4.7 prose.
+        # Rule 2: corrupting either site drops the count and fails.
+        out.append((got == n, f"{label} CI {tok} at {n} sites",
+                    f"{got} occurrence(s)"))
+    out.append((b_ctl[0] > b_int[1], "fix-a-leaky intervals disjoint",
+                f"{b_ctl[0]:.4f} > {b_int[1]:.4f}"))
+    out.append((a_int[0] > a_ctl[1], "break-a-clean intervals disjoint",
+                f"{a_int[0]:.4f} > {a_ctl[1]:.4f}"))
     return out
 
 
 def check_dose_response():
-    """P6, and the band size the Methods promises to report wherever eq. (2) is used."""
     d = csv("dose_response.csv")
-    s = tex()
     ok = int(d.prediction_correct.sum())
-    flip = d[d.ranking_inverts]
-    out = [
+    triv = int(((d.rf_rank_orig == 1) == d.ranking_inverts).sum())
+    flip = d[d.ranking_inverts].iloc[0]
+    lo, hi = d.mid_band_frac.min() * 100, d.mid_band_frac.max() * 100
+    return [
         (ok == len(d), f"P6 holds on {ok}/{len(d)} doses", ""),
         (len(d) == 10, f"ten doses committed (found {len(d)})", ""),
+        near("paper", r"first inverts at dose", float(flip.phi_used),
+             label=f"flip-point phi {flip.phi_used:.3f}"),
+        near("paper", r"first inverts at dose", float(flip.phi_star),
+             label=f"flip-point phi* {flip.phi_star:.3f}"),
+        near("paper", r"we report the intermediate", lo, places=1,
+             label=f"band minimum {lo:.1f}%"),
+        near("paper", r"we report the intermediate", hi, places=1,
+             label=f"band maximum {hi:.1f}%"),
+        # rule 3: assert the COMPUTED competing-rule score, not the mere phrase
+        says("paper", f"also scores ${triv}/{len(d)}$",
+             label=f"competing rule {triv}/{len(d)} disclosed with its true score"),
     ]
-    if len(flip):
-        phi, ps = flip.iloc[0].phi_used, flip.iloc[0].phi_star
-        out.append((quoted(s, phi), f"flip-point phi {phi:.3f} quoted", ""))
-        out.append((quoted(s, ps), f"flip-point phi* {ps:.3f} quoted", ""))
-    if "mid_band_frac" in d.columns:
-        lo, hi = d.mid_band_frac.min() * 100, d.mid_band_frac.max() * 100
-        out.append((f"${lo:.1f}$--${hi:.1f}\\%$" in s,
-                    f"intermediate band {lo:.1f}-{hi:.1f}% reported", ""))
-    # the trivial competing rule must still be disclosed
-    triv = int(((d.rf_rank_orig == 1) == d.ranking_inverts).sum())
-    out.append(("also scores $10/10$" in s or "also scores" in s,
-                f"competing rule (RF leads) scores {triv}/{len(d)}, disclosed in text",
-                "disclosed" if "also scores" in s else "NOT DISCLOSED"))
-    return out
+
+
+def _pct(x):
+    """Percent, rounded half-up. 0.0875*100 is 8.749999... in binary, which formats as
+    8.7 while the paper correctly writes 8.8; the gate must not fail on that."""
+    from decimal import Decimal, ROUND_HALF_UP
+    return float(Decimal(str(x)) * 100)
+
+
+def check_intervals_are_labelled():
+    """The round-12 defect: an interval labelled as the cluster bootstrap when it was the
+    combined-source one. Both must be quoted, each under its own name."""
+    cb = csv("cluster_bootstrap_full.csv")
+    row = cb[(cb.dataset == "human_nontata_promoters") & (cb.model == "RF_k6")].iloc[0]
+    clu = [_pct(x) for x in re.findall(r"-?\d+\.\d+", str(row.delta_ci_cluster))[:2]]
+    com = [_pct(x) for x in re.findall(r"-?\d+\.\d+", str(row.delta_ci_combined))[:2]]
+    s = doc("paper")
+    return [
+        (f"[{clu[0]:.1f},{clu[1]:.1f}]".replace(" ", "") in s.replace(" ", "")
+         or f"${clu[0]:.1f},{clu[1]:.1f}$" in s
+         or f"[{clu[0]:.1f},{clu[1]:.1f}]" in s,
+         f"nontata cluster-bootstrap CI [{clu[0]:.1f},{clu[1]:.1f}] quoted", ""),
+        (f"[{com[0]:.1f},{com[1]:.1f}]" in s,
+         f"nontata combined-source CI [{com[0]:.1f},{com[1]:.1f}] quoted", ""),
+        (abs(clu[0] - com[0]) > 1e-6,
+         "the two intervals are genuinely different numbers",
+         f"cluster {clu} vs combined {com}"),
+        near("paper", r"combined-source interval---which additionally folds", com[0],
+             places=1, label="nontata combined-source interval named where it is used"),
+    ]
 
 
 def check_cohesion():
-    """The C9 cut and the two datasets it is calibrated on."""
     g = csv("exp_g11_cohesion.csv").set_index("dataset")
-    s = tex()
     ens = g.loc["human_enhancers_ensembl", "largest_cluster_cohesion"]
     ntp = g.loc["human_nontata_promoters", "largest_cluster_cohesion"]
     return [
-        (f"${ens:.2f}$" in s, f"ensembl cohesion {ens:.2f} quoted", ""),
-        (f"${ntp:.2f}$" in s, f"nontata cohesion {ntp:.2f} quoted", ""),
+        near("paper", r"cohesion \$0\.\d\d\$ and", ens, places=2,
+             label=f"ensembl cohesion {ens:.2f}"),
+        near("paper", r"cohesion \$0\.\d\d\$ and", ntp, places=2,
+             label=f"nontata cohesion {ntp:.2f}"),
         (ens >= 0.5 > ntp, "the two datasets straddle the 0.5 cut",
          f"{ens:.3f} >= 0.5 > {ntp:.3f}"),
     ]
 
 
 def check_crosssuite_counts():
-    """The Nucleotide Transformer independent-task count, after both nestings collapse."""
     c = csv("crosssuite_census.csv")
     nt = c[c.suite == "NT-original"]
-    # enhancers_types duplicates enhancers; promoter_all is the union of the other two
-    independent = len(nt) - 2
+    independent = len(nt) - 2          # enhancers_types and promoter_all are nested
     leaky = nt[(nt.verdict == "LEAKY") & (nt.task != "enhancers_types")]
-    s = tex()
+    borderline = nt[(nt.verdict == "borderline")]
+    clean = independent - len(leaky) - len(borderline)
     return [
         (len(nt) == 13, f"13 NT-original tasks shipped (found {len(nt)})", ""),
-        (independent == 11, f"{independent} independent after collapsing both nestings", ""),
         (len(leaky) == 3, f"{len(leaky)} leaky independent tasks", ""),
-        ("three of eleven" in s, "main.tex says three of eleven",
-         "correct" if "three of eleven" in s else "STALE -- says twelve somewhere"),
-        ("three of twelve" not in s, "main.tex no longer says three of twelve", ""),
+        (len(borderline) == 3, f"{len(borderline)} borderline", ""),
+        (clean == 5, f"{clean} clean independent tasks", "3+3+5 = 11"),
+        says("paper", "three of eleven", label="paper says three of eleven"),
+        says("paper", "three of twelve", want=False,
+             label="paper no longer says three of twelve"),
+        # the round-12/13 regression lived in the findings document, not the paper
+        says("findings", "of 12 independent", want=False,
+             label="findings no longer says 12 independent"),
+        says("findings", "twelve are leaky", want=False,
+             label="findings no longer says twelve"),
+        occurs("paper", "three of eleven", 3,
+               label="paper states the eleven-task count at all 3 sites"),
     ]
 
 
 CHECKS = [
     ("corrected graded gaps", check_corrected_gaps),
-    ("GUE leak range", check_gue_range),
-    ("GUE pre-registered score", check_gue_score),
-    ("manipulation intervals", check_manipulation_intervals),
+    ("GUE census and pre-registered score", check_gue),
+    ("manipulation intervals", check_manipulation),
     ("dose-response / P6", check_dose_response),
+    ("interval labelling", check_intervals_are_labelled),
     ("cluster cohesion / C9", check_cohesion),
     ("cross-suite counts", check_crosssuite_counts),
 ]
 
 
-def main():
-    print("== check_numbers: manuscript claims against committed CSVs ==\n")
-    failed = 0
-    total = 0
+def run(verbose=True):
+    failed = total = 0
     for group, fn in CHECKS:
-        print(f"{group}")
+        if verbose:
+            print(group)
         try:
             results = fn()
         except Exception as ex:                                    # noqa: BLE001
-            print(f"  !! check raised {type(ex).__name__}: {ex}")
+            if verbose:
+                print(f"  !! check raised {type(ex).__name__}: {ex}")
             failed += 1
             continue
         for ok, label, detail in results:
             total += 1
-            mark = "ok  " if ok else "FAIL"
             if not ok:
                 failed += 1
-            print(f"  [{mark}] {label}" + (f"  -- {detail}" if detail else ""))
-        print()
+            if verbose:
+                print(f"  [{'ok  ' if ok else 'FAIL'}] {label}"
+                      + (f"  -- {detail}" if detail else ""))
+        if verbose:
+            print()
+    return total, failed
+
+
+def self_test():
+    """Rule 3: demonstrate that the gate can actually fail.
+
+    Each mutation corrupts ONE site of a value the manuscript states at several. Under the
+    old whole-document matcher every one of these passed. A mutation that does not make
+    the gate fail is a check that cannot fail, which is a defect in the gate itself.
+    """
+    import copy
+    base = doc("paper")
+    mutations = [
+        ("nonTATA non-memorizer mean at its single site",
+         "memorizers average $+0.122$ against $+0.179$",
+         "memorizers average $+0.122$ against $+0.155$"),
+        ("ensembl non-memorizer mean where section 4.5 states it",
+         "average $+0.292$ against $+0.165$", "average $+0.292$ against $+0.155$"),
+        ("one of the two sites quoting the break-a-clean interval",
+         "$[0.083,0.126]^{*}$", "$[0.084,0.127]^{*}$"),
+        ("the competing-rule score in the dose-response caveat",
+         "also scores $10/10$", "also scores $7/10$"),
+        ("the GUE Jaccard minimum", "from $0.009$ to $0.041$",
+         "from $0.011$ to $0.041$"),
+    ]
+    print("== self-test: each mutation must make the gate FAIL ==\n")
+    bad = 0
+    for label, old, new in mutations:
+        if old not in base:
+            print(f"  [SKIP] {label} -- target text not present; check needs updating")
+            bad += 1
+            continue
+        _cache["paper"] = base.replace(old, new, 1)
+        _, failed = run(verbose=False)
+        print(f"  [{'ok  ' if failed else 'BLIND'}] {label}"
+              + ("" if failed else "  <-- gate did NOT fail; this check is vacuous"))
+        if not failed:
+            bad += 1
+    _cache["paper"] = base
+    print(f"\n{len(mutations) - bad}/{len(mutations)} mutations detected")
+    return bad
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--self-test", action="store_true",
+                    help="verify the gate can fail, by breaking the manuscript on purpose")
+    a = ap.parse_args()
+
+    print("== check_numbers: document claims against committed CSVs ==\n")
+    total, failed = run()
     print(f"{total - failed}/{total} checks pass")
-    if failed:
-        print("\nRESULT: FAIL -- a manuscript number disagrees with its source CSV, or a "
-              "value the manuscript should quote was not found in it.")
+
+    bad = 0
+    if a.self_test:
+        print()
+        bad = self_test()
+
+    if failed or bad:
+        print("\nRESULT: FAIL" + ("" if not failed else
+              " -- a document number disagrees with its source CSV")
+              + ("" if not bad else " -- and the gate has a check that cannot fail"))
         sys.exit(1)
     print("\nRESULT: PASS")
 
