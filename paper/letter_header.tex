@@ -1,12 +1,28 @@
-% Map the handful of Unicode math symbols used in the letters onto real math
-% glyphs, so the text font does not need to cover them.
+% Letter typography.
+%
+% Text is set in Charter (Matthew Carter, 1987) -- a workmanlike, highly legible
+% serif with tight, even numerals, which suits letters this dense with figures
+% better than Times does, and reads as a deliberate choice rather than a default.
+%
+% Two fonts were tried and rejected:
+%   - Times New Roman: works, but is the default nobody chose.
+%   - STIX Two Text: the obvious "scientific publishing" pick, but it is installed
+%     here as a VARIABLE font (one file per italic/upright, with a weight axis).
+%     xelatex cannot select the bold instance from a variable axis, so every bold
+%     run in both letters silently collapsed to regular weight -- losing the
+%     emphasis structure without raising a single warning. Do not reinstate it
+%     unless static Bold/BoldItalic faces are installed.
+%
+% Charter covers approx, <=, >=, times, minus, pi and tau natively. It lacks
+% -> (U+2192) and element-of (U+2208), so only those two are mapped into math
+% mode; STIX Two Math supplies them, being close enough to Charter in colour that
+% two operators do not read as foreign.
+%
+% If you add a new symbol to either .md source, check the build log for
+% "Missing character" -- build_letters.sh reports the count per letter, and a
+% missing glyph is dropped SILENTLY from the PDF rather than erroring.
+\usepackage{unicode-math}
+\setmathfont{STIX Two Math}
 \usepackage{newunicodechar}
-\newunicodechar{∈}{\ensuremath{\in}}
-\newunicodechar{≈}{\ensuremath{\approx}}
-\newunicodechar{≤}{\ensuremath{\leq}}
-\newunicodechar{≥}{\ensuremath{\geq}}
-\newunicodechar{−}{\ensuremath{-}}
-\newunicodechar{×}{\ensuremath{\times}}
-\newunicodechar{π}{\ensuremath{\pi}}
-\newunicodechar{τ}{\ensuremath{\tau}}
 \newunicodechar{→}{\ensuremath{\rightarrow}}
+\newunicodechar{∈}{\ensuremath{\in}}

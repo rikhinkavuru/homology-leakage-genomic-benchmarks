@@ -45,10 +45,21 @@ SUMMARY = os.path.join(ROOT, "results", "summary_final.csv")
 # Okabe-Ito colorblind-safe palette, matching the suite's other figures.
 BLUE, VERM, GREY = "#0072B2", "#D55E00", "#8a8a8a"
 
+# Helvetica Neue rather than the matplotlib default (DejaVu Sans), which reads as
+# an unstyled default plot. Sans-serif in figures is the convention in this field.
+# mathtext is pointed at the same family so the italic k in "k=6" matches the
+# surrounding labels instead of falling back to DejaVu.
 plt.rcParams.update({
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Helvetica Neue", "Helvetica", "Arial", "DejaVu Sans"],
+    "mathtext.fontset": "custom",
+    "mathtext.rm": "Helvetica Neue",
+    "mathtext.it": "Helvetica Neue:italic",
+    "mathtext.bf": "Helvetica Neue:bold",
     "font.size": 10, "axes.spines.top": False, "axes.spines.right": False,
     "axes.grid": True, "grid.alpha": 0.0, "axes.axisbelow": True,
-    "figure.dpi": 300,
+    "axes.labelsize": 10.5, "figure.dpi": 300,
+    "pdf.fonttype": 42, "ps.fonttype": 42,  # embed as TrueType, not Type 3
 })
 
 NICE = {
@@ -122,7 +133,7 @@ for ax, group, title in [(axL, LEAKY, "leaky"), (axR, CLEAN, "borderline + clean
         # Annotate the drop only where it is material, i.e. on the leaky panel.
         # Labelling the clean deltas too would give a null the visual weight of an effect.
         if d in LEAKY:
-            ax.annotate(f"$-${orig - corr:.1f} pts", xy=(x + DX, corr),
+            ax.annotate(f"−{orig - corr:.1f} pts", xy=(x + DX, corr),
                         xytext=(x + DX, corr - 2.2), fontsize=8.5, color=VERM,
                         va="top", ha="center", weight="bold")
 
