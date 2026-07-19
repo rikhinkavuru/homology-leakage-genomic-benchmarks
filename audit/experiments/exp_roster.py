@@ -58,29 +58,38 @@ INVERSION_MARGIN = 0.01          # report_card.py:55 convention
 
 
 def make_roster(n_jobs=4):
-    """Nine learners, all from scratch, all on the same k=6 count features."""
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.svm import LinearSVC
-    from sklearn.ensemble import (RandomForestClassifier, ExtraTreesClassifier,
-                                  HistGradientBoostingClassifier)
+    """Nine learners on the same k=6 count features.
+
+    The four models the paper already reports are taken VERBATIM from expkit.models(),
+    which is the frozen configuration -- in particular LR and LinearSVC are
+    Normalizer(l2)+estimator pipelines, as Methods states. Defining a fresh bare
+    LogisticRegression here instead (an earlier version of this file did) silently
+    creates a DIFFERENT model from the paper's LR and made the roster disagree with
+    the four-model result about who wins the corrected split. The five added learners
+    follow the same documented convention: scale-sensitive learners (kNN, MLP) get the
+    same L2 normalization as the linear models; tree ensembles are scale-invariant and
+    Gaussian naive Bayes standardizes internally, so both take raw counts."""
+    from sklearn.ensemble import ExtraTreesClassifier
     from sklearn.neighbors import KNeighborsClassifier
     from sklearn.neural_network import MLPClassifier
     from sklearn.naive_bayes import GaussianNB
     from sklearn.preprocessing import Normalizer
     from sklearn.pipeline import make_pipeline
+    frozen = E.models()                      # LR, LinearSVC, RF, HGB -- exactly as frozen
     return {
-        "kNN-1": KNeighborsClassifier(n_neighbors=1, n_jobs=n_jobs),
-        "kNN-15": KNeighborsClassifier(n_neighbors=15, n_jobs=n_jobs),
-        "RF": RandomForestClassifier(n_estimators=150, random_state=SEED, n_jobs=n_jobs),
-        "ExtraTrees": ExtraTreesClassifier(n_estimators=150, random_state=SEED, n_jobs=n_jobs),
+        "kNN-1": make_pipeline(Normalizer(norm="l2"),
+                               KNeighborsClassifier(n_neighbors=1, n_jobs=n_jobs)),
+        "kNN-15": make_pipeline(Normalizer(norm="l2"),
+                                KNeighborsClassifier(n_neighbors=15, n_jobs=n_jobs)),
+        "RF": frozen["RF"],
+        "ExtraTrees": ExtraTreesClassifier(n_estimators=150, random_state=SEED,
+                                           n_jobs=n_jobs),
         "MLP": make_pipeline(Normalizer(norm="l2"),
                              MLPClassifier(hidden_layer_sizes=(128,), max_iter=60,
                                            random_state=SEED, early_stopping=True)),
-        "HGB": HistGradientBoostingClassifier(random_state=SEED),
-        "LinearSVC": make_pipeline(Normalizer(norm="l2"),
-                                   LinearSVC(C=1.0, dual=False, max_iter=5000,
-                                             random_state=SEED)),
-        "LR": LogisticRegression(max_iter=1000, random_state=SEED, n_jobs=n_jobs),
+        "HGB": frozen["HGB"],
+        "LinearSVC": frozen["LinearSVC"],
+        "LR": frozen["LR"],
         "GaussianNB": GaussianNB(),
     }
 
@@ -171,7 +180,10 @@ def run_dataset(d, cap=None, boot_models=("kNN-1", "RF", "LinearSVC", "LR")):
     order_o, order_c = _order(acc_o, names), _order(acc_c, names)
     top_o, top_c = order_o.split(">")[0], order_c.split(">")[0]
     inv, supp_o, supp_c = False, None, None
+    runner_up_o = order_o.split(">")[1]
+    top2_o = _paired_ci(corr_o[top_o] - corr_o[runner_up_o], blk_o)
     if top_o != top_c:
+        # margin between the two models that SWAP, in each direction
         supp_o = _paired_ci(corr_o[top_o] - corr_o[top_c], blk_o)
         supp_c = _paired_ci(corr_c[top_c] - corr_c[top_o], blk_c)
         inv = bool(supp_o[0] > 0 and supp_c[0] > 0)
@@ -180,8 +192,16 @@ def run_dataset(d, cap=None, boot_models=("kNN-1", "RF", "LinearSVC", "LR")):
         r["rank_corr"] = 1 + sum(acc_c[o] > acc_c[r["model"]] for o in names)
         r["order_orig"], r["order_corr"] = order_o, order_c
         r["top_orig"], r["top_corr"] = top_o, top_c
-        r["lead_margin_orig_ci"] = (f"[{supp_o[0]:.4f}, {supp_o[1]:.4f}]" if supp_o else None)
-        r["lead_margin_corr_ci"] = (f"[{supp_c[0]:.4f}, {supp_c[1]:.4f}]" if supp_c else None)
+        # NOTE two different margins, and conflating them overstates the lead:
+        #  swap_margin_* is between the two models that exchange the top slot;
+        #  top2_margin_orig is between the as-shipped #1 and #2, which may be a TIE
+        #  even when the swap margin is large.
+        r["runner_up_orig"] = runner_up_o
+        r["top2_margin_orig"] = round(acc_o[top_o] - acc_o[runner_up_o], 4)
+        r["top2_margin_orig_ci"] = f"[{top2_o[0]:.4f}, {top2_o[1]:.4f}]"
+        r["top2_orig_is_tie"] = bool(top2_o[0] <= 0 <= top2_o[1])
+        r["swap_margin_orig_ci"] = (f"[{supp_o[0]:.4f}, {supp_o[1]:.4f}]" if supp_o else None)
+        r["swap_margin_corr_ci"] = (f"[{supp_c[0]:.4f}, {supp_c[1]:.4f}]" if supp_c else None)
         r["ranking_inverts"] = inv
     print(f"  as-shipped: {rows[0]['order_orig']}")
     print(f"  corrected : {rows[0]['order_corr']}")
@@ -235,8 +255,17 @@ def main():
     df = pd.DataFrame(rows)
     if df.empty:
         print("nothing completed"); return
+    # Merge with any previous run's datasets rather than overwriting. Running one
+    # dataset at a time previously left roster_predictions.csv holding only the last
+    # dataset, which silently hid the nonTATA prediction failures.
     for frame, name in ((df, "roster_rankings"), (score_predictions(df), "roster_predictions")):
-        tmp = f"{R}/{name}.csv.tmp"; frame.to_csv(tmp, index=False); os.replace(tmp, f"{R}/{name}.csv")
+        path = f"{R}/{name}.csv"
+        if os.path.exists(path):
+            prev = pd.read_csv(path)
+            if "dataset" in prev.columns:
+                prev = prev[~prev.dataset.isin(set(frame.dataset))]
+                frame = pd.concat([prev, frame], ignore_index=True)
+        tmp = path + ".tmp"; frame.to_csv(tmp, index=False); os.replace(tmp, path)
     part = f"{R}/roster_rankings.csv.partial"
     if os.path.exists(part):
         os.remove(part)
