@@ -63,6 +63,17 @@ def evaluate(seqs, y, tr, te, tag, extra, comp=None):
     if comp is None:
         comp = E.clusters(seqs, 0.7, 8)
     ctr, cte = E.assign(comp, y, SEED, len(te) / len(seqs))
+    # Cluster-bootstrap interval on each model's drop. The manipulation is the paper's
+    # only causal experiment and previously shipped without one.
+    from audit.experiments.cluster_bootstrap import test_internal_clusters, delta_boot
+    blk_o, _ = test_internal_clusters([seqs[i] for i in te], 0.7)
+    blk_c, _ = test_internal_clusters([seqs[i] for i in cte], 0.7)
+    drop_ci = {}
+    for m in MODELS:
+        c_o = E.correctness(E.models()[m], X, y, tr, te)
+        c_c = E.correctness(E.models()[m], X, y, ctr, cte)
+        d_pt, lo, hi, excl0 = delta_boot(c_o, blk_o, c_c, blk_c, mode="cluster")
+        drop_ci[m] = (round(d_pt, 4), f"[{lo:.4f}, {hi:.4f}]", bool(excl0))
     acc_c = {m: float(E.correctness(E.models()[m], X, y, ctr, cte).mean()) for m in MODELS}
 
     tr_set = {seqs[i] for i in tr}
@@ -83,12 +94,15 @@ def evaluate(seqs, y, tr, te, tag, extra, comp=None):
         **{f"acc_orig_{m}": round(acc_o[m], 4) for m in MODELS},
         **{f"acc_corr_{m}": round(acc_c[m], 4) for m in MODELS},
         rf_drop=round(acc_o["RF"] - acc_c["RF"], 4),
+        rf_drop_ci=drop_ci["RF"][1], rf_drop_excl0=drop_ci["RF"][2],
         lr_drop=round(acc_o["LR"] - acc_c["LR"], 4),
+        lr_drop_ci=drop_ci["LR"][1], lr_drop_excl0=drop_ci["LR"][2],
         order_orig=order_o, order_corr=order_c,
         rf_rank_orig=rank_o, rf_rank_corr=rank_c,
         ranking_inverts=bool(order_o.split(">")[0] != order_c.split(">")[0]),
         seconds=round(time.time() - t0, 1), **extra)
     print(f"  [{tag}] n={len(seqs)} leak@0.7={row['leak_jaccard_0p7']:.4f} "
+          f"RFci={drop_ci['RF'][1]}{'*' if drop_ci['RF'][2] else ''} "
           f"RF {acc_o['RF']:.4f}->{acc_c['RF']:.4f} (drop {row['rf_drop']:+.4f}) "
           f"rank {rank_o}->{rank_c} | {order_o}  =>  {order_c} ({row['seconds']}s)",
           flush=True)
