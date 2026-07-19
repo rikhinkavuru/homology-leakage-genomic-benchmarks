@@ -407,6 +407,17 @@ def check_retired_claims():
         ("Three limits bound",      "the Discussion limitations count: the foundation-model "
                                     "exclusion was split into its own titled paragraph, so "
                                     "the remaining paragraph carries two, not three"),
+        ("do not claim the network would win",
+                                    "superseded: the seed-replicated paired comparison now "
+                                    "supports the ranking claim 4.4 previously declined"),
+        ("single most useful experiment",
+                                    "4.4 nominated the seed-replicated CNN comparison as "
+                                    "future work; it has been run"),
+        ("Whether a CNN-based leaderboard",
+                                    "the Discussion's open question, now answered: the CNN "
+                                    "goes rank 5 -> rank 1 under correction"),
+        ("interval-bearing CNN comparison that we have not run",
+                                    "we have now run it"),
     ]
     out = []
     for phrase, why in retired:
@@ -521,8 +532,66 @@ def check_imbalance_panel():
     return out
 
 
+def check_cnn_seed_replication():
+    """The seed-replicated CNN comparison (4.4, 4.9) and its paired interval.
+
+    This one is guarded tightly because it is the newest claim in the paper and the most
+    flattering, which is the combination that has historically gone stale first. Three
+    things are asserted, not one: the corrected-accuracy range, the paired difference and
+    its interval, and -- crucially -- the 4-of-5 count. That last is the number a summary
+    would round away, since the seed-averaged interval excludes zero and it is tempting to
+    report only that. The manuscript must keep saying that one seed does not.
+    """
+    seeds = csv("exp_deep_cnn_seeds.csv")
+    paired = csv("exp_deep_cnn_paired.csv")
+
+    corr = seeds["acc_corr"]
+    lo_acc, hi_acc = float(corr.min()), float(corr.max())
+    drops = seeds["drop"]
+    lo_drop, hi_drop = float(drops.min()), float(drops.max())
+
+    per_seed = paired[paired["seed"].astype(str) != "mean"]
+    mean_row = paired[paired["seed"].astype(str) == "mean"].iloc[0]
+    n_excl = int(per_seed["paired_excl0"].astype(str).str.lower().eq("true").sum())
+    n_tot = len(per_seed)
+
+    out = []
+    # 4.4: the corrected-accuracy range and the paired interval
+    for where, ctx in (("paper", r"Replicating the pre-registered reference cell"),
+                       ("response", r"Across\s+\*\*five training seeds\*\*")):
+        out.append(near(where, ctx, lo_acc, places=4, label=f"{where}: CNN corrected min {lo_acc:.4f}"))
+        out.append(near(where, ctx, hi_acc, places=4, label=f"{where}: CNN corrected max {hi_acc:.4f}"))
+    for where, ctx in (("paper", r"paired cluster-bootstrap difference is"),
+                       ("response", r"paired\s+cluster-bootstrap difference is")):
+        out.append(near(where, ctx, float(mean_row["paired_diff"]), places=4,
+                        label=f"{where}: paired difference {float(mean_row['paired_diff']):.4f}"))
+        out.append(near(where, ctx, float(mean_row["paired_ci_lo"]), places=4,
+                        label=f"{where}: paired CI lower {float(mean_row['paired_ci_lo']):.4f}"))
+        out.append(near(where, ctx, float(mean_row["paired_ci_hi"]), places=4,
+                        label=f"{where}: paired CI upper {float(mean_row['paired_ci_hi']):.4f}"))
+    # 4.9: the drop range, which weakens a previously single-valued claim
+    out.append(near("paper", r"gives drops of", lo_drop, places=4,
+                    label=f"paper: CNN drop min {lo_drop:.4f}"))
+    out.append(near("paper", r"gives drops of", hi_drop, places=4,
+                    label=f"paper: CNN drop max {hi_drop:.4f}"))
+
+    # the non-uniformity must survive in every document that states the result
+    assert n_excl == 4 and n_tot == 5, f"CSV says {n_excl}/{n_tot}; update the prose"
+    for where in ("paper", "response", "cover"):
+        body = " ".join(doc(where).split())
+        states_split = ("four of the five" in body.lower()
+                        or "four of five" in body.lower()
+                        or "one of the five seeds" in body.lower()
+                        or "one of the five" in body.lower())
+        out.append((states_split,
+                    f"{where}: discloses that one of five seeds does not clear zero",
+                    "" if states_split else "the 4/5 split has been summarised away"))
+    return out
+
+
 CHECKS = [
     ("retired claims", check_retired_claims),
+    ("CNN seed replication / paired interval", check_cnn_seed_replication),
     ("imbalance panel", check_imbalance_panel),
     ("shared numbers across documents", check_shared_numbers),
     ("letter section pointers", check_letter_section_refs),
@@ -589,6 +658,13 @@ def self_test():
          "paper", "also scores $10/10$", "also scores $7/10$"),
         ("paper: the GUE Jaccard minimum", "paper", "from $0.009$ to $0.041$",
          "from $0.011$ to $0.041$"),
+        ("paper: the CNN paired-interval lower bound",
+         "paper", "$[0.0063,0.0161]$", "$[0.0071,0.0161]$"),
+        ("response: the CNN corrected-accuracy floor, letter side",
+         "response", "0.8028–0.8131 corrected", "0.8044–0.8131 corrected"),
+        ("cover: the 4-of-5 disclosure summarised away",
+         "cover", "one of the five seeds not individually clearing zero",
+         "every seed clearing zero"),
     ]
     print("== self-test: each mutation must make the gate FAIL ==\n")
     bad = 0

@@ -120,6 +120,18 @@ cross-suite modules, which download the Nucleotide Transformer task files.
 | T27 | `python -m audit.experiments.full_scale_containment` | `full_scale_containment.csv` — full-scale containment for the clean sets | ~30 min |
 | T28 | `python -m audit.experiments.exp_transformer` | `exp_transformer.csv` — the from-scratch attention probe (not used in the paper) | ~2 h; needs torch |
 | T29 | `python -m audit.pipeline.rf_seed_variance` | `rf_seed_variance.csv` — the §4.2 RF *training*-seed robustness check (a different axis from step 18's re-split seeds) | ~15 min |
+| T30 | `python -m audit.experiments.exp_deep_seeds` | `exp_deep_cnn_seeds.csv` — the §4.4/§4.9 CNN *training*-seed replication of the pre-registered reference cell on `human_enhancers_ensembl`, both splits | ~35 min; needs torch |
+| T31 | `python -m audit.experiments.exp_deep_paired` | `exp_deep_cnn_paired.csv` — the §4.4 paired CNN-vs-LinearSVC cluster-bootstrap interval on the corrected split | ~16 min; needs torch; run T30 first (shares the cached prep) |
+
+**Do not run `exp_deep` (T15) to reproduce T30/T31.** `exp_deep.py` takes no arguments
+and rewrites `results/exp_deep_cnn.csv` unconditionally; that file holds the committed
+20-cell grid quoted throughout §4.9. T30 and T31 are additive and write their own CSVs.
+
+T31 begins with a validation gate: it refits LinearSVC on the deep-model corrected split
+and aborts unless it reproduces the published `0.7975`. That gate is the check that the
+deep-model and roster corrected splits are the same partition — §4.4 compares numbers
+across the two, and before T31 nothing verified they came from one split. If it ever
+fails, the correct response is to report a manuscript defect, not to relax the tolerance.
 | — | `audit/pipeline/prep_datasets.py` | none — an earlier cache builder, superseded by `audit.tools.prefetch`; nothing in the paper depends on it |  |
 
 `certify` also runs end to end on a dataset (`--dataset NAME [--cap N]`) or on arbitrary

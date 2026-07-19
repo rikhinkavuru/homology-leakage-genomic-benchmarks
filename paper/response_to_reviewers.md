@@ -132,6 +132,38 @@ pre-registration called this a *dose-response* grid, and it is not one — the d
 non-monotone in both dropout and weight decay. We state this rather than quietly
 restating the grid, since a pre-registration reported selectively is worth nothing.
 
+**(c) The deep model is not just affected — it is the model the leaky split
+penalises.** An earlier draft of this revision declined to rank the CNN, because the
+evidence was a single run whose value sat inside a nine-cell grid spanning
+0.749–0.813 with the linear SVM's 0.7975 in the middle of it. We have since run the
+replicated, interval-bearing comparison that situation called for (§4.4). Across
+**five training seeds** the network scores 0.8028–0.8131 corrected (mean 0.8086,
+sd 0.0040) against the SVM's 0.7975, and 0.8119–0.8359 as shipped. **On every seed it
+ranks fifth on the leaky split and first on the corrected one.** Scoring both models
+on the same corrected test set and differencing per example, the paired
+cluster-bootstrap difference is **+0.0111, CI [0.0063, 0.0161]**, excluding zero — so
+the comparison now satisfies the inversion criterion (§3.3) that the earlier draft
+was unwilling to bypass.
+
+So leakage does not only promote a memorizer; on this dataset it **demotes the
+architecture family whose baselines this suite publishes**. We attach three
+qualifications rather than leave them for a referee: four of the five seeds' paired
+intervals exclude zero and the fifth does not (+0.0053, [−0.0006, 0.0109]), so the
+advantage is uniform in rank but not in significance; the CNN was not in the
+pre-registered nine-model roster, so this comparison is **post hoc** and labelled so;
+and it is one dataset.
+
+Two by-products of running it are worth reporting. First, we **verified rather than
+assumed** that the deep-model and roster corrected splits are the same partition —
+refitting the linear SVM on the deep-model split reproduces its published 0.7975
+exactly. The manuscript had been comparing those two numbers without that check.
+Second, the same replication **weakens** a number we had reported: the reference
+cell's drop is 0.014 at seed 0 but ranges 0.0049–0.0269 across seeds, a five-fold
+spread, and the smallest seed's interval includes zero. §4.9 now reports that range
+and flags the +0.014 as one draw rather than the cell's value. The corrected accuracy
+is stable to ±0.004 while the drop varies five-fold, so it is the as-shipped score
+that moves.
+
 **(b) Reach.** We now separate two claims explicitly (Introduction): **Claim I**
 (de-leaking lowers accuracy) is credited to prior work across domains and
 reproduced only as a within-suite control; **Claim II** (leakage can *reorder*
@@ -240,9 +272,11 @@ confirmation, not a restatement. **§4.12**, **§4.6**; Methods §3.4, §3.6, §
 
 ### R2.a3 — "Extend to deep models and to the multiclass setting."
 
-**Deep models:** the CNN (R1.1a, §4.9) and the multilayer perceptron in the
-nine-model roster (§4.4), whose drop also excludes zero — the inflation reaches a
-neural learner that we had not designated memorization-prone in advance.
+**Deep models:** the CNN (R1.1a, §4.9), now seed-replicated with a paired interval
+and shown to move from rank 5 to rank 1 under correction (R1.1c, §4.4); and the
+multilayer perceptron in the nine-model roster (§4.4), whose drop also excludes zero
+— the inflation reaches a neural learner that we had not designated
+memorization-prone in advance.
 **Multiclass:** the only multiclass set is clean, so we answer by construction,
 injecting label-carrying near-duplicates at f ∈ {0, 0.1, 0.2, 0.4} into the clean
 3-class `human_ensembl_regulatory` set. The RF drop grows monotonically with f
@@ -250,6 +284,16 @@ injecting label-carrying near-duplicates at f ∈ {0, 0.1, 0.2, 0.4} into the cl
 accuracy is stable (~0.58) because the split removes the injected leakage. **§4.13**;
 Methods §3.9. We state explicitly that leakage is injected because the suite ships no
 naturally leaky multiclass set.
+
+One part of this comment we have **not** fully met, and would rather name than let
+pass: the reviewer asks for deep models "in both binary and 3-class settings", and our
+multiclass arm is **classical only** (random forest against logistic regression). The
+CNN evidence is binary. We did not extend the injected-leakage construction to the CNN
+because the mechanism there is imposed by us rather than measured, so a deep replicate
+would test our injection procedure rather than the suite; the binary CNN result, which
+is measured on shipped data, is the stronger evidence and is where we put the compute.
+That is a judgement, not a claim of coverage, and a referee who disagrees is entitled
+to ask for the run.
 
 ### R2.b1 — "Give a threshold-sensitivity analysis and concrete recommendations."
 
@@ -271,7 +315,12 @@ recommendations are in §6.
 **(i) Trained deep net:** answered by the from-scratch 1D residual CNN (§4.9),
 trained on the training split only, whose regularized reference cell drops on both
 leaky datasets with cluster-bootstrap CIs excluding zero — the memorization mechanism
-reaches a trained neural network with no pretraining confound. We also attempted a
+reaches a trained neural network with no pretraining confound. Since the first
+revision we have strengthened this considerably: the CNN is now seed-replicated with a
+paired cluster-bootstrap interval, and on `human_enhancers_ensembl` it ranks **fifth
+on the leaky split and first on the corrected one, on every one of five seeds**
+(paired difference +0.0111, CI [0.0063, 0.0161]; R1.1c, §4.4). The leaky split does
+not merely fail to detect the deep model — it actively demotes it. We also attempted a
 from-scratch attention (Transformer) encoder under the same protocol, and mention it
 here only so the record is complete: **it is not in the manuscript and we rest no
 claim on it.** It did not yield a usable comparison — on `human_nontata_promoters`
