@@ -99,17 +99,34 @@ print(rc.to_string(index=False))
 # ---- table figure ----
 fig, ax = plt.subplots(figsize=(12, 3.2))
 ax.axis("off")
-cols = ["dataset", "n", "leak@0.7", "leak@0.9", "verdict", "best model",
-        "acc drop\n(corrected)", "ranking\ninverts", "RF rank\norig->corr"]
-cell = [[r["dataset"], f"{r['n_full']:,}", f"{r['leak_at_0p7']:.3f}", f"{r['leak_at_0p9']:.3f}",
-         r["verdict"], r["best_model"], f"{r.get('acc_drop_seed0', r.get('acc_drop_corrected', 0)):+.3f}",
-         r["ranking_inverts"], r["rf_rank_orig_to_corr"]] for r in rows]
+# Column set mirrors the CSV exactly. Round 20 renamed two row keys and left this
+# block reading the old ones, so the script wrote a corrected CSV and then died with a
+# KeyError before emitting the figure -- leaving the released figure frozen at the
+# pre-correction state while the CSV beside it was right. The figure now carries
+# containment and the three-way verdict, like Table 2.
+cols = ["dataset", "n", "leak@0.7", "leak@0.9", "contain\n@0.7", "verdict", "best model",
+        "acc drop\n(seed 0)", "top model\nchanges", "RF rank\norig->corr"]
+
+
+def _cell(r):
+    con = r.get("leak_containment_0p7")
+    return [r["dataset"], f"{r['n_full']:,}", f"{r['leak_at_0p7']:.3f}",
+            f"{r['leak_at_0p9']:.3f}",
+            "n/a" if con is None or pd.isna(con) else f"{float(con):.3f}",
+            r["verdict"], r["best_model"],
+            f"{r.get('acc_drop_seed0', r.get('acc_drop_corrected', 0) or 0):+.3f}",
+            r.get("top_model_changes_accuracy", r.get("ranking_inverts", "n/a")),
+            r["rf_rank_orig_to_corr"]]
+
+
+cell = [_cell(r) for r in rows]
 tab = ax.table(cellText=cell, colLabels=cols, loc="center", cellLoc="center")
 tab.auto_set_font_size(False); tab.set_fontsize(9); tab.scale(1, 1.6)
 for j in range(len(cols)):
     tab[0, j].set_facecolor("#34495e"); tab[0, j].get_text().set_color("white"); tab[0, j].get_text().set_weight("bold")
 for i, r in enumerate(rows, start=1):
-    color = "#f8d7da" if r["verdict"] == "LEAKY" else "#d4edda"
+    color = ("#f8d7da" if r["verdict"] == "LEAKY"
+             else "#fff3cd" if r["verdict"] == "borderline" else "#d4edda")
     tab[i, 4].set_facecolor(color)
     if r["verdict"] == "LEAKY":
         for j in range(len(cols)):

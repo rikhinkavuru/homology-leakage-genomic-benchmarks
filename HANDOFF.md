@@ -1,6 +1,6 @@
 # Handoff — parallel-session work while two experiments run
 
-## Do not touch (two jobs are writing these)
+## Do not touch (HISTORICAL -- both jobs completed 2026-07-19; their CSVs are committed and quoted in the paper)
 
 Two CPU-bound experiments are running on full-scale `human_enhancers_ensembl`:
 
@@ -53,11 +53,11 @@ Assessed ceilings: science **8.5** (structurally capped — the suite has only t
 datasets and one is honestly disclaimed), manuscript **9.5** (all editing).
 AE recommendation: major revision, low end.
 
-Seven adversarial audit rounds: 272 findings raised, 222 confirmed. Round 7 used four
+Twenty-one adversarial audit rounds: 501 findings recorded, 494 confirmed. Round 7 used four
 fresh perspectives (PDF-only referee, benchmark curator, practitioner, replication
 specialist). Full record: `results/audit_findings.csv`. Narrative: `results/TIER1_FINDINGS.md`.
 
-Build: `paper/build.sh` → 15 pages, 0 errors, 0 undefined refs, 45 overfull hboxes.
+Build: `paper/build.sh` → 19 pages, 0 errors, 0 undefined refs.
 
 ## Highest-value parallel work, ranked
 
