@@ -91,8 +91,8 @@ cross-suite modules, which download the Nucleotide Transformer task files.
 | T9 | `python -m audit.experiments.exp_tuning` | `tuning_selection.csv` | ~15 min (nonTATA); the ensembl arm is hours |
 | T10 | `python -m audit.experiments.exp_bh_correction` | `bh_correction_frozen.csv` | < 5 s |
 | T11 | `python -m audit.tools.certify --self-validate` | `certify_self_validation.csv`; **exit 1 on drift** | ~2 s |
-| T12 | `python -m audit.experiments.exp_gue --cap 100000` | `gue_census.csv`, `gue_screen.csv` | ~40 min + download |
-| T13 | `python -m audit.experiments.exp_estimator_sensitivity` | `estimator_{sensitivity,specificity,specificity_real}.csv` | ~3 min |
+| T12 | `python -m audit.experiments.exp_gue --cap 100000` | `gue_census.csv` (and `gue_screen.csv` only if a task is non-clean) | ~40 min + download |
+| T13 | `python -m audit.experiments.exp_estimator_sensitivity` | `estimator_sensitivity.csv`, `estimator_specificity.csv`, `estimator_specificity_real.csv` | ~3 min |
 
 `certify` also runs end to end on a dataset (`--dataset NAME [--cap N]`) or on arbitrary
 input (`--fasta X.fa --labels y.txt [--full-n N]`). Without `--full-n` the C1 full-scale

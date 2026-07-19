@@ -28,7 +28,9 @@ Counting note: GUE ships train/dev/test. We use train as train and test as test,
 ignore dev, so the split we audit is the one the leaderboard reports on.
 
 Run:  python -m audit.experiments.exp_gue [--tasks ...] [--cap N]
-Out:  results/gue_census.csv, results/gue_screen.csv
+Out:  results/gue_census.csv (always); results/gue_screen.csv only if some task
+      is non-clean -- the inversion screen has nothing to run on a clean task, so a
+      fully clean census writes no screen file. The full-scale run writes none.
 """
 from __future__ import annotations
 import argparse, io, itertools, os, sys, time
@@ -67,7 +69,10 @@ PREREG = {
 # happened to come out as this module expected, so scoring them inflated the headline
 # from 3/15 to 5/17 -- an unregistered task that agrees with you is not evidence, and
 # quietly adding two of them to a pre-registered tally is the exact failure this whole
-# paper argues against. They are censused and reported, separately and unscored.
+# paper argues against. They are reported separately and unscored whenever they are
+# run. Note the committed full-scale census covers the fifteen REGISTERED tasks only,
+# so results/gue_census.csv has no mouse rows; they appeared in the earlier capped
+# run. Pass them explicitly via --tasks to re-census them.
 EXPLORATORY = {"mouse_0": "expected CLEAN (multi-species, not registered)",
                "mouse_1": "expected CLEAN (multi-species, not registered)"}
 DEFAULT = list(PREREG) + list(EXPLORATORY)
@@ -77,10 +82,17 @@ DEFAULT = list(PREREG) + list(EXPLORATORY)
 # set(prom_core_all.test) == set(prom_core_notata.test) | set(prom_core_tata.test), with
 # zero symmetric difference, and likewise at 300 bp. So the eleven predicted-leaky tasks
 # are not eleven independent benchmarks -- two of them are unions of two others. The
-# independent count is NINE test partitions (core notata+tata, 300 notata+tata, and the
-# five TF tasks). Any statement of the form "N independent benchmarks are clean" must use
-# nine, not eleven. The 70 bp and 300 bp families are, by contrast, genuinely different
-# windows: only 8% of the 70 bp test windows occur as substrings of the 300 bp corpus.
+# independent count is at most NINE test partitions (core notata+tata, 300 notata+tata,
+# and the five TF tasks). Any statement of the form "N independent benchmarks are clean"
+# must use nine, not eleven.
+#
+# Nine is an UPPER bound on independence, not a demonstration of it. The 70 bp and the
+# 300 bp promoter families ship identical row counts (47,356 train / 5,920 test), which
+# is consistent with one underlying promoter set windowed at two widths; only 8% of the
+# 70 bp test windows occur as literal substrings of the 300 bp corpus, but that is weak
+# evidence either way, since a re-extracted window need not be a substring of a wider
+# one. We therefore do NOT claim the two families are independent of each other. If they
+# share loci, the independent count is nearer seven.
 REDUNDANT_UNIONS = {"prom_core_all": ("prom_core_notata", "prom_core_tata"),
                     "prom_300_all": ("prom_300_notata", "prom_300_tata")}
 N_INDEPENDENT_LEAKY_PREDICTIONS = 9
