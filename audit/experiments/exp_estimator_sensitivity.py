@@ -164,7 +164,7 @@ def real_dna_floor(cap=6000, n_pairs=4000):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--trials", type=int, default=300)
+    ap.add_argument("--trials", type=int, default=200)   # the value the committed CSVs use
     ap.add_argument("--skip-real", action="store_true")
     a = ap.parse_args()
     os.makedirs(R, exist_ok=True)

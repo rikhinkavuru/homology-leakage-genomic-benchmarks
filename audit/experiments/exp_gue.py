@@ -78,24 +78,30 @@ EXPLORATORY = {"mouse_0": "expected CLEAN (multi-species, not registered)",
 DEFAULT = list(PREREG) + list(EXPLORATORY)
 
 # Redundancy among the registered tasks, verified directly against the shipped files.
-# The "_all" promoter tasks are the EXACT union of their own notata and tata variants:
-# set(prom_core_all.test) == set(prom_core_notata.test) | set(prom_core_tata.test), with
-# zero symmetric difference, and likewise at 300 bp. So the eleven predicted-leaky tasks
-# are not eleven independent benchmarks -- two of them are unions of two others. The
-# independent count is at most NINE test partitions (core notata+tata, 300 notata+tata,
-# and the five TF tasks). Any statement of the form "N independent benchmarks are clean"
-# must use nine, not eleven.
+# The eleven predicted-leaky tasks are NOT eleven independent benchmarks. Two nestings:
 #
-# Nine is an UPPER bound on independence, not a demonstration of it. The 70 bp and the
-# 300 bp promoter families ship identical row counts (47,356 train / 5,920 test), which
-# is consistent with one underlying promoter set windowed at two widths; only 8% of the
-# 70 bp test windows occur as literal substrings of the 300 bp corpus, but that is weak
-# evidence either way, since a re-extracted window need not be a substring of a wider
-# one. We therefore do NOT claim the two families are independent of each other. If they
-# share loci, the independent count is nearer seven.
+#   1. The "_all" promoter tasks are the EXACT union of their own notata and tata
+#      variants: set(prom_core_all.test) == set(prom_core_notata.test)
+#      | set(prom_core_tata.test), symmetric difference zero, and likewise at 300 bp.
+#
+#   2. The 70 bp and 300 bp promoter families are THE SAME LOCI at two window widths.
+#      90.15% of prom_core_all's test windows (5337/5920) occur verbatim inside the
+#      prom_300_all corpus, and the 70 bp window is the [216:286] slice of the 300 bp
+#      one -- a fixed offset, not an incidental overlap. An earlier version of this
+#      comment claimed the two families were "genuinely different windows" on the basis
+#      of an 8% substring rate; that measurement compared test against test only, and
+#      against train+test the rate is 90%. The claim was wrong and is withdrawn.
+#
+# So the independent count is SEVEN test partitions: the promoter set contributes two
+# (notata and tata, at whichever width), and the five TF tasks contribute five. Any
+# statement of the form "N independent benchmarks are clean" must use seven.
+#
+# Note this cross-task nesting does not affect any verdict: the census measures test
+# against train WITHIN a task, and every task is clean on that measure at full scale.
 REDUNDANT_UNIONS = {"prom_core_all": ("prom_core_notata", "prom_core_tata"),
                     "prom_300_all": ("prom_300_notata", "prom_300_tata")}
-N_INDEPENDENT_LEAKY_PREDICTIONS = 9
+SAME_LOCI_FAMILIES = [("prom_core_*", "prom_300_*")]   # 70 bp is the [216:286] slice
+N_INDEPENDENT_LEAKY_PREDICTIONS = 7
 
 
 def load_task(task, cap=None, seed=0, sizes=None):
