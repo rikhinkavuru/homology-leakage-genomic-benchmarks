@@ -1,0 +1,3 @@
+dataset,prediction,expected,observed,holds
+human_nontata_promoters,P1 kNN-1 has largest graded gap,kNN-1,kNN-15,False
+human_nontata_promoters,P2 kNN-1 has largest drop,kNN-1,ExtraTrees,False

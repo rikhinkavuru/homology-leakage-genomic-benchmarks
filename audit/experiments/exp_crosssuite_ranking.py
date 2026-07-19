@@ -218,7 +218,14 @@ def run_task(spec, cap=None):
         Dg = strata[A]["g"] - strata[B]["g"]
         phi_star = delta / Dg if Dg > 0 else np.nan
         pred = bool(delta > 0 and phi * Dg > delta)
-        obs = bool(acc_c[B] > acc_c[A] and (acc_o[A] - acc_o[B]) > INVERSION_MARGIN)
+        # Two different questions, and conflating them mis-scores the condition.
+        # (i) Did the PAIR ORDER swap? That is what eq. (1) actually predicts.
+        # (ii) Is the swap a MATERIAL inversion under the paper's >=1pt as-shipped
+        #      margin convention? A pair separated by 0.005 that swaps has swapped, but
+        #      the benchmark was never meaningfully reporting one of them as better.
+        # We score the condition against (i) and report (ii) separately.
+        obs_swap = bool(acc_c[B] > acc_c[A])
+        obs = bool(obs_swap and (acc_o[A] - acc_o[B]) > INVERSION_MARGIN)
         pair_rows.append(dict(
             suite="NT-original", task=task, leader_A=A, challenger_B=B,
             phi=round(phi, 4), n_A=round(strata[A]["n"], 4), n_B=round(strata[B]["n"], 4),
@@ -226,7 +233,14 @@ def run_task(spec, cap=None):
             g_B=round(strata[B]["g"], 4), Dg=round(Dg, 4),
             phi_star=(round(phi_star, 4) if np.isfinite(phi_star) else None),
             m_inv=round(phi * Dg - delta, 4),
-            PREDICTED_inversion=pred, OBSERVED_inversion=obs, agree=bool(pred == obs)))
+            as_shipped_margin=round(acc_o[A] - acc_o[B], 4),
+            PREDICTED_swap=pred,
+            OBSERVED_swap=obs_swap,
+            OBSERVED_material_inversion=obs,
+            # A prediction is only informative when delta > 0; with delta <= 0 no
+            # inversion is possible at any phi, so "no inversion" is vacuously correct.
+            informative=bool(delta > 0),
+            agree=bool(pred == obs_swap)))
     return rows, pair_rows
 
 
@@ -274,10 +288,17 @@ def main():
     print("\n== inversion law: predicted from the AS-SHIPPED split, revealed after ==")
     if not dp.empty:
         print(dp[["task", "leader_A", "challenger_B", "delta", "Dg", "phi", "phi_star",
-                  "PREDICTED_inversion", "OBSERVED_inversion", "agree"]].to_string(index=False))
-        print(f"\n  law agrees with observation on {int(dp.agree.sum())}/{len(dp)} pairs")
-        fp = dp[(dp.PREDICTED_inversion) & (~dp.OBSERVED_inversion)]
-        print(f"  false 'inversion' predictions: {len(fp)}")
+                  "informative", "PREDICTED_swap", "OBSERVED_swap",
+                  "OBSERVED_material_inversion", "agree"]].to_string(index=False))
+        inf = dp[dp.informative]
+        print(f"\n  pairs where delta>0 (prediction is INFORMATIVE): {len(inf)}/{len(dp)}")
+        print(f"  agreement on informative pairs: {int(inf.agree.sum())}/{len(inf)}")
+        print(f"  agreement on all pairs:         {int(dp.agree.sum())}/{len(dp)}")
+        base = int((dp.OBSERVED_swap == False).sum())
+        print(f"  BASELINE: a constant 'no swap' predictor scores {base}/{len(dp)}"
+              f"  <- the number the law must beat to mean anything")
+        fp = dp[(dp.PREDICTED_swap) & (~dp.OBSERVED_swap)]
+        print(f"  false positive predictions: {len(fp)}")
 
     inv = df[df.ranking_inverts].task.unique()
     print(f"\nTASKS WHOSE BEST MODEL CHANGES AFTER DE-LEAKING: {list(inv)}")
