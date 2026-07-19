@@ -404,7 +404,7 @@ both splits, so it too is nested. The independent tally is therefore **3 leaky t
 | enhancers (= enhancers_types) | 0.2500 | 0.2500 | **0.2500** | byte-identical duplication |
 | splice_sites_acceptors | 0.2435 | 0.3724 | 0.0000 | cross-species homology (multi-species set) |
 | splice_sites_donors | 0.2452 | 0.3699 | 0.0000 | cross-species homology (multi-species set) |
-| splice_sites_all *(borderline)* | 0.0797 | 0.1067 | 0.0593 | mixed |
+| splice_sites_all *(borderline)* | 0.0977 | 0.1327 | 0.0737 | mixed |
 
 The two splice tasks are near-independent of each other (their test sets share 1
 sequence), but their leakage is a *different* mechanism from the enhancer task's: zero
@@ -600,7 +600,7 @@ The registered call `NT-original → LEAKY` was **wrong as a suite-level stateme
 scale. (An earlier capped pass reported 3 borderline and 5 clean; re-running uncapped
 moved three histone tasks across the containment cut.) The
 informative consequence is that **`human_nontata_promoters`' leak fraction of 0.406 is
-not a property of the promoter task** — NT's equivalent is clean at 0.0059 — but of
+not a property of the promoter task** — NT's equivalent is clean at 0.0125 — but of
 Genomic Benchmarks' construction of it. That separates task effect from curation effect
 and corroborates §2, while refuting the coarser prediction we registered.
 

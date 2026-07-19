@@ -83,7 +83,7 @@ cross-suite modules, which download the Nucleotide Transformer task files.
 | T1 | `python -m audit.experiments.exp_inversion_law [--bootstrap]` | `inversion_law_*.csv`, `figures/fig_inversion_*.png` | 1 s / 9 min with `--bootstrap` |
 | T2 | `python -m audit.experiments.exp_construction` | `construction_{signatures,provenance,rule,alignment_check}.csv` | ~1 min |
 | T3 | `python -m audit.experiments.exp_construction_manip [--only A\|B]` | `construction_manipulation.csv` | ~45 min (B is full-scale) |
-| T4 | `python -m audit.experiments.exp_crosssuite_census` | `crosssuite_census.csv` | ~5 min + download |
+| T4 | `python -m audit.experiments.exp_crosssuite_census --cap 100000` | `crosssuite_census.csv` | ~8 min + download |
 | T5 | `python -m audit.experiments.exp_crosssuite_verify` | `crosssuite_exact_verification.csv` | ~2 min |
 | T6 | `python -m audit.experiments.exp_crosssuite_ranking` | `crosssuite_ranking{,_pairs}.csv` | ~15 min |
 | T7 | `python -m audit.experiments.exp_roster` | `roster_{rankings,predictions}.csv` | ~60 min (full-scale ensembl) |
@@ -101,7 +101,7 @@ input (`--fasta X.fa --labels y.txt [--full-n N]`). Without `--full-n` the C1 fu
 check reports `UNVERIFIABLE` and any clean verdict is downgraded to `provisional-clean`,
 because the tool cannot tell a full dataset from a subsample by inspection.
 
-Two notes on the newer modules. **T12 must be run uncapped** (`--cap 100000` exceeds every
+Two notes on the newer modules. **T4 and T12 must both be run uncapped** (`--cap 100000` exceeds every
 GUE task, so nothing is truncated): the first pass of this census capped training sets at
 20,000 and its clean verdicts were lower bounds rather than measurements, since truncating
 train can only lower a max-similarity-to-train statistic. Rows carry `train_frac_used` and

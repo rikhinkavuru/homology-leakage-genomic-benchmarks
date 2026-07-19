@@ -164,7 +164,12 @@ def census_one(suite, repo, task, cap, seed=0):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--cap", type=int, default=20000)
+    ap.add_argument("--cap", type=int, default=100000,
+                    help="training-set cap. The default is above every task in both "
+                         "releases, so nothing is truncated. It used to be 20000, "
+                         "which silently produced lower-bound verdicts: three NT "
+                         "histone tasks read clean at the cap and borderline at full "
+                         "scale. Lower it only deliberately.")
     ap.add_argument("--tasks", nargs="*", default=SHARED_TASKS)
     ap.add_argument("--out", default=os.path.join(R, "crosssuite_census.csv"))
     a = ap.parse_args()
