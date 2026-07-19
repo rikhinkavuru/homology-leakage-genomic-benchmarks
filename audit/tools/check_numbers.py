@@ -227,6 +227,13 @@ def check_gue():
         near("paper", ctx, hi, label=f"GUE Jaccard max {hi:.3f}"),
         near("paper", ctx, clo, label=f"GUE containment min {clo:.3f}"),
         near("paper", ctx, chi, label=f"GUE containment max {chi:.3f}"),
+        # The virus_covid false-positive argument's two figures. Until round 26 these had
+        # no generator: exp_gue kept only thresholded fractions, so the minimum and median
+        # of the similarity vector existed nowhere but a hand-written notes file.
+        near("paper", r"test-to-train similarity has a", float(g[g.task == "virus_covid"].sim_min.iloc[0]),
+             label="virus_covid similarity minimum"),
+        near("paper", r"test-to-train similarity has a", float(g[g.task == "virus_covid"].sim_median.iloc[0]),
+             label="virus_covid similarity median"),
         near("paper", r"predictions score", float(correct), places=0,
              label=f"paper quotes {correct} of 15"),
         # the capped-run range is the round-12 regression in the findings doc

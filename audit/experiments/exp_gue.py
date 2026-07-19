@@ -173,7 +173,15 @@ def run_task(task, cap, do_screen=True):
                len_med=int(np.median(L)), n_classes=int(len(np.unique(y))),
                exact_dup_test_in_train=round(exact, 4),
                leak_jaccard_0p7=round(jac07, 4), leak_containment_0p7=round(con07, 4),
-               phi_ge0p9=round(phi, 4), verdict=verdict,
+               phi_ge0p9=round(phi, 4),
+               # The paper quotes the minimum and median of this vector for
+               # virus_covid, as the quantitative basis for calling that task a
+               # false positive of the detector rather than a curation defect.
+               # Until round 26 only the thresholded fractions were persisted, so
+               # those two numbers had no generator.
+               sim_min=round(float(sim_j.min()), 4),
+               sim_median=round(float(np.median(sim_j)), 4),
+               verdict=verdict,
                prereg_correct=(bool(PREREG[task] ==
                                     ("LEAKY" if verdict == "LEAKY" else "CLEAN"))
                                if registered else None),
