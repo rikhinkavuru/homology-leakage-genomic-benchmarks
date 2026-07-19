@@ -132,8 +132,11 @@ def run_task(spec, cap=None):
     test_frac = len(te) / len(seqs)
 
     if pooled:
-        # 400 test sequences cannot carry an interval; redraw a stratified split at the
-        # SAME ratio over the pooled data. Disclosed in the output.
+        # 400 test sequences cannot carry an interval; redraw a stratified split over
+        # the pooled data. NOT at the shipped ratio: enhancers ships 400/15368 =
+        # 2.6% test, and redrawing at 2.6% would leave the interval exactly as
+        # unusable as before. We use 20%, which is the point of pooling. Disclosed
+        # in the output and in the paper.
         rng = np.random.RandomState(SEED)
         test_frac = 0.2
         idx = rng.permutation(len(seqs))

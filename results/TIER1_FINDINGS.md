@@ -395,8 +395,9 @@ holds 14,968 rows on 14,002 unique sequences.
 
 Counting honestly, **`enhancers` and `enhancers_types` are the same sequences** — their
 train and test sequence sets are identical in content and order, the files differing only
-in the label field — so they are one dataset scored twice. The independent tally is therefore **3 leaky tasks of
-12 independent tasks**, not 4 of 13:
+in the label field — so they are one dataset scored twice. `promoter_all` is likewise the exact union of `promoter_no_tata` and `promoter_tata` on
+both splits, so it too is nested. The independent tally is therefore **3 leaky tasks of
+11 independent tasks**, not 4 of 13:
 
 | task (independent) | jac@0.7 | containment@0.7 | exact | mechanism |
 |---|---|---|---|---|
@@ -595,7 +596,8 @@ defect `exp_roster.py` had. Both now merge by dataset.*
 ### 4.2 A pre-registered prediction that failed
 
 The registered call `NT-original → LEAKY` was **wrong as a suite-level statement**: only
-3 of 11 independent tasks are leaky and 6 are clean, including all three promoter tasks. The
+3 of 11 independent tasks are leaky, 3 are borderline and 5 are clean, including both
+independent promoter tasks. The
 informative consequence is that **`human_nontata_promoters`' leak fraction of 0.406 is
 not a property of the promoter task** — NT's equivalent is clean at 0.0059 — but of
 Genomic Benchmarks' construction of it. That separates task effect from curation effect
@@ -640,8 +642,8 @@ touched, and called them the document's strongest-risk claims. They are now run.
 
 | registered | tasks | outcome |
 |---|---|---|
-| **LEAKY** — GUE short human regulatory (core-promoter 70 bp, promoter 300 bp, TF-binding 101 bp) | 11 | **0/11.** All clean; jac@0.7 spans 0.005–0.041, median 0.009 |
-| CLEAN — yeast EMP, mouse | 5 | 5/5 |
+| **LEAKY** — GUE short human regulatory (core-promoter 70 bp, promoter 300 bp, TF-binding 101 bp) | 11 | **0/11.** All clean at full scale; jac@0.7 spans 0.009–0.041, median 0.014 |
+| CLEAN — yeast EMP | 3 | 3/3 (but `emp_H3K4me3` is borderline at full scale, so 2/3 under a three-way rule) |
 | CLEAN — virus CVC | 1 | 0/1, but see below |
 
 **What this refutes.** The registered hypothesis was that *short fixed-length human

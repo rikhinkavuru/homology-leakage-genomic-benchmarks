@@ -43,7 +43,8 @@ PRE-COMMITTED PREDICTION (recorded here before the run)
       condition does not predict the manipulation and we report that.
 
 Run:  python -m audit.experiments.exp_dose_response
-Out:  results/dose_response.csv
+Out:  results/dose_response.csv (includes mid_band_frac, the [0.5,0.9) share that
+      eq. (1) treats as belonging to neither stratum)
 """
 from __future__ import annotations
 import argparse, itertools, os, sys, time
@@ -150,6 +151,13 @@ def main():
                             phi_star_Dg=round(float(Dg), 4)
                             if np.isfinite(Dg) else None,
                             phi_star=round(float(ps), 4) if np.isfinite(ps) else None))
+        # The intermediate [0.5,0.9) band belongs to neither stratum, so eq. (1) is an
+        # approximation whose error grows with it. Methods commits to reporting the band
+        # size wherever the condition is applied, so we record it here rather than in a
+        # side script -- an earlier version computed it out-of-band and left a CSV with
+        # no producer.
+        sim_mid = E.max_sim_to_train(seqs_m, tr, te, k=8, mode="jaccard")
+        row["mid_band_frac"] = round(float(((sim_mid >= 0.5) & (sim_mid < 0.9)).mean()), 4)
         phi = row["leak_jaccard_0p9"]          # phi is the >=0.9 fraction, as in eq. (1)
         predicted = bool(np.isfinite(ps) and phi > ps)
         row.update(phi_used=phi, predicted_invert=predicted,
@@ -176,7 +184,7 @@ def main():
     os.replace(out + ".tmp", out)
 
     print("\n== dose-response ==")
-    print(df[["dose_target_share", "n", "positive_frac", "phi_used", "phi_star",
+    print(df[["dose_target_share", "n", "positive_frac", "mid_band_frac", "phi_used", "phi_star",
               "phi_star_leader", "phi_star_challenger", "predicted_invert",
               "ranking_inverts", "prediction_correct"]].to_string(index=False))
     ok = int(df.prediction_correct.sum())

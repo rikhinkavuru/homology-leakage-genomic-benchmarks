@@ -70,9 +70,10 @@ PREREG = {
 # from 3/15 to 5/17 -- an unregistered task that agrees with you is not evidence, and
 # quietly adding two of them to a pre-registered tally is the exact failure this whole
 # paper argues against. They are reported separately and unscored whenever they are
-# run. Note the committed full-scale census covers the fifteen REGISTERED tasks only,
-# so results/gue_census.csv has no mouse rows; they appeared in the earlier capped
-# run. Pass them explicitly via --tasks to re-census them.
+# run. The committed results/gue_census.csv holds all seventeen tasks the default
+# censuses -- the fifteen registered ones plus these two -- every row at full scale
+# (train_frac_used 1.0). The mouse rows carry registered=False and an empty
+# prereg_correct, so they are visible but cannot enter the tally.
 EXPLORATORY = {"mouse_0": "expected CLEAN (multi-species, not registered)",
                "mouse_1": "expected CLEAN (multi-species, not registered)"}
 DEFAULT = list(PREREG) + list(EXPLORATORY)
