@@ -562,6 +562,36 @@ raw statistic on ensembl (RF 0.230 vs 0.208) and **holds decisively** under the 
 one (kNN-1 0.461 vs RF 0.319). Both are reported; the prediction concerned memorization
 propensity, and the corrected statistic is the one that measures it.
 
+
+### 4.1f Does tuning rescue you? Not unless the tuning is leakage-aware
+
+`tuning_selection.csv`. Cross-validating `min_samples_leaf` on the as-shipped **training**
+set, naive stratified 5-fold versus cluster-grouped 5-fold.
+
+| dataset | selector | selects | as-shipped | corrected | drop |
+|---|---|---|---|---|---|
+| ensembl | naive | **1** | 0.8596 | 0.6957 | **0.1639** |
+| ensembl | grouped | **20** | 0.7513 | 0.7291 | **0.0222** |
+| nonTATA | naive | 1 | 0.9284 | 0.8200 | 0.1083 |
+| nonTATA | grouped | 1 | 0.9284 | 0.8200 | 0.1083 |
+
+**On the dataset carrying the reordering claim the two procedures diverge sharply.**
+Ordinary CV selects the memorizing default, and its model loses 16.4 points to de-leaking;
+leakage-aware CV selects `min_samples_leaf=20`, and its model loses 2.2. So ordinary
+tuning does not rescue the practitioner — it selects the configuration whose advantage is
+almost entirely leakage.
+
+**The benchmark punishes the correct methodology.** The leakage-aware tuner's model looks
+**10.8 points worse** on the as-shipped split (0.7513 vs 0.8596) while being **3.3 points
+better** on the corrected one (0.7291 vs 0.6957).
+
+Pre-registered P5 (grouped CV selects a more regularized forest) **holds on ensembl,
+fails on nonTATA** where both select 1. Reported per dataset.
+
+*Bug found and fixed in the course of this: `exp_tuning.py` overwrote its output CSV per
+invocation, so running one dataset at a time silently dropped the other's rows — the same
+defect `exp_roster.py` had. Both now merge by dataset.*
+
 ### 4.2 A pre-registered prediction that failed
 
 The registered call `NT-original → LEAKY` was **wrong as a suite-level statement**: only

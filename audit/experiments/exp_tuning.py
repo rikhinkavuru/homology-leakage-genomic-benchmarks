@@ -130,8 +130,17 @@ def main():
     df = pd.DataFrame(rows)
     if df.empty:
         print("nothing completed"); return
-    tmp = f"{R}/tuning_selection.csv.tmp"
-    df.to_csv(tmp, index=False); os.replace(tmp, f"{R}/tuning_selection.csv")
+    # Merge with any previous run's datasets rather than overwriting. Running one
+    # dataset at a time previously left the CSV holding only the last one (the same
+    # bug exp_roster.py had), which silently dropped the other dataset's result.
+    out = f"{R}/tuning_selection.csv"
+    if os.path.exists(out):
+        prev = pd.read_csv(out)
+        if "dataset" in prev.columns:
+            prev = prev[~prev.dataset.isin(set(df.dataset))]
+            df = pd.concat([prev, df], ignore_index=True)
+    tmp = out + ".tmp"
+    df.to_csv(tmp, index=False); os.replace(tmp, out)
     print("\n== what cross-validation selects ==")
     print(df[["dataset", "leaky", "selector", "selected_min_samples_leaf",
               "acc_as_shipped", "acc_corrected", "drop"]].to_string(index=False))
