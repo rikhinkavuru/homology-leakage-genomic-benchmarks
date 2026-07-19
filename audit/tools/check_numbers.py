@@ -445,8 +445,41 @@ def check_letter_section_refs():
     return out
 
 
+def check_shared_numbers():
+    """Quantities the manuscript and the letters both state, checked against the CSV AND
+    against each other.
+
+    The retired-claims group catches a stale *phrase*; it cannot see a stale *numeral*.
+    Round 19 proved the gap: the ICC range was corrected in main.tex and left at its old
+    value in the response letter, and the gate passed 77/77 while the two documents in one
+    submission packet quoted different ranges for the same four fits. Any figure that
+    appears in more than one document belongs here.
+    """
+    cb = csv("cluster_bootstrap_full.csv")
+    icc = cb[cb.icc.notna()].icc
+    lo, hi = icc.min(), icc.max()
+    out = []
+    for where, ctx in (("paper", r"intraclass correlation is high"),
+                       ("response", r"intraclass correlation is high")):
+        out.append(near(where, ctx, float(lo), places=2,
+                        label=f"{where}: ICC lower bound {lo:.2f}"))
+        out.append(near(where, ctx, float(hi), places=2,
+                        label=f"{where}: ICC upper bound {hi:.2f}"))
+    # and the two documents must agree with each other, not merely each with the CSV
+    pat = re.compile(r"intraclass correlation is high \(?\$?([\d.]+)\$?[^\d]{1,12}\$?([\d.]+)")
+    seen = {}
+    for where in ("paper", "response"):
+        m = pat.search(" ".join(doc(where).split()).replace("--", "-").replace("–", "-"))
+        seen[where] = (m.group(1), m.group(2)) if m else None
+    agree = seen["paper"] is not None and seen["paper"] == seen["response"]
+    out.append((agree, "manuscript and response letter quote the same ICC range",
+                f"{seen['paper']} vs {seen['response']}"))
+    return out
+
+
 CHECKS = [
     ("retired claims", check_retired_claims),
+    ("shared numbers across documents", check_shared_numbers),
     ("letter section pointers", check_letter_section_refs),
     ("corrected graded gaps", check_corrected_gaps),
     ("GUE census and pre-registered score", check_gue),

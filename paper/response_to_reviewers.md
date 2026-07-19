@@ -42,7 +42,7 @@ generality concern directly.
 
 3. **A cross-suite census (§4.10) — and an honest null.** We applied the census
    unchanged to the Nucleotide Transformer downstream tasks. Three of eleven
-   independent tasks are leaky and six more borderline, one at 25.0% *byte-identical* train/test overlap.
+   independent tasks are leaky — one at 25.0% *byte-identical* train/test overlap — and six more borderline.
    (verified on a separate code path using no k-mers). **No ranking inverts
    materially on any of them, and we report that null prominently rather than
    burying it.** One swap does occur — HistGradientBoosting overtakes the forest on
@@ -308,7 +308,7 @@ Implemented and reported in full. Resampling whole within-test near-duplicate
 components as blocks widens the CIs by **1.0–1.8×** but **flips no verdict**: the RF
 drop still excludes zero on both datasets (ensembl [0.156, 0.172]; nontata
 [0.092, 0.126]) and the ensembl LR drop stays null. We now also report the diagnostics
-the reviewer's request implies: the intraclass correlation is high (0.91–0.99) yet the
+the reviewer's request implies: the intraclass correlation is high (0.78–0.99) yet the
 **design effect is small** (1.06–1.17), because the correlated near-duplicates are
 test-to-**train**, not test-to-test — within-test clustering is only 1.06–1.19
 sequences per component, a regime in which a sample-wise bootstrap of a fixed trained
