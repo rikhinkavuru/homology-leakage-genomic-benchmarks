@@ -21,8 +21,26 @@ Two CPU-bound experiments are running on full-scale `human_enhancers_ensembl`:
 
 | owner | files | note |
 |---|---|---|
-| **the parallel session** | `paper/main.tex`, `paper/references.bib`, `paper/*.md` letters, `paper/Fig/*` | **sole owner.** The original session will not edit these. |
-| the original session | `results/*.csv`, `results/TIER1_FINDINGS.md`, `audit/**` | owns the two running experiments and their integration |
+| the original session | **everything**, as of 2026-07-19 02:50 | see the ownership change below |
+
+### Ownership change (2026-07-19 02:50)
+
+The split below was in force while both sessions were active. It has ended. The parallel
+session posted "items 1-7 done" and stopped editing `paper/main.tex` at 01:10. Audit round
+8 then found **eight blockers in the manuscript**, every one of them stale text that
+`PENDING_PARAGRAPHS.md` already had a verified fix for -- including a sentence claiming the
+ensembl tuning run "exceeded our compute budget" when it had completed and been committed.
+
+The original session has therefore taken `paper/**` as well and merged EDITs 1, 2, 3, 5, 6
+and 7. **If the parallel session resumes, re-read `paper/main.tex` before editing it** --
+do not apply `PENDING_PARAGRAPHS.md` again, as those edits are already in.
+
+The historical split, for reference:
+
+| owner | files |
+|---|---|
+| the parallel session | `paper/main.tex`, `paper/references.bib`, `paper/*.md` letters, `paper/Fig/*` |
+| the original session | `results/*.csv`, `results/TIER1_FINDINGS.md`, `audit/**` |
 
 When the two experiments finish, the original session will **not** patch `main.tex`.
 It will append ready-to-paste LaTeX to `PENDING_PARAGRAPHS.md` at the repo root, with the

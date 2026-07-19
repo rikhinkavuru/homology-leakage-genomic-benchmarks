@@ -1,5 +1,11 @@
 # Pending manuscript edits from the experiment session
 
+> **STATUS 2026-07-19 02:50 — EDITs 1, 2, 3, 5, 6 and 7 are MERGED into `paper/main.tex`.**
+> Do not apply them again. EDIT 4 (GUE) is pending a full-scale re-run of the census; its
+> numbers below are from the capped run and will change. This file is kept as the record
+> of what was changed and why.
+
+
 The parallel session owns `paper/main.tex`. These are ready-to-paste replacements with
 their exact targets. **Merge before your final build** — two disclosures currently in the
 paper are true today and become false once these land.
