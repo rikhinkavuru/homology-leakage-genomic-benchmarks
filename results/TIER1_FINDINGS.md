@@ -378,7 +378,7 @@ and C8 are now wired into it, and every check's state is recorded in the report.
 
 | suite | tasks (independent) | LEAKY | borderline | clean | max jac@0.7 | max exact |
 |---|---|---|---|---|---|---|
-| NT-original | 13 (11) | **4 (3)** | 3 | 6 | **0.2500** | **0.2500** |
+| NT-original | 13 (11) | **4 (3)** | 6 | 2 | **0.2500** | **0.2500** |
 | NT-revised | 13 (11) | 0 | 0 | 13 | 0.0020 | 0.0000 |
 
 Parenthesised counts deduplicate `enhancers` / `enhancers_types`: their train and test
@@ -596,8 +596,9 @@ defect `exp_roster.py` had. Both now merge by dataset.*
 ### 4.2 A pre-registered prediction that failed
 
 The registered call `NT-original → LEAKY` was **wrong as a suite-level statement**: only
-3 of 11 independent tasks are leaky, 3 are borderline and 5 are clean, including both
-independent promoter tasks. The
+3 of 11 independent tasks are leaky, 6 are borderline and only 2 are clean at full
+scale. (An earlier capped pass reported 3 borderline and 5 clean; re-running uncapped
+moved three histone tasks across the containment cut.) The
 informative consequence is that **`human_nontata_promoters`' leak fraction of 0.406 is
 not a property of the promoter task** — NT's equivalent is clean at 0.0059 — but of
 Genomic Benchmarks' construction of it. That separates task effect from curation effect

@@ -99,7 +99,10 @@ def near(where, context, value, places=3, signed=False, label="", span=420):
         return (False, label or context, f"context not found in {where}")
     lo = max(0, m.start() - 40)
     window = s[lo:m.end() + span]
-    ok = any(t in window for t in toks)
+    # A bare substring test lets a corrupted value pass whenever the expected rendering
+    # is a PREFIX of it -- 0.08 matches 0.089, +0.122 matches +0.1229. Round 14 proved
+    # five checks blind that way. Require a non-digit boundary on both sides.
+    ok = any(re.search(r"(?<!\d)" + re.escape(t) + r"(?!\d)", window) for t in toks)
     shown = sorted(toks)[0]
     return (ok, label or context,
             f"{where}: {shown} present in the passage" if ok
@@ -123,7 +126,8 @@ def absent(where, value, places=3, signed=False, label="", context=None):
     toks = _tokens(value, places, signed)
     if toks is None:
         return (True, label, "not applicable")
-    hit = [t for t in toks if t in s]
+    hit = [t for t in toks
+           if re.search(r"(?<!\d)" + re.escape(t) + r"(?!\d)", s)]
     return (not hit, label, "absent" if not hit else f"{where}: found {hit[0]}")
 
 
@@ -136,7 +140,14 @@ def occurs(where, text, n, label=""):
 
 
 def says(where, text, label="", want=True):
-    got = text in doc(where)
+    """Substring test with whitespace normalised.
+
+    Without normalisation the check is fragile to line wrapping: TIER1_FINDINGS wraps
+    "tasks of eleven are\n   leaky", so a literal "twelve are leaky" could never match a
+    revert of that sentence and the check was vacuous. Round 14's self-test caught it.
+    """
+    norm = " ".join(doc(where).split())
+    got = " ".join(text.split()) in norm
     return (got == want, label or f"{where} says {text!r}",
             "present" if got else "absent")
 
@@ -170,6 +181,15 @@ def check_corrected_gaps():
                   (g.model == "kNN-1")].graded_gap_balanced.iloc[0])
     out.append(near("paper", r"definitional memorizer", knn, signed=True,
                     label=f"1-NN corrected gap {knn:+.3f}"))
+    # Rule 2, applied where round 14 proved a single anchored check was not enough. Each
+    # of these values is stated at several sites; an anchored check protects one of them
+    # and the count protects the rest, so a stale site drops the count and fails.
+    for tok, n, what in (("0.461", 3, "1-NN corrected gap"),
+                         ("+0.179", 3, "nonTATA non-memorizer mean"),
+                         ("0.370", 2, "ExtraTrees corrected gap"),
+                         ("$3$ of $15$", 2, "GUE registered score"),
+                         ("$0.96$", 2, "ensembl cohesion")):
+        out.append(occurs("paper", tok, n, label=f"{what} {tok} at all {n} sites"))
     return out
 
 
@@ -308,9 +328,16 @@ def check_crosssuite_counts():
     clean = independent - len(leaky) - len(borderline)
     return [
         (len(nt) == 13, f"13 NT-original tasks shipped (found {len(nt)})", ""),
+        # Round 14 found the NT census had been left capped at 20,000 while the GUE one
+        # was re-run in full; three verdicts flipped when it was finally run uncapped.
+        # This mirrors the GUE full-scale assertion so it cannot recur silently.
+        (not bool(c.subsampled.any()),
+         "cross-suite census is full scale on every row",
+         "no row subsampled" if not c.subsampled.any()
+         else "SOME ROWS CAPPED -- clean verdicts there are provisional"),
         (len(leaky) == 3, f"{len(leaky)} leaky independent tasks", ""),
-        (len(borderline) == 3, f"{len(borderline)} borderline", ""),
-        (clean == 5, f"{clean} clean independent tasks", "3+3+5 = 11"),
+        (len(borderline) == 6, f"{len(borderline)} borderline", ""),
+        (clean == 2, f"{clean} clean independent tasks", "3+6+2 = 11"),
         says("paper", "three of eleven", label="paper says three of eleven"),
         says("paper", "three of twelve", want=False,
              label="paper no longer says three of twelve"),
@@ -367,34 +394,43 @@ def self_test():
     the gate fail is a check that cannot fail, which is a defect in the gate itself.
     """
     import copy
-    base = doc("paper")
+    # Rule 4 said the gate reads the results documents too; rule 3 says every check must
+    # be shown to fail. Until round 14 this function mutated only the manuscript, so no
+    # non-manuscript check was ever proved capable of failing. Mutations now name their
+    # document.
+    base = {k: doc(k) for k in DOCS}
     mutations = [
-        ("nonTATA non-memorizer mean at its single site",
-         "memorizers average $+0.122$ against $+0.179$",
+        ("findings: the NT independent-task count",
+         "findings", "tasks of eleven are", "tasks of twelve are"),
+        ("findings: the full-scale GUE minimum in the outcome table",
+         "findings", "jac@0.7 spans 0.009", "jac@0.7 spans 0.005"),
+        ("paper: nonTATA non-memorizer mean at its single site",
+         "paper", "memorizers average $+0.122$ against $+0.179$",
          "memorizers average $+0.122$ against $+0.155$"),
-        ("ensembl non-memorizer mean where section 4.5 states it",
-         "average $+0.292$ against $+0.165$", "average $+0.292$ against $+0.155$"),
-        ("one of the two sites quoting the break-a-clean interval",
-         "$[0.083,0.126]^{*}$", "$[0.084,0.127]^{*}$"),
-        ("the competing-rule score in the dose-response caveat",
-         "also scores $10/10$", "also scores $7/10$"),
-        ("the GUE Jaccard minimum", "from $0.009$ to $0.041$",
+        ("paper: ensembl non-memorizer mean where section 4.5 states it",
+         "paper", "average $+0.292$ against $+0.165$", "average $+0.292$ against $+0.155$"),
+        ("paper: one of the two sites quoting the break-a-clean interval",
+         "paper", "$[0.083,0.126]^{*}$", "$[0.084,0.127]^{*}$"),
+        ("paper: the competing-rule score in the dose-response caveat",
+         "paper", "also scores $10/10$", "also scores $7/10$"),
+        ("paper: the GUE Jaccard minimum", "paper", "from $0.009$ to $0.041$",
          "from $0.011$ to $0.041$"),
     ]
     print("== self-test: each mutation must make the gate FAIL ==\n")
     bad = 0
-    for label, old, new in mutations:
-        if old not in base:
+    for label, where, old, new in mutations:
+        if old not in base[where]:
             print(f"  [SKIP] {label} -- target text not present; check needs updating")
             bad += 1
             continue
-        _cache["paper"] = base.replace(old, new, 1)
+        _cache.update(base)
+        _cache[where] = base[where].replace(old, new, 1)
         _, failed = run(verbose=False)
         print(f"  [{'ok  ' if failed else 'BLIND'}] {label}"
               + ("" if failed else "  <-- gate did NOT fail; this check is vacuous"))
         if not failed:
             bad += 1
-    _cache["paper"] = base
+    _cache.update(base)
     print(f"\n{len(mutations) - bad}/{len(mutations)} mutations detected")
     return bad
 
