@@ -132,7 +132,8 @@ All random-resplit deltas within ±0.006 except: ['demo_human_or_worm', 'drosoph
 ## 7. Cross-dataset summary
 
 - **Leaky (leak@0.7>0.1): 2** (human_nontata_promoters, human_enhancers_ensembl): best-model homology drop mean **0.139** (range +0.121..+0.156); random drop mean -0.001.
-- **Clean: 5** (demo_coding_vs_intergenomic_seqs, human_ocr_ensembl, demo_human_or_worm, drosophila_enhancers_stark, human_enhancers_cohn): best-model homology drop mean **+0.001** (range -0.004..+0.012) — ~0; random drop mean +0.004.
+- **Borderline: 1** (demo_coding_vs_intergenomic_seqs): clean under the length-blind $k$-mer Jaccard but above the cut on the length-robust containment index; best-model homology drop mean **-0.001**.
+- **Clean: 4** (human_ocr_ensembl, demo_human_or_worm, drosophila_enhancers_stark, human_enhancers_cohn): best-model homology drop mean **+0.002** (range -0.004..+0.012) — ~0; random drop mean +0.006.
 
 ## 8. Subsampling-masking effect (why full-scale leakage matters)
 
@@ -244,20 +245,20 @@ On the ORIGINAL split, test sequences are binned by max 8-mer Jaccard to the tra
 
 ## 13. Leakage report card (which datasets can you trust?)
 
-| dataset | n | leak@0.7 | leak@0.9 | verdict | best model | acc drop (seed 0) | top model changes | RF rank orig->corr |
-|---|---|---|---|---|---|---|---|---|
-| human_nontata_promoters | 36,131 | 0.406 | 0.225 | LEAKY | RF_k6 | +0.108 | yes | 1->3 |
-| human_enhancers_ensembl | 154,842 | 0.384 | 0.380 | LEAKY | RF_k6 | +0.164 | yes | 1->4 |
-| demo_coding_vs_intergenomic_seqs | 100,000 | 0.078 | 0.024 | borderline | LR_k6 | -0.001 | no | 4->4 |
-| human_ocr_ensembl | 174,756 | 0.010 | 0.001 | clean | LR_k6 | +0.004 | no | 4->4 |
-| demo_human_or_worm | 100,000 | 0.012 | 0.003 | clean | LR_k6 | -0.004 | no | 4->4 |
-| drosophila_enhancers_stark | 6,914 | 0.016 | 0.006 | clean | LR_k6 | +0.012 | no | 2->3 |
-| human_enhancers_cohn | 27,791 | 0.001 | 0.000 | clean | LR_k6 | -0.004 | no | 4->4 |
-| human_ensembl_regulatory (3-class) | 289,061 | 0.005 | 0.001 | clean | RF_k4 | -0.010 | n/a | n/a |
+| dataset | n | leak@0.7 | leak@0.9 | contain@0.7 | verdict | best model | acc drop (seed 0) | top model changes | RF rank orig->corr |
+|---|---|---|---|---|---|---|---|---|---|
+| human_nontata_promoters | 36,131 | 0.406 | 0.225 | 0.445 | LEAKY | RF_k6 | +0.108 | yes | 1->3 |
+| human_enhancers_ensembl | 154,842 | 0.384 | 0.380 | 0.845 | LEAKY | RF_k6 | +0.164 | yes | 1->4 |
+| demo_coding_vs_intergenomic_seqs | 100,000 | 0.078 | 0.024 | 0.131 | borderline | LR_k6 | -0.001 | no | 4->4 |
+| human_ocr_ensembl | 174,756 | 0.010 | 0.001 | 0.068 | clean | LR_k6 | +0.004 | no | 4->4 |
+| demo_human_or_worm | 100,000 | 0.012 | 0.003 | 0.042 | clean | LR_k6 | -0.004 | no | 4->4 |
+| drosophila_enhancers_stark | 6,914 | 0.016 | 0.006 | 0.033 | clean | LR_k6 | +0.012 | no | 2->3 |
+| human_enhancers_cohn | 27,791 | 0.001 | 0.000 | 0.005 | clean | LR_k6 | -0.004 | no | 4->4 |
+| human_ensembl_regulatory (3-class) | 289,061 | 0.005 | 0.001 | n/a | clean | RF_k4 | -0.010 | n/a | n/a |
 
 *Drop values are the bootstrap-consistent point estimates (seed-0 corrected split, with 95% CIs reported in §16); 3-seed-mean corrected accuracies and SDs are in §16.*
 
-Verdict rule: LEAKY if full-scale test/train near-duplicate fraction > 0.1 at Jaccard 0.7. *Source: `report_card.py` -> `leakage_report_card.csv`; figure `fig_report_card.*`.*
+Verdict rule: LEAKY if the full-scale near-duplicate test fraction exceeds 0.1 at Jaccard 0.7; **borderline** if the length-robust containment index does; clean otherwise. The containment column below is what distinguishes the two. *Source: `report_card.py` -> `leakage_report_card.csv`; figure `fig_report_card.*`.*
 
 ## 14. Label concordance of near-duplicates (Check 1)
 

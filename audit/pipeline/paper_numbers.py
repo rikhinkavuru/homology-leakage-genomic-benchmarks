@@ -186,11 +186,23 @@ L.append(f"\nAll random-resplit deltas within ±0.006 except: {big if big else '
 
 # ---- 7. cross-dataset summary ----
 L.append("## 7. Cross-dataset summary\n")
-lk = sfin.loc[[d for d in BINARY if leak.loc[d, "leak_full_0.7"] > 0.1]]
-cl = sfin.loc[[d for d in BINARY if leak.loc[d, "leak_full_0.7"] <= 0.1]]
+# Partition on the report card's verdict rather than re-deriving a two-way rule here.
+# Until round 23 this section applied the retired Jaccard-only cut and therefore listed
+# demo_coding among the clean, contradicting section 13 of this same file, Table 2 and
+# the abstract, all of which call it borderline.
+_verd = (rcard.set_index("dataset")["verdict"].to_dict()
+         if rcard is not None else {})
+lk = sfin.loc[[d for d in BINARY if _verd.get(d) == "LEAKY"]]
+bd = sfin.loc[[d for d in BINARY if _verd.get(d) == "borderline"]]
+cl = sfin.loc[[d for d in BINARY if _verd.get(d) == "clean"]]
 L.append(f"- **Leaky (leak@0.7>0.1): {len(lk)}** ({', '.join(lk.index)}): best-model homology drop "
          f"mean **{lk.delta_homology.mean():.3f}** (range {lk.delta_homology.min():+.3f}"
          f"..{lk.delta_homology.max():+.3f}); random drop mean {lk.delta_random.mean():+.3f}.")
+if len(bd):
+    L.append(f"- **Borderline: {len(bd)}** ({', '.join(bd.index)}): clean under the "
+             f"length-blind $k$-mer Jaccard but above the cut on the length-robust "
+             f"containment index; best-model homology drop "
+             f"mean **{bd.delta_homology.mean():+.3f}**.")
 L.append(f"- **Clean: {len(cl)}** ({', '.join(cl.index)}): best-model homology drop "
          f"mean **{cl.delta_homology.mean():+.3f}** (range {cl.delta_homology.min():+.3f}"
          f"..{cl.delta_homology.max():+.3f}) — ~0; random drop mean {cl.delta_random.mean():+.3f}.\n")
@@ -341,10 +353,15 @@ else:
 # ---- 13. leakage report card (Part 1 artifact) ----
 L.append("## 13. Leakage report card (which datasets can you trust?)\n")
 if rcard is not None:
-    L.append("| dataset | n | leak@0.7 | leak@0.9 | verdict | best model | acc drop (seed 0) | top model changes | RF rank orig->corr |")
-    L.append("|---|---|---|---|---|---|---|---|---|")
+    # containment is the column that distinguishes borderline from clean; omitting it left
+    # the file's verdicts unexplainable from the file itself.
+    L.append("| dataset | n | leak@0.7 | leak@0.9 | contain@0.7 | verdict | best model | acc drop (seed 0) | top model changes | RF rank orig->corr |")
+    L.append("|---|---|---|---|---|---|---|---|---|---|")
     for _, r in rcard.iterrows():
+        _con = r.get("leak_containment_0p7")
+        _con = "n/a" if _con is None or pd.isna(_con) else f"{float(_con):.3f}"
         L.append(f"| {r['dataset']} | {int(r['n_full']):,} | {r['leak_at_0p7']:.3f} | {r['leak_at_0p9']:.3f} "
+                 f"| {_con} "
                  f"| {r['verdict']} | {r['best_model']} "
                  # report_card renamed these two columns; the binary rows carry the new
                  # names and only the 3-class row still carries the old ones. Reading the
@@ -357,8 +374,10 @@ if rcard is not None:
     L.append("\n*Drop values are the bootstrap-consistent point estimates (seed-0 corrected "
              "split, with 95% CIs reported in §16); 3-seed-mean corrected accuracies and "
              "SDs are in §16.*")
-    L.append("\nVerdict rule: LEAKY if full-scale test/train near-duplicate fraction > 0.1 at "
-             "Jaccard 0.7. *Source: `report_card.py` -> `leakage_report_card.csv`; figure "
+    L.append("\nVerdict rule: LEAKY if the full-scale near-duplicate test fraction exceeds "
+             "0.1 at Jaccard 0.7; **borderline** if the length-robust containment index "
+             "does; clean otherwise. The containment column below is what distinguishes the "
+             "two. *Source: `report_card.py` -> `leakage_report_card.csv`; figure "
              "`fig_report_card.*`.*\n")
 else:
     L.append("*(pending: run `python report_card.py`)*\n")

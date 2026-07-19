@@ -156,7 +156,7 @@ nontata-as-cautionary-case framing (§4.3, §5).
 We also disclose a decomposition that cuts the other way and belongs in the record
 (§4.3): on ensembl, evaluated on the as-shipped split's *novel* stratum with no
 re-splitting and no retraining, the forest already ranks below the linear SVM, but
-by only 1.2 points; the remaining ~10 points are a **retraining penalty**, because
+by only 1.2 points; after re-splitting and refitting it sits ~10 points below, so the remaining ~9 points are a **retraining penalty**, because
 de-leaking removes near-duplicate partners from the training set too. Both are
 consequences of leakage, but they are different quantities and we now say so.
 
