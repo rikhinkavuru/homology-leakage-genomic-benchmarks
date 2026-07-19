@@ -16,6 +16,18 @@ Two CPU-bound experiments are running on full-scale `human_enhancers_ensembl`:
 - Do **not** rewrite git history. Normal commits on top are fine.
 - Everything below is pure writing/figure work: no CPU, no conflict.
 
+
+## File ownership (agreed 2026-07-19)
+
+| owner | files | note |
+|---|---|---|
+| **the parallel session** | `paper/main.tex`, `paper/references.bib`, `paper/*.md` letters, `paper/Fig/*` | **sole owner.** The original session will not edit these. |
+| the original session | `results/*.csv`, `results/TIER1_FINDINGS.md`, `audit/**` | owns the two running experiments and their integration |
+
+When the two experiments finish, the original session will **not** patch `main.tex`.
+It will append ready-to-paste LaTeX to `PENDING_PARAGRAPHS.md` at the repo root, with the
+exact target location for each snippet. Check that file before your final build.
+
 ## Where the work stands
 
 Independent blind scoring: **science 7.5/10, manuscript 7.0/10** (from 6.5/6.5).
