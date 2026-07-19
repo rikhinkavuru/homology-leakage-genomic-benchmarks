@@ -91,7 +91,7 @@ cross-suite modules, which download the Nucleotide Transformer task files.
 | T9 | `python -m audit.experiments.exp_tuning` | `tuning_selection.csv` | ~15 min (nonTATA); the ensembl arm is hours |
 | T10 | `python -m audit.experiments.exp_bh_correction` | `bh_correction_frozen.csv` | < 5 s |
 | T11 | `python -m audit.tools.certify --self-validate` | `certify_self_validation.csv`; **exit 1 on drift** | ~2 s |
-| T12 | `python -m audit.experiments.exp_gue --cap 100000 --tasks prom_core_all prom_core_notata prom_core_tata prom_300_all prom_300_notata prom_300_tata human_tf_0 human_tf_1 human_tf_2 human_tf_3 human_tf_4 emp_H3 emp_H3K4me3 emp_H4 virus_covid` | `gue_census.csv` (and `gue_screen.csv` only if a task is non-clean) | ~40 min + download |
+| T12 | `python -m audit.experiments.exp_gue --cap 100000` | `gue_census.csv` (and `gue_screen.csv` only if a task is non-clean) | ~40 min + download |
 | T13 | `python -m audit.experiments.exp_estimator_sensitivity` | `estimator_sensitivity.csv`, `estimator_specificity.csv`, `estimator_specificity_real.csv` | ~3 min |
 
 `certify` also runs end to end on a dataset (`--dataset NAME [--cap N]`) or on arbitrary
@@ -103,9 +103,9 @@ Two notes on the newer modules. **T12 must be run uncapped** (`--cap 100000` exc
 GUE task, so nothing is truncated): the first pass of this census capped training sets at
 20,000 and its clean verdicts were lower bounds rather than measurements, since truncating
 train can only lower a max-similarity-to-train statistic. Rows carry `train_frac_used` and
-`verdict_is_lower_bound` so a capped run is never mistaken for a full one. The task list
-is given explicitly because the module's default also censuses the two unregistered mouse
-tasks, which the committed CSV deliberately excludes. **T13** measures
+`verdict_is_lower_bound` so a capped run is never mistaken for a full one. The committed CSV holds all seventeen tasks the default censuses: the fifteen registered
+ones plus `mouse_0` and `mouse_1`, which carry `registered=False` and an empty
+`prereg_correct`, so they are reported but never enter the tally. **T13** measures
 the detector's specificity on real DNA as well as synthetic; the synthetic figure alone
 understates the false-positive tail by more than an order of magnitude and should not be
 quoted on its own.

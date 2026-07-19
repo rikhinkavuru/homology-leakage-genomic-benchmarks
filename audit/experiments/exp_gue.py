@@ -227,12 +227,23 @@ def main():
             pd.DataFrame(rows).to_csv(f"{R}/gue_census.csv.partial", index=False)
     if not rows:
         print("nothing censused"); return
-    for frame, name in ((pd.DataFrame(rows), "gue_census"),
-                        (pd.DataFrame(screens), "gue_screen")):
+    # Merge with any previous run's tasks rather than overwriting. Running a subset via
+    # --tasks previously left the CSV holding only that subset, silently discarding the
+    # rest of the census -- the same bug exp_roster.py and exp_tuning.py both had.
+    for frame, name, key in ((pd.DataFrame(rows), "gue_census", "task"),
+                             (pd.DataFrame(screens), "gue_screen", None)):
         if frame.empty:
             continue
-        tmp = f"{R}/{name}.csv.tmp"; frame.to_csv(tmp, index=False)
-        os.replace(tmp, f"{R}/{name}.csv")
+        out = f"{R}/{name}.csv"
+        if key and os.path.exists(out):
+            prev = pd.read_csv(out)
+            if key in prev.columns:
+                prev = prev[~prev[key].isin(set(frame[key]))]
+                frame = pd.concat([prev, frame], ignore_index=True)
+                if "registered" in frame.columns:
+                    frame = frame.sort_values(["registered", "task"], ascending=[False, True])
+        tmp = out + ".tmp"; frame.to_csv(tmp, index=False)
+        os.replace(tmp, out)
     part = f"{R}/gue_census.csv.partial"
     if os.path.exists(part):
         os.remove(part)
