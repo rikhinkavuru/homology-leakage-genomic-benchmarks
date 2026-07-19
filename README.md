@@ -49,7 +49,8 @@ and prints a summary:
 | `audit/experiments/exp_inject3class.py` | injected-leakage multiclass construction | R2.a3 |
 | `audit/experiments/exp_deep.py` | from-scratch 1D CNN dropout×weight-decay dose-response (MPS/CPU) | R1.1, R3.1(i) |
 | `audit/experiments/exact_dup_count.py` | exact byte-identical train/test duplicate census | terminology |
-| `audit/figures/make_paper_figures.py`, `audit/figures/make_part_b_figures.py`, `audit/figures/make_graded_figure.py` | Figures 1–3 | — |
+| `paper/Fig/make_fig_controls.py` | Figure 1 (the `audit/figures/` block is superseded) |
+| `audit/figures/make_paper_figures.py`, `audit/figures/make_part_b_figures.py`, `audit/figures/make_graded_figure.py` | Figures 2–3 | — |
 
 Deep-model pre-registration (claim, dose-response grid, binding refutation condition):
 [`results/deep_preregistration.md`](results/deep_preregistration.md).

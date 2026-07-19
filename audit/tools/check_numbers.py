@@ -385,21 +385,69 @@ def check_retired_claims():
                                     "the ensembl tuning run that in fact completed"),
         ("Both select min_samples_leaf = 1",
                                     "true of nontata only; ensembl grouped CV selects 20"),
+        ("cluster-grouped cross-validation select the memorizing default",
+                                    "the same claim in paraphrase -- round 18 found the "
+                                    "literal-string guard blind to it"),
+        ("expectation to the contrary was wrong",
+                                    "P5 holds on ensembl; it did not fail"),
         ("P5 fails outright",       "P5 holds on ensembl and ties on nontata"),
         ("P5) failing outright",    "the same, in the cover letter's phrasing"),
         ("Of the five,",            "there are six pre-registered predictions, not five"),
     ]
     out = []
     for phrase, why in retired:
-        hits = [w for w in DOCS if " ".join(phrase.split()) in " ".join(doc(w).split())]
+        # Case-folded. Round 18 found "Three of twelve" alive in the response letter while
+        # this check reported the lowercase phrase absent: a sentence-initial capital was
+        # enough to hide a retired claim in a shipped PDF.
+        needle = " ".join(phrase.split()).lower()
+        hits = [w for w in DOCS if needle in " ".join(doc(w).split()).lower()]
         out.append((not hits, f"retired: {phrase!r} ({why})",
                     "absent everywhere" if not hits
                     else f"STILL PRESENT in {', '.join(hits)}"))
     return out
 
 
+def check_letter_section_refs():
+    """The letters are markdown and cannot use \\ref, so their section pointers are typed
+    by hand and drift whenever a subsection is inserted. Round 18 found all ten of them off
+    by one, because the dose-response section became 4.11 and everything after it shifted --
+    so the response letter routed reviewers to the wrong section for the two items the
+    Associate Editor had gated the decision on. This resolves each pointer against the
+    manuscript's own numbering and checks the topic matches.
+    """
+    tex = doc("paper")
+    # Results subsections in source order; index+1 is the number after "4."
+    marker = "\\section{Results}"
+    body = tex[tex.index(marker):] if marker in tex else tex
+    end = body.find("\\section{Discussion}")
+    if end > 0:
+        body = body[:end]
+    subs = re.findall(r"\\subsection\{(.+?)\}", body)
+    numbering = {f"4.{i+1}": t for i, t in enumerate(subs)}
+    expect = [
+        ("§4.12", ("alignment", "chromosome", "control")),
+        ("§4.13", ("robust",)),
+    ]
+    out = []
+    for ref, keywords in expect:
+        num = ref.lstrip("§")
+        title = numbering.get(num, "")
+        ok = any(k.lower() in title.lower() for k in keywords)
+        out.append((ok, f"{ref} in the letters resolves to a section about {keywords[0]}",
+                    f"{num} = {title[:56]!r}" if title else f"{num} not found"))
+    # and nothing may point past the last Results subsection
+    highest = max(int(k.split(".")[1]) for k in numbering) if numbering else 0
+    for where in ("response", "cover"):
+        refs = [int(m) for m in re.findall(r"§4\.(\d+)", doc(where))]
+        bad = [r for r in refs if r > highest]
+        out.append((not bad, f"{where} letter has no pointer past §4.{highest}",
+                    "all in range" if not bad else f"dangling: {bad}"))
+    return out
+
+
 CHECKS = [
     ("retired claims", check_retired_claims),
+    ("letter section pointers", check_letter_section_refs),
     ("corrected graded gaps", check_corrected_gaps),
     ("GUE census and pre-registered score", check_gue),
     ("manipulation intervals", check_manipulation),

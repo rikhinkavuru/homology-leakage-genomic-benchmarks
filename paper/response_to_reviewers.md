@@ -41,8 +41,8 @@ generality concern directly.
    the causal claim from correlational to interventional.
 
 3. **A cross-suite census (§4.10) — and an honest null.** We applied the census
-   unchanged to the Nucleotide Transformer downstream tasks. Three of twelve
-   independent tasks are leaky, one at 25.0% *byte-identical* train/test overlap
+   unchanged to the Nucleotide Transformer downstream tasks. Three of eleven
+   independent tasks are leaky and six more borderline, one at 25.0% *byte-identical* train/test overlap.
    (verified on a separate code path using no k-mers). **No ranking inverts
    materially on any of them, and we report that null prominently rather than
    burying it.** One swap does occur — HistGradientBoosting overtakes the forest on
@@ -139,13 +139,13 @@ Agreed, and we now **measure** rather than assert it. On `human_nontata_promoter
 the corrected and novel-only rankings diverge (τ = −0.67): the random forest is
 demoted under the corrected split yet remains best on truly novel sequences, so its
 advantage is partly genuine generalization. Single-linkage **cohesion** supplies the
-biological reason (§4.12): ensembl's clusters are 99.6% pairwise with largest-cluster
+biological reason (§4.13): ensembl's clusters are 99.6% pairwise with largest-cluster
 cohesion 0.96 — clean discrete locus duplication, where correction is a clean fix —
 whereas nontata's 420-member largest cluster has cohesion 0.083, i.e. heavy
 transitive chaining that over-removes genuine promoter and gene-family signal. We
 reframe both the corrected split and novel-only accuracy as explicit
 near-duplicate-bounded proxies (Methods §3.5, §3.9) and name leave-one-chromosome-out
-as the deployment-relevant control (§4.11). This is the core of the
+as the deployment-relevant control (§4.12). This is the core of the
 nontata-as-cautionary-case framing (§4.3, §5).
 
 We also disclose a decomposition that cuts the other way and belongs in the record
@@ -163,7 +163,7 @@ edge metric changes), and refit all four models. The `human_enhancers_ensembl` e
 is metric-independent (RF drop **0.164** Jaccard ≈ **0.162** alignment; RF still rank
 4); nontata is milder under alignment (0.108 → 0.064), reinforcing its partial status.
 We describe this as "alignment-scored", not k-mer-independent, since MMseqs2 is
-itself k-mer-seeded (**§4.11**, Methods **§3.6**).
+itself k-mer-seeded (**§4.12**, Methods **§3.6**).
 
 **Thresholds:** the clustering-threshold sweep (0.5/0.7/0.9) changes no verdict
 (Methods §3.5); the length-robust containment re-measure and the bimodal-vs-graded
@@ -187,7 +187,7 @@ metrics: the leakage inflation is **revealed by AUPRC/MCC/minority-recall but ma
 by accuracy** (ensembl π=0.2: AUPRC 0.622 → 0.477, MCC 0.422 → 0.182, minority recall
 0.258 → 0.070, while accuracy barely moves, 0.844 → 0.808). The splitter is extended
 with a per-class realized-fraction check and preserves the target prevalence
-(realized 0.5001 / 0.2007 / 0.1001). **§4.12**; Methods §3.9.
+(realized 0.5001 / 0.2007 / 0.1001). **§4.13**; Methods §3.9.
 
 ### R2.a2 — "The similarity measure and the features are both k-mer based, so the leakage finding may be circular."
 
@@ -201,7 +201,7 @@ identifies the defect in the shipped genomic intervals, which are causally upstr
 of and statistically independent from the k-mer clustering: 77,421 positive intervals
 sit on only 40,934 distinct coordinates, and every one of the 36,487 duplicated pairs
 carries byte-identical sequences and a single label. That is a cross-modal
-confirmation, not a restatement. **§4.11**, **§4.6**; Methods §3.4, §3.6, §3.10.
+confirmation, not a restatement. **§4.12**, **§4.6**; Methods §3.4, §3.6, §3.10.
 
 ### R2.a3 — "Extend to deep models and to the multiclass setting."
 
@@ -212,7 +212,7 @@ neural learner that we had not designated memorization-prone in advance.
 injecting label-carrying near-duplicates at f ∈ {0, 0.1, 0.2, 0.4} into the clean
 3-class `human_ensembl_regulatory` set. The RF drop grows monotonically with f
 (+0.0004, +0.118, +0.179, +0.258) while LR stays flat (≤0.066), and the corrected
-accuracy is stable (~0.58) because the split removes the injected leakage. **§4.12**;
+accuracy is stable (~0.58) because the split removes the injected leakage. **§4.13**;
 Methods §3.9. We state explicitly that leakage is injected because the suite ships no
 naturally leaky multiclass set.
 
@@ -220,7 +220,7 @@ naturally leaky multiclass set.
 
 The verdict is robust to the clustering threshold (0.5/0.7/0.9 sweep, no change;
 Methods §3.5) and to removal of the single largest component. We report the geometry
-that drives the recommendation: the length-robust containment index (§4.1, §4.12) as
+that drives the recommendation: the length-robust containment index (§4.1, §4.13) as
 the metric to prefer when lengths vary, and single-linkage cohesion as the diagnostic
 separating a clean discrete-duplication case (ensembl — one threshold suffices) from
 a transitive-chaining case (nontata — treat as partial scope, avoid over-removal).
@@ -316,7 +316,7 @@ model's test correctness is nearly unbiased. An analytic Liang–Zeger cluster-r
 standard error agrees with the block bootstrap, and a **combined-source interval**
 folding in the five re-split-seed variance still excludes zero for both leaky RF drops
 (ensembl [0.154, 0.174]; nontata [0.088, 0.129]). Every deep-model drop CI (§4.9) uses
-this cluster bootstrap. **§4.12**; Methods §3.9.
+this cluster bootstrap. **§4.13**; Methods §3.9.
 
 Relatedly, because we report roughly a dozen leaky-versus-clean delta intervals, we
 applied a **Benjamini–Hochberg correction** at q = 0.05: it leaves the two leaky RF
@@ -341,8 +341,8 @@ since a clean verdict carries a heavier evidential burden than a leaky one.
 
 We agree it could not be addressed quickly, and did not try to. The revision adds the
 two hard-gate experiments the panel expected — a trained deep model (§4.9) and
-alignment-based validation (§4.11) — plus the genomics-standard **leave-one-chromosome-out
-control** (§4.11), which independently reproduces the marquee `human_enhancers_ensembl`
+alignment-based validation (§4.12) — plus the genomics-standard **leave-one-chromosome-out
+control** (§4.12), which independently reproduces the marquee `human_enhancers_ensembl`
 demotion (RF rank 1 → 4, identical corrected order) and independently confirms
 `human_nontata_promoters` as the partial case (RF stays rank 1). Beyond those, it adds
 the nine-model roster, the construct-and-break manipulation, the coordinate-space
