@@ -51,6 +51,10 @@ DOCS = {
     "reproduce": os.path.join(HERE, "REPRODUCE.md"),
     "response": os.path.join(HERE, "paper", "response_to_reviewers.md"),
     "cover": os.path.join(HERE, "paper", "cover_letter.md"),
+    # PAPER_NUMBERS calls itself the single authoritative source, so it is the
+    # last document that should be outside the guard. Round 22 found it frozen
+    # two rounds behind, contradicting Table 2 on the borderline verdict.
+    "numbers": os.path.join(R, "PAPER_NUMBERS.md"),
 }
 
 _cache = {}

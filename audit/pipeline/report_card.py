@@ -97,7 +97,7 @@ rc.to_csv(f"{R}/leakage_report_card.csv", index=False)
 print(rc.to_string(index=False))
 
 # ---- table figure ----
-fig, ax = plt.subplots(figsize=(12, 3.2))
+fig, ax = plt.subplots(figsize=(15, 3.4))
 ax.axis("off")
 # Column set mirrors the CSV exactly. Round 20 renamed two row keys and left this
 # block reading the old ones, so the script wrote a corrected CSV and then died with a
@@ -122,6 +122,10 @@ def _cell(r):
 cell = [_cell(r) for r in rows]
 tab = ax.table(cellText=cell, colLabels=cols, loc="center", cellLoc="center")
 tab.auto_set_font_size(False); tab.set_fontsize(9); tab.scale(1, 1.6)
+# Without this the dataset column keeps matplotlib's default equal width and every
+# name is clipped at both ends -- "an_enhancers_er" and "man_enhancers_" are two
+# different datasets, and neither shows the suffix that tells them apart.
+tab.auto_set_column_width(col=list(range(len(cols))))
 for j in range(len(cols)):
     tab[0, j].set_facecolor("#34495e"); tab[0, j].get_text().set_color("white"); tab[0, j].get_text().set_weight("bold")
 for i, r in enumerate(rows, start=1):
@@ -131,8 +135,13 @@ for i, r in enumerate(rows, start=1):
     if r["verdict"] == "LEAKY":
         for j in range(len(cols)):
             tab[i, j].set_facecolor("#fdeef0" if j != 4 else "#f8d7da")
-ax.set_title("Genomic Benchmarks homology-leakage report card\n"
-             "(LEAKY = test/train near-duplicate fraction > 0.1 at Jaccard 0.7; full-scale leakage)",
+# Three-way rule, stated as Table 2 states it. The old title gave only the LEAKY
+# condition, which left the borderline row unexplained once the verdict went three-way,
+# and used "homology-leakage", the term the review asked us to retire in favour of
+# "near-duplicate".
+ax.set_title("Genomic Benchmarks near-duplicate leakage report card\n"
+             "(LEAKY if the full-scale near-duplicate test fraction exceeds 0.1 at Jaccard 0.7; "
+             "borderline if the length-robust containment index does)",
              fontsize=11, weight="bold")
 for ext_ in ("png", "svg", "pdf"):
     fig.savefig(f"{FIG}/fig_report_card.{ext_}", dpi=300, bbox_inches="tight")

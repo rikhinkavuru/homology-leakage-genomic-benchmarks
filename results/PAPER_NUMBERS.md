@@ -244,16 +244,16 @@ On the ORIGINAL split, test sequences are binned by max 8-mer Jaccard to the tra
 
 ## 13. Leakage report card (which datasets can you trust?)
 
-| dataset | n | leak@0.7 | leak@0.9 | verdict | best model | acc drop (corrected) | ranking inverts | RF rank orig->corr |
+| dataset | n | leak@0.7 | leak@0.9 | verdict | best model | acc drop (seed 0) | top model changes | RF rank orig->corr |
 |---|---|---|---|---|---|---|---|---|
 | human_nontata_promoters | 36,131 | 0.406 | 0.225 | LEAKY | RF_k6 | +0.108 | yes | 1->3 |
 | human_enhancers_ensembl | 154,842 | 0.384 | 0.380 | LEAKY | RF_k6 | +0.164 | yes | 1->4 |
-| demo_coding_vs_intergenomic_seqs | 100,000 | 0.078 | 0.024 | clean | LR_k6 | -0.001 | no | 4->4 |
+| demo_coding_vs_intergenomic_seqs | 100,000 | 0.078 | 0.024 | borderline | LR_k6 | -0.001 | no | 4->4 |
 | human_ocr_ensembl | 174,756 | 0.010 | 0.001 | clean | LR_k6 | +0.004 | no | 4->4 |
 | demo_human_or_worm | 100,000 | 0.012 | 0.003 | clean | LR_k6 | -0.004 | no | 4->4 |
 | drosophila_enhancers_stark | 6,914 | 0.016 | 0.006 | clean | LR_k6 | +0.012 | no | 2->3 |
 | human_enhancers_cohn | 27,791 | 0.001 | 0.000 | clean | LR_k6 | -0.004 | no | 4->4 |
-| human_ensembl_regulatory (3-class) | 289,061 | 0.005 | 0.001 | clean | RF_k4 | -0.010 | nan | nan |
+| human_ensembl_regulatory (3-class) | 289,061 | 0.005 | 0.001 | clean | RF_k4 | -0.010 | n/a | n/a |
 
 *Drop values are the bootstrap-consistent point estimates (seed-0 corrected split, with 95% CIs reported in §16); 3-seed-mean corrected accuracies and SDs are in §16.*
 

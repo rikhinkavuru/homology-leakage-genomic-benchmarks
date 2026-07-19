@@ -15,6 +15,14 @@ import os
 import numpy as np
 import pandas as pd
 
+
+def _pick(row, *names, default=None):
+    """First present, non-NaN value among the column `names`; `default` if none."""
+    for n in names:
+        if n in row and not pd.isna(row[n]):
+            return row[n]
+    return default
+
 R = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "results")
 CONFIGS = [(4, "LR"), (6, "LR"), (4, "RF"), (6, "RF")]
 LEAKY = ["human_nontata_promoters", "human_enhancers_ensembl"]
@@ -333,12 +341,19 @@ else:
 # ---- 13. leakage report card (Part 1 artifact) ----
 L.append("## 13. Leakage report card (which datasets can you trust?)\n")
 if rcard is not None:
-    L.append("| dataset | n | leak@0.7 | leak@0.9 | verdict | best model | acc drop (corrected) | ranking inverts | RF rank orig->corr |")
+    L.append("| dataset | n | leak@0.7 | leak@0.9 | verdict | best model | acc drop (seed 0) | top model changes | RF rank orig->corr |")
     L.append("|---|---|---|---|---|---|---|---|---|")
     for _, r in rcard.iterrows():
         L.append(f"| {r['dataset']} | {int(r['n_full']):,} | {r['leak_at_0p7']:.3f} | {r['leak_at_0p9']:.3f} "
-                 f"| {r['verdict']} | {r['best_model']} | {r['acc_drop_corrected']:+.3f} "
-                 f"| {r['ranking_inverts']} | {r['rf_rank_orig_to_corr']} |")
+                 f"| {r['verdict']} | {r['best_model']} "
+                 # report_card renamed these two columns; the binary rows carry the new
+                 # names and only the 3-class row still carries the old ones. Reading the
+                 # old names alone yields NaN rather than raising, so this file silently
+                 # degraded instead of failing loudly -- the same rename that broke the
+                 # figure block, one file over. Fall back explicitly.
+                 f"| {_pick(r, 'acc_drop_seed0', 'acc_drop_corrected', default=float('nan')):+.3f} "
+                 f"| {_pick(r, 'top_model_changes_accuracy', 'ranking_inverts', default='n/a')} "
+                 f"| {_pick(r, 'rf_rank_orig_to_corr', default='n/a')} |")
     L.append("\n*Drop values are the bootstrap-consistent point estimates (seed-0 corrected "
              "split, with 95% CIs reported in §16); 3-seed-mean corrected accuracies and "
              "SDs are in §16.*")
