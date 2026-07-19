@@ -290,12 +290,21 @@ fix-a-leaky the two arms differ by only 0.0120 (−0.0080 matched vs +0.0040 unb
 which is not a difference we read as meaningful — see the note on intervals below. What
 is read there is that both arms sit two orders of magnitude below the control's +0.1650.
 
-**No uncertainty interval is attached to these manipulation drops.** Each condition is a
-single fit at a single split seed, so the contrast between −0.0080 and +0.0040 in the two
-fix-a-leaky arms should not be read as a difference; what is read is the contrast against
-+0.1650, which is an order of magnitude larger than anything else in the table. Putting
-cluster-bootstrap intervals on the manipulation deltas is a straightforward extension and
-is not done here.
+**Cluster-bootstrap intervals are now attached to every manipulation arm**, and the two
+directions are cleanly separated with **disjoint control-versus-intervention intervals**:
+
+| condition | n | pos % | leak@0.7 | RF drop | 95 % CI | excl. 0 |
+|---|---|---|---|---|---|---|
+| B control — ensembl as shipped | 154,842 | 50.0 | 0.390 | **+0.1650** | [0.1566, 0.1733] | **yes** |
+| B manipulated, balance-matched | 81,868 | 50.0 | 0.012 | **−0.0080** | [−0.0189, 0.0030] | no |
+| B manipulated, unbalanced | 118,355 | 34.6 | 0.011 | +0.0040 | [−0.0040, 0.0119] | no |
+| A control — ocr as shipped | 20,000 | 50.0 | 0.004 | +0.0022 | [−0.0191, 0.0247] | no |
+| A manipulated, size+balance-matched | 20,000 | 50.0 | 0.204 | **+0.1054** | [0.0834, 0.1263] | **yes** |
+| A manipulated, unmatched | 28,914 | 65.4 | 0.498 | +0.0627 | [0.0447, 0.0809] | yes |
+
+Each condition is still a single fit at one split seed, so the difference between the two
+fix-a-leaky arms (−0.0080 vs +0.0040) is not read as a difference; what is read is that
+both are null while the control is +0.1650 with a disjoint interval.
 
 **Remaining caveat, stated plainly.** Manipulation A duplicates rows, and duplicated rows
 scattered across a random split are leaky by construction; that part is not a discovery.
