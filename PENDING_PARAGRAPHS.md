@@ -74,14 +74,6 @@ If you need to ship before it lands, leave §5 untouched — it is honest as-is.
 
 ---
 
-## Status
-
-| edit | ready | blocks final build? |
-|---|---|---|
-| 1 — Table 2 intervals | **yes** | yes, merge it |
-| 2 — §4.7 disclosure | **yes** | yes, merge it |
-| 3 — §5 tuning | no, job running | no — current text is correct |
-
 ---
 
 ## EDIT 3 — §5 Discussion: the tuning limitation is now RESOLVED (ready to merge)
