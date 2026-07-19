@@ -1,0 +1,22 @@
+dataset,group,split,accuracy_pct,best_model,leak_full_0.7
+human_nontata_promoters,leaky,original split,92.84,RF_k6,0.4064
+human_nontata_promoters,leaky,random re-split (control),92.91,RF_k6,0.4064
+human_nontata_promoters,leaky,near-duplicate-aware split,81.01,RF_k6,0.4064
+human_enhancers_ensembl,leaky,original split,85.96,RF_k6,0.3839
+human_enhancers_ensembl,leaky,random re-split (control),86.17,RF_k6,0.3839
+human_enhancers_ensembl,leaky,near-duplicate-aware split,69.51,RF_k6,0.3839
+demo_coding_vs_intergenomic_seqs,borderline + clean,original split,90.03,LR_k6,0.0784
+demo_coding_vs_intergenomic_seqs,borderline + clean,random re-split (control),90.25,LR_k6,0.0784
+demo_coding_vs_intergenomic_seqs,borderline + clean,near-duplicate-aware split,90.11,LR_k6,0.0784
+human_ocr_ensembl,borderline + clean,original split,67.7,LR_k6,0.0104
+human_ocr_ensembl,borderline + clean,random re-split (control),67.62,LR_k6,0.0104
+human_ocr_ensembl,borderline + clean,near-duplicate-aware split,67.32,LR_k6,0.0104
+demo_human_or_worm,borderline + clean,original split,93.74,LR_k6,0.0124
+demo_human_or_worm,borderline + clean,random re-split (control),94.35,LR_k6,0.0124
+demo_human_or_worm,borderline + clean,near-duplicate-aware split,94.14,LR_k6,0.0124
+drosophila_enhancers_stark,borderline + clean,original split,71.79,LR_k6,0.0156
+drosophila_enhancers_stark,borderline + clean,random re-split (control),69.34,LR_k6,0.0156
+drosophila_enhancers_stark,borderline + clean,near-duplicate-aware split,70.61,LR_k6,0.0156
+human_enhancers_cohn,borderline + clean,original split,73.62,LR_k6,0.0012
+human_enhancers_cohn,borderline + clean,random re-split (control),73.31,LR_k6,0.0012
+human_enhancers_cohn,borderline + clean,near-duplicate-aware split,74.05,LR_k6,0.0012
