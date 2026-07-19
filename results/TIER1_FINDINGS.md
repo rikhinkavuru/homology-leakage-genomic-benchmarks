@@ -445,6 +445,76 @@ sequences (δ > 0) as well as a leak fraction above φ*, and NT-original has the
 condition without the first. The law thus converts "we looked and did not find one" into
 a screenable criterion.
 
+### 4.1c Correction to how the condition was scored
+
+An earlier version of §4.1b reported "23 of 24 pairs correct" and called the test passed.
+Two independent scorers flagged it, and both were right that it was overstated, though the
+underlying fault was mine in a different place than they supposed:
+
+- **The aggregate is nearly vacuous.** 22 of 24 pairs have δ ≤ 0, where no inversion is
+  possible at any leak fraction, so "no swap" is correct by construction. A constant
+  "nothing swaps" predictor scores **23/24** on this data. Quoting 23/24 as a pass was
+  meaningless.
+- **My own materiality gate was hiding the one real test.** `exp_crosssuite_ranking.py`
+  originally scored a prediction against *material* inversion (top-model change with a
+  ≥1 pt as-shipped margin). The condition's single positive prediction — `enhancers`
+  RF→HGB at φ = 0.0992 against φ\* = 0.0727 — was recorded as a failure. It was not: the
+  pair **did** swap (HGB 0.8865 over RF 0.8686 after correction). It was simply
+  immaterial, the two being 0.0049 apart as shipped.
+
+The module now records `OBSERVED_swap` and `OBSERVED_material_inversion` separately and
+reports the informative subset. Honest result: **2 of 24 pairs are informative (δ > 0),
+the condition called both correctly, and one of those two is exactly the case the trivial
+baseline gets wrong.** Real, but slender, and now stated that way in the paper.
+
+### 4.1d Expanded nine-model roster
+
+`roster_rankings.csv`, `roster_predictions.csv`. The standing objection to a claim about
+"rankings" is a four-model comparison set with three foils. Nine learners, same splits,
+same decision rule, all trained from scratch, with two predictions committed before the
+run.
+
+**`human_enhancers_ensembl` (full scale) — the result strengthens:**
+
+| model | gap | as-shipped | corrected | drop | rank |
+|---|---|---|---|---|---|
+| MLP | 0.159 | **0.8736** | 0.7684 | 0.105 * | 1→3 |
+| ExtraTrees | 0.210 | 0.8721 | 0.6278 | 0.244 * | 2→7 |
+| RandomForest | 0.230 | 0.8596 | 0.6957 | 0.164 * | 3→5 |
+| LogisticRegression | 0.026 | 0.8189 | **0.8136** | 0.005 | 4→1 |
+| kNN-1 | 0.327 | 0.8007 | 0.5584 | 0.242 * | 5→8 |
+| LinearSVC | 0.037 | 0.7980 | 0.7975 | 0.001 | 6→2 |
+| HistGB | 0.034 | 0.7636 | 0.7608 | 0.003 | 7→4 |
+| GaussianNB | −0.234 | 0.6482 | 0.6492 | −0.001 | 8→6 |
+| kNN-15 | −0.235 | 0.5557 | 0.5430 | 0.013 * | 9→9 |
+
+*The as-shipped winner is a neural network; the corrected winner is logistic regression.*
+Leader margins exclude zero in both directions under a paired cluster bootstrap
+([0.050, 0.060] as shipped, [0.039, 0.052] corrected). The five drops excluding zero are
+exactly the four memorizers plus the perceptron; all four non-memorizers are null. This
+removes the "sklearn tree defaults" reading of the result.
+
+**Committed predictions:** P1 (kNN-1 largest graded gap) **holds** at 0.327. P2 (kNN-1
+largest drop) **fails** — ExtraTrees 0.2443 against kNN-1 0.2424, a margin of 0.002.
+P3 (memorizers above linears as shipped, below after) **holds** decisively: mean ranks
+4.75 vs 5.00 as shipped, 7.25 vs 1.50 corrected.
+
+**`human_nontata_promoters` — a larger scramble that we decline to bank.** ExtraTrees
+falls 1→7 and kNN-1 rises 6→1 with supported margins, but decomposing each drop against
+the two-stratum product φ·g leaves large *positive* residuals (+0.152 ExtraTrees, +0.088
+LR), meaning most of the movement is not attributable to test-side near-duplicate
+memorization. Both committed predictions fail there (kNN-15 has the larger gap,
+ExtraTrees the larger drop). Combined with the known chaining (cohesion 0.083), the
+reading remains cautionary — the wider roster sharpens the existing verdict rather than
+overturning it.
+
+**A finding that complicates the mechanism story, reported rather than buried:** the
+graded gap and the drop are *not* the same quantity and can point in opposite directions.
+kNN-15 has the largest gap on nonTATA (0.255) and nearly the smallest drop (0.018);
+ExtraTrees has a small gap (0.067) and the largest drop (0.167). The drop contains a
+train-side retraining component that the two-stratum identity does not model, and for
+tree ensembles it dominates.
+
 ### 4.2 A pre-registered prediction that failed
 
 The registered call `NT-original → LEAKY` was **wrong as a suite-level statement**: only
