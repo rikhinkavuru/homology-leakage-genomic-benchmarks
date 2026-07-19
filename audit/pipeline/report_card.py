@@ -21,8 +21,10 @@ sfin = pd.read_csv(f"{R}/summary_final.csv").set_index("dataset")
 subsum = pd.read_csv(f"{R}/summary.csv").set_index("dataset")
 ext = pd.read_csv(f"{R}/extended_models_long.csv")
 
-# Leaky-dataset "acc drop" uses the bootstrap-consistent point estimate (seed-0
-# corrected split; 95% CIs in PAPER_NUMBERS S16.2), matching manuscript Table 2.
+# Leaky-dataset "acc drop" is the seed-0 corrected-split point estimate. Table 2 of
+# the manuscript reports the FIVE-SEED MEAN instead (0.118 / 0.165 against the
+# 0.108 / 0.164 here), so the column is named acc_drop_seed0 rather than implying
+# it matches the table. Both estimands are legitimate; conflating them is not.
 # Clean rows keep the 3-seed-mean delta (~0). 3-seed/5-seed values are in S16.
 try:
     _s3 = pd.read_csv(f"{R}/step3_delta_ci.csv")
@@ -30,6 +32,22 @@ try:
                  for _, r in _s3.iterrows() if r["group"] == "leaky" and r["model"] == "RF_k6"}
 except Exception:
     BOOT_DROP = {}
+
+# Full-scale containment, so the verdict can be three-way. Same source certify uses.
+CONTAIN = {}
+try:
+    # exp_gb1_containment is the full-scale run for the two leaky datasets;
+    # full_scale_containment covers the rest. certify.self_validate composes the same
+    # two sources in the same order, so the card and the gate cannot disagree.
+    _gb1 = pd.read_csv(f"{R}/exp_gb1_containment.csv").set_index("dataset")
+    CONTAIN.update({d: float(v) for d, v in _gb1["leak_contain_0p7"].items()})
+except Exception:
+    pass
+try:
+    _fsc = pd.read_csv(f"{R}/full_scale_containment.csv").set_index("dataset")
+    CONTAIN.update({d: float(v) for d, v in _fsc["leak_con_0p7"].items()})
+except Exception:
+    pass
 
 # order: leaky first, then clean by descending leakage
 BINARY = ["human_nontata_promoters", "human_enhancers_ensembl",
@@ -46,7 +64,13 @@ rows = []
 for d in BINARY:
     n = int(leak.loc[d, "n_train"] + leak.loc[d, "n_test"])
     l7, l9 = float(leak.loc[d, "leak_full_0.7"]), float(leak.loc[d, "leak_full_0.9"])
-    verdict = "LEAKY" if l7 > 0.1 else "clean"
+    # Three-way, matching Table 2 and audit/tools/certify.verdict_from. The two-way
+    # rule here labelled demo_coding "clean" while the paper calls it borderline on the
+    # length-robust containment index -- the very finding the paper lists as a
+    # contribution. The released card contradicted Table 2 on it until round 20.
+    con7 = CONTAIN.get(d)
+    verdict = ("LEAKY" if l7 > 0.1 else
+               "borderline" if (con7 is not None and con7 > 0.1) else "clean")
     o = {m: xacc(d, "original", m) for m in M4}
     c = {m: xacc(d, "homology@0.7", m) for m in M4}
     top_o, top_c = max(M4, key=lambda m: o[m]), max(M4, key=lambda m: c[m])
@@ -54,9 +78,10 @@ for d in BINARY:
     rf_c = sorted(M4, key=lambda m: -c[m]).index("RF") + 1
     inverts = (top_o != top_c) and (o[top_o] - o[top_c] > 0.01)
     rows.append(dict(dataset=d, n_full=n, leak_at_0p7=round(l7, 3), leak_at_0p9=round(l9, 3),
+                     leak_containment_0p7=(round(con7, 3) if con7 is not None else None),
                      verdict=verdict, best_model=sfin.loc[d, "best_model"],
-                     acc_drop_corrected=BOOT_DROP.get(d, round(float(sfin.loc[d, "delta_homology"]), 3)),
-                     ranking_inverts="yes" if inverts else "no",
+                     acc_drop_seed0=BOOT_DROP.get(d, round(float(sfin.loc[d, "delta_homology"]), 3)),
+                     top_model_changes_accuracy="yes" if inverts else "no",
                      rf_rank_orig_to_corr=f"{rf_o}->{rf_c}"))
 # 3-class regulatory, noted separately (numbers from the subsample suite)
 d = "human_ensembl_regulatory"
@@ -77,7 +102,7 @@ ax.axis("off")
 cols = ["dataset", "n", "leak@0.7", "leak@0.9", "verdict", "best model",
         "acc drop\n(corrected)", "ranking\ninverts", "RF rank\norig->corr"]
 cell = [[r["dataset"], f"{r['n_full']:,}", f"{r['leak_at_0p7']:.3f}", f"{r['leak_at_0p9']:.3f}",
-         r["verdict"], r["best_model"], f"{r['acc_drop_corrected']:+.3f}",
+         r["verdict"], r["best_model"], f"{r.get('acc_drop_seed0', r.get('acc_drop_corrected', 0)):+.3f}",
          r["ranking_inverts"], r["rf_rank_orig_to_corr"]] for r in rows]
 tab = ax.table(cellText=cell, colLabels=cols, loc="center", cellLoc="center")
 tab.auto_set_font_size(False); tab.set_fontsize(9); tab.scale(1, 1.6)

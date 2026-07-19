@@ -42,8 +42,8 @@ generality concern directly.
 
 3. **A cross-suite census (§4.10) — and an honest null.** We applied the census
    unchanged to the Nucleotide Transformer downstream tasks. Three of eleven
-   independent tasks are leaky — one at 25.0% *byte-identical* train/test overlap — and six more borderline.
-   (verified on a separate code path using no k-mers). **No ranking inverts
+   independent tasks are leaky — one at 25.0% *byte-identical* train/test overlap,
+   verified on a separate code path using no k-mers — and six more borderline. **No ranking inverts
    materially on any of them, and we report that null prominently rather than
    burying it.** One swap does occur — HistGradientBoosting overtakes the forest on
    `enhancers` after correction, 0.887 vs 0.869 — but the two were separated by only
@@ -55,6 +55,11 @@ generality concern directly.
    and on 22 of 24 pairs the as-shipped leader is also the novel-sequence leader.
    On the two pairs where the condition had something to say it was right both
    times — including the one case a trivial "nothing swaps" baseline gets wrong.
+   Only one of those two is admissible under our own Methods §3.13, which permits
+   the condition only where the intermediate similarity band is small: the
+   `splice_sites_acceptors` pair's band is 33.3%, so we rule that call out and do
+   not count it. The condition therefore rests on **one** admissible out-of-sample
+   call, and we state it that way in §4.10 rather than claiming the two.
    We also state plainly that the aggregate 24/24 score is nearly uninformative,
    since that baseline scores 23/24.
 
@@ -306,7 +311,7 @@ model code untouched, both removes the reordering and creates it.
 
 Implemented and reported in full. Resampling whole within-test near-duplicate
 components as blocks widens the CIs by **1.0–1.8×** but **flips no verdict**: the RF
-drop still excludes zero on both datasets (ensembl [0.156, 0.172]; nontata
+drop still excludes zero on both datasets (ensembl [0.155, 0.173]; nontata
 [0.092, 0.126]) and the ensembl LR drop stays null. We now also report the diagnostics
 the reviewer's request implies: the intraclass correlation is high (0.78–0.99) yet the
 **design effect is small** (1.06–1.17), because the correlated near-duplicates are
