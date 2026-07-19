@@ -46,15 +46,39 @@ audit/                         importable package
     check1_label_concordance.py  nearest-train-neighbour label concordance
     check2_novelonly_ranking.py  novel-only ranking + 3-way comparison
   experiments/                 revision experiments (each imports core via expkit)
-    exp_stats.py, exp_regpath.py, exp_canonical.py, exp_alignment.py,
-    exp_imbalance.py, exp_inject3class.py, exp_geometry.py, exp_clusterboot_full.py,
-    exp_repeat.py, exp_deep.py, exp_transformer.py, cluster_bootstrap.py,
-    exact_dup_count.py, chromosome_holdout.py, full_scale_containment.py
-  figures/                     publication-figure generators (read results/, write figures/)
-    make_paper_figures.py, make_part_b_figures.py, make_graded_figure.py
-  tools/                       operational helpers
-    prefetch.py                serial build of the local datacache/*.pkl
-    run_serial.sh              serial experiment chain (one heavy job at a time)
+    original revision:
+      exp_stats.py, exp_regpath.py, exp_canonical.py, exp_alignment.py,
+      exp_imbalance.py, exp_inject3class.py, exp_geometry.py, exp_clusterboot_full.py,
+      exp_repeat.py, exp_deep.py, exp_transformer.py, cluster_bootstrap.py,
+      exact_dup_count.py, chromosome_holdout.py, full_scale_containment.py
+    resubmission (the six deepeners and their supports):
+      exp_roster.py              nine-model roster; P1-P4 scored in the output
+      exp_graded_corrected.py    prevalence-corrected graded gap (balanced accuracy)
+      exp_construction.py        coordinate-space construction signatures
+      exp_construction_manip.py  construct-and-break, with cluster-bootstrap intervals
+      exp_inversion_law.py       the phi* = delta/Dg condition, in and out of sample
+      exp_dose_response.py       ten-dose causal test of phi*; P6
+      exp_tuning.py              what naive vs cluster-grouped CV selects; P5
+      exp_gue.py                 GUE census, executing the pre-registered predictions
+      exp_crosssuite_census.py   Nucleotide Transformer census (run uncapped)
+      exp_crosssuite_ranking.py  re-ranking on the tasks the census flags
+      exp_crosssuite_verify.py   byte-identical verification, no k-mers
+      exp_estimator_sensitivity.py  what the detector detects, by sequence length
+      exp_bh_correction.py       Benjamini-Hochberg over the frozen delta families
+  figures/                       publication-figure generators (read results/)
+    make_paper_figures.py        Figures 2-3 (its fig_controls block is SUPERSEDED)
+    make_part_b_figures.py, make_graded_figure.py
+    NOTE Figure 1 is built by paper/Fig/make_fig_controls.py, not from this package.
+  tools/                         operational helpers and gates
+    prefetch.py                  serial build of the local datacache/*.pkl
+    run_serial.sh                serial experiment chain (one heavy job at a time)
+    certify.py                   the executable certification standard (C1-C9);
+                                 --self-validate is a regression gate over the
+                                 published verdicts
+    check_numbers.py             the numbers gate: every registered document claim
+                                 recomputed from its CSV, plus retired-claim and
+                                 cross-document consistency checks. --self-test proves
+                                 the gate can fail.
 ```
 
 `exp_transformer.py` is an extra, git-untracked experiment that follows the
