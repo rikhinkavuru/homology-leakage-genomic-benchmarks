@@ -121,13 +121,20 @@ def _batches(idx, bs):
 
 
 def train_and_correct(X, y, train_idx, test_idx, dropout, wd, converge,
-                      max_epochs=MAX_EPOCHS):
+                      max_epochs=MAX_EPOCHS, seed=0):
     """Train a ResCNN on X[train_idx] (early stopping on a fixed internal 10% val slice,
     unless converge=True) and return the per-test-example correctness vector on test_idx
-    (pred>0.5 == y). Deterministic: torch.manual_seed(0) so weight init is identical
-    across configs -- only dropout/wd/split/convergence vary."""
-    torch.manual_seed(0)
-    np.random.seed(0)
+    (pred>0.5 == y). Deterministic: torch.manual_seed(seed) so weight init is identical
+    across configs -- only dropout/wd/split/convergence vary.
+
+    `seed` varies TRAINING stochasticity only: weight init, dropout masks and batch
+    order. The internal validation slice stays at RandomState(0) for every seed, because
+    that slice is part of the split definition rather than of training -- varying it too
+    would confound seed replication with re-partitioning. seed=0 reproduces the original
+    single-seed grid exactly, so results/exp_deep_cnn.csv is unaffected by this parameter
+    existing; exp_deep_seeds.py is the only caller that passes anything else."""
+    torch.manual_seed(seed)
+    np.random.seed(seed)
 
     rs = np.random.RandomState(0)
     perm = rs.permutation(len(train_idx))
@@ -144,7 +151,7 @@ def train_and_correct(X, y, train_idx, test_idx, dropout, wd, converge,
 
     for epoch in range(max_epochs):
         model.train()
-        er = np.random.RandomState(1000 + epoch)
+        er = np.random.RandomState(1000 + epoch + 1000 * seed)
         order = fit_idx[er.permutation(len(fit_idx))]
         for bi in _batches(order, BATCH):
             xb = X[bi].to(DEVICE)
