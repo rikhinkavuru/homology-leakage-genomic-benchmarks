@@ -72,8 +72,26 @@ EXPLORATORY = {"mouse_0": "expected CLEAN (multi-species, not registered)",
                "mouse_1": "expected CLEAN (multi-species, not registered)"}
 DEFAULT = list(PREREG) + list(EXPLORATORY)
 
+# Redundancy among the registered tasks, verified directly against the shipped files.
+# The "_all" promoter tasks are the EXACT union of their own notata and tata variants:
+# set(prom_core_all.test) == set(prom_core_notata.test) | set(prom_core_tata.test), with
+# zero symmetric difference, and likewise at 300 bp. So the eleven predicted-leaky tasks
+# are not eleven independent benchmarks -- two of them are unions of two others. The
+# independent count is NINE test partitions (core notata+tata, 300 notata+tata, and the
+# five TF tasks). Any statement of the form "N independent benchmarks are clean" must use
+# nine, not eleven. The 70 bp and 300 bp families are, by contrast, genuinely different
+# windows: only 8% of the 70 bp test windows occur as substrings of the 300 bp corpus.
+REDUNDANT_UNIONS = {"prom_core_all": ("prom_core_notata", "prom_core_tata"),
+                    "prom_300_all": ("prom_300_notata", "prom_300_tata")}
+N_INDEPENDENT_LEAKY_PREDICTIONS = 9
 
-def load_task(task, cap=None, seed=0):
+
+def load_task(task, cap=None, seed=0, sizes=None):
+    """Load a GUE task. When `sizes` is a dict it is filled with the FULL, pre-cap row
+    counts, so the caller can record whether a verdict rests on a truncated training
+    set. Truncating train can only lower a max-similarity-to-train statistic, so a
+    capped clean verdict is a lower bound, never a clean bill of health -- this is the
+    same C1 discipline the paper applies to its own suite."""
     from huggingface_hub import hf_hub_download
     frames = {}
     for split in ("train", "test"):
@@ -86,6 +104,8 @@ def load_task(task, cap=None, seed=0):
     te_s = frames["test"][seq_col].astype(str).str.upper().tolist()
     tr_y = frames["train"][lab_col].to_numpy()
     te_y = frames["test"][lab_col].to_numpy()
+    if sizes is not None:
+        sizes["n_train_full"], sizes["n_test_full"] = len(tr_s), len(te_s)
     rng = np.random.RandomState(seed)
     sub = False
     if cap and len(tr_s) > cap:
@@ -100,7 +120,8 @@ def load_task(task, cap=None, seed=0):
 def run_task(task, cap, do_screen=True):
     t0 = time.time()
     try:
-        tr_s, tr_y, te_s, te_y, sub = load_task(task, cap=cap)
+        sizes = {}
+        tr_s, tr_y, te_s, te_y, sub = load_task(task, cap=cap, sizes=sizes)
     except Exception as ex:                                        # noqa: BLE001
         print(f"  [{task}] unavailable: {type(ex).__name__}", flush=True)
         return None, []
@@ -123,6 +144,13 @@ def run_task(task, cap, do_screen=True):
                preregistered=PREREG.get(task, "not_registered"),
                registered=registered,
                n_train=len(tr_s), n_test=len(te_s), subsampled=sub,
+               n_train_full=sizes.get("n_train_full"),
+               n_test_full=sizes.get("n_test_full"),
+               train_frac_used=round(len(tr_s) / sizes["n_train_full"], 4)
+               if sizes.get("n_train_full") else None,
+               # A clean verdict measured on a truncated training set is a LOWER bound:
+               # the discarded rows could have been the near-duplicate partners.
+               verdict_is_lower_bound=bool(sub),
                len_med=int(np.median(L)), n_classes=int(len(np.unique(y))),
                exact_dup_test_in_train=round(exact, 4),
                leak_jaccard_0p7=round(jac07, 4), leak_containment_0p7=round(con07, 4),

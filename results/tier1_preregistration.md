@@ -137,10 +137,33 @@ which has no coordinate signature by construction.*
 
 ---
 
-## 4. BINDING forward predictions (data not yet analysed locally)
+## 4. BINDING forward predictions
 
-These are the predictions that carry real risk. They are recorded before the
-corresponding experiments are run.
+These are the predictions that carry real risk. They were recorded before the
+corresponding experiments were run.
+
+> **Outcome of the §4.1 GUE predictions (recorded here rather than quietly dropped,
+> following the convention of §0).** The GUE rows below have now been executed
+> (`audit/experiments/exp_gue.py`, `results/gue_census.csv`). **They mostly failed.**
+>
+> - **Registered score: 3 of 15.** The three correct ones are all yeast EMP.
+> - **All eleven predicted-LEAKY tasks measured clean**, at full scale, under both the
+>   length-blind Jaccard and the length-robust containment index. The reasoning recorded
+>   in the "basis" column — that short fixed-length human regulatory windows are the
+>   regime the construction rule flags — is **refuted as a predictor of leakage**.
+> - Those eleven are not eleven independent benchmarks: `prom_core_all` is the exact
+>   union of `prom_core_notata` and `prom_core_tata`, and likewise at 300 bp, so the
+>   independent count is **nine** test partitions.
+> - **`virus_covid`, registered CLEAN, measures a leak fraction of 1.000** — the largest
+>   observed anywhere in this project. It is a false positive of our own detector, not a
+>   curation defect: the task classifies SARS-CoV-2 variants that differ by a handful of
+>   mutations, so the corpus is near-identical by biology.
+>
+> An earlier version of this note reported 5 of 17. That tally included `mouse_0` and
+> `mouse_1`, which appear nowhere in the table below; both happened to come out as
+> expected, so counting them inflated the score. They are censused but unscored.
+>
+> The GLRB, BEND and DeepSTARR rows remain unexecuted and are still open.
 
 ### 4.1 Cross-suite leak census (Deepener #1, remaining suites)
 
