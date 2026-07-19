@@ -6,7 +6,7 @@ Turns the paper's one-suite audit into a reusable BUILD-and-CERTIFY protocol tha
 benchmark author can run before shipping a split. It wraps modules already in this
 repo, so a certification is exactly the audit the paper performed.
 
-THE EIGHT CERTIFY CHECKS (each maps to a repo module and to a failure this audit hit)
+THE NINE CERTIFY CHECKS (each maps to a repo module and to a failure this audit hit)
 ------------------------------------------------------------------------------------
  C1 full scale        Run on the FULL dataset, never a subsample. demo_coding flips
                       clean->borderline ONLY at full scale.      [full_scale_containment]
@@ -30,6 +30,13 @@ THE EIGHT CERTIFY CHECKS (each maps to a repo module and to a failure this audit
                       intervals overlapping a TRAIN interval at >=50% reciprocal overlap
                       must be < 0.1. Catches the cause upstream of sequence space and
                       is independent of any k-mer choice.          [exp_construction]
+ C9 cluster cohesion  Whether whole-cluster re-splitting is a legitimate correction at
+                      all. Single linkage chains -- A~B, B~C puts unrelated A and C in
+                      one component -- so on a chained dataset "correcting" the split
+                      quarantines a gene family and removes real signal. Below a cohesion
+                      of 0.5 the verdict becomes leaky-but-correction-unsafe and the tool
+                      directs the user to the novel-stratum readout on the as-shipped
+                      split instead.                                    [exp_geometry G11]
 
 Green verdicts carry the heavier evidential burden: a dataset is only certified CLEAN
 when every applicable check passes, whereas ONE failing check is enough to flag it.
@@ -41,7 +48,13 @@ USAGE
       refitting). This is the repo's regression gate: it FAILS loudly on drift.
 
   python -m audit.tools.certify --fasta X.fa --labels y.txt [--splits s.json]
-      Certify an arbitrary dataset end to end.
+      Certify an arbitrary dataset end to end. --splits accepts either key spelling,
+      so a split written by audit/core/homology_split.py loads directly.
+
+  python -m audit.tools.certify --dataset D --emit-splits corrected.json
+      Certify, and hand back the corrected near-duplicate-aware partition the
+      certification itself used, so retraining does not re-derive it with different
+      parameters.
 """
 from __future__ import annotations
 import argparse, json, os, shutil, subprocess, sys, tempfile, time
@@ -121,6 +134,15 @@ def self_validate(verbose=True):
               f"{(df.verdict=='borderline').sum()} borderline / "
               f"{(df.verdict=='clean').sum()} clean)")
         print("RESULT:", "PASS" if ok else "FAIL")
+        # C9 is computed only by a full certify_dataset() run, not from the committed
+        # CSVs, so this gate cannot see it. Say so, or a reader comparing the two paths
+        # will read the refinement as drift.
+        print("\nnote: --self-validate reproduces the published report-card verdicts "
+              "(LEAKY / borderline / clean) by rule from committed CSVs. A full "
+              "certify run additionally applies C9 (cluster cohesion), which refines "
+              "human_nontata_promoters from LEAKY to leaky-but-correction-unsafe "
+              "(cohesion 0.084). That is a refinement of the same verdict, not a "
+              "disagreement with it.")
     df.to_csv(f"{R}/certify_self_validation.csv", index=False)
     return ok, df
 
@@ -275,6 +297,49 @@ def certify_dataset(seqs, y, tr, te, name="dataset", boot=2000, seed=0,
         rep["leak_mmseqs_cluster_share"] = None
         rep["engine_agreement"] = None
 
+    # ---- C9: cluster cohesion (single-linkage chaining diagnostic).
+    # Whole-cluster assignment is only a legitimate correction when the clusters are
+    # actually near-duplicate sets. Single linkage chains: A~B and B~C put A and C in one
+    # component even when A and C are unrelated, so a "correction" can quarantine an
+    # entire gene family and remove genuine signal rather than leakage. This is not
+    # hypothetical -- it is the difference between this repo's two leaky datasets, and
+    # without this check the tool returns a bare LEAKY on the one where correcting is
+    # destructive. Two metrics, defined exactly as exp_geometry.py's G11 so the numbers
+    # reconcile with results/exp_g11_cohesion.csv:
+    #   cohesion      fraction of member PAIRS in the largest cluster that are real edges
+    #   frac_pairs    fraction of multi-member clusters that are simple size-2 pairs
+    # Calibration on the two leaky datasets: ensembl 0.959 / 0.996 (clusters are duplicate
+    # pairs; correction is safe) vs nontata 0.083 / 0.240 (large chained blobs; the paper
+    # finds correction there over-removes promoter/gene-family signal).
+    COHESION_CUT = 0.5
+    sizes = np.bincount(comp)
+    multi = sizes[sizes > 1]
+    biggest = int(sizes.argmax())
+    members = np.where(comp == biggest)[0]
+    nm = len(members)
+    cohesion = 1.0
+    if nm > 1:
+        # Enumerating all pairs is O(nm^2); cap it with a deterministic subsample so a
+        # pathological component cannot make certification unbounded. The estimate is
+        # unbiased -- it is a mean over a uniform sample of the same pair population.
+        MAX_M = 300
+        mem = members
+        if nm > MAX_M:
+            mem = members[np.random.RandomState(seed).choice(nm, MAX_M, replace=False)]
+        sub = [seqs[i] for i in mem]
+        M_sub = H.kmer_binary_matrix(sub, 8)
+        er, ec = H._edges(M_sub, 0.7)
+        present = len({(min(a, b), max(a, b)) for a, b in zip(er.tolist(), ec.tolist())
+                       if a != b})
+        possible = len(mem) * (len(mem) - 1) // 2
+        cohesion = present / possible if possible else 1.0
+        rep["cohesion_estimated_on_subsample"] = bool(nm > MAX_M)
+    rep["max_cluster"] = int(sizes.max())
+    rep["largest_cluster_cohesion"] = round(float(cohesion), 4)
+    rep["frac_clusters_that_are_pairs"] = (round(float((multi == 2).mean()), 4)
+                                           if len(multi) else None)
+    rep["correction_safe"] = bool(cohesion >= COHESION_CUT)
+
     # ---- C8: coordinate geometry, when the dataset ships intervals we have measured
     coord = None
     cpath = f"{R}/construction_rule.csv"
@@ -316,6 +381,8 @@ def certify_dataset(seqs, y, tr, te, name="dataset", boot=2000, seed=0,
         "C7_cluster_ci": "drop_excludes_0" if rep["RF_drop_excl0"] else "drop_includes_0",
         "C8_coordinates": ("not_applicable" if coord is None
                            else "LEAKY" if coord > LEAK_CUT else "clean"),
+        "C9_cluster_cohesion": ("correction_safe" if rep["correction_safe"]
+                                else "CHAINED_correction_unsafe"),
     }
     rep["checks"] = checks
 
@@ -341,10 +408,46 @@ def certify_dataset(seqs, y, tr, te, name="dataset", boot=2000, seed=0,
             if checks["C1_full_scale"] == "NOT_FULL_SCALE"
             else "C1: full-scale status unverifiable from the input; pass --full-n to "
                  "assert the true dataset size. Clean verdict is provisional")
+    # C9 does not change WHETHER the dataset leaks -- it changes what the user should do
+    # about it. A leaky dataset whose clusters are chained cannot be repaired by
+    # whole-cluster re-splitting without removing real signal, so the tool must say so
+    # instead of handing back a bare LEAKY that implies "re-split and proceed".
+    if v in ("LEAKY", "borderline") and not rep["correction_safe"]:
+        v = "leaky-but-correction-unsafe"
+        escalations.append(
+            f"C9: largest-cluster cohesion {rep['largest_cluster_cohesion']:.3f} < "
+            f"{COHESION_CUT}, so components are single-linkage chains rather than "
+            f"near-duplicate sets. Whole-cluster re-splitting will quarantine related "
+            f"but non-duplicate sequences and remove genuine signal. Report the "
+            f"novel-stratum accuracy (RF_novel_acc / LR_novel_acc above) on the "
+            f"as-shipped split instead of re-splitting.")
     rep["verdict"] = v
     rep["escalated_by"] = escalations or None
+    # Carried out for --emit-splits and popped before the report is written, so
+    # "certify then retrain" does not require a second tool run whose parameters
+    # are chosen independently of the ones the certification actually used.
+    rep["_corrected_split"] = (ctr, cte)
     rep["seconds"] = round(time.time() - t0, 1)
     return rep
+
+
+def _load_splits(path):
+    """Read a split JSON, accepting either key spelling.
+
+    homology_split.py writes {'train_idx', 'test_idx'}; earlier versions of this tool
+    read only {'train', 'test'}, so certifying the repo's own shipped demo_splits.json --
+    the obvious next step after producing a split -- died on a bare KeyError. The two
+    tools are advertised together, so they have to compose.
+    """
+    sp = json.load(open(path))
+    tr = sp.get("train_idx", sp.get("train"))
+    te = sp.get("test_idx", sp.get("test"))
+    if tr is None or te is None:
+        raise SystemExit(
+            f"[certify] {path}: expected train/test indices under either "
+            f"'train_idx'/'test_idx' (what homology_split.py writes) or 'train'/'test'. "
+            f"Found keys: {sorted(sp)}")
+    return np.asarray(tr), np.asarray(te)
 
 
 def _read_fasta(path):
@@ -371,7 +474,14 @@ def main():
                     help="reproduce the paper's 8-dataset verdicts from committed CSVs")
     ap.add_argument("--dataset", help="a Genomic Benchmarks dataset name to certify")
     ap.add_argument("--fasta"), ap.add_argument("--labels")
-    ap.add_argument("--splits", help="JSON with {'train': [...], 'test': [...]} indices")
+    ap.add_argument("--splits", help="JSON of split indices; accepts either "
+                    "{'train_idx','test_idx'} (what homology_split.py writes) or "
+                    "{'train','test'}")
+    ap.add_argument("--emit-splits", dest="emit_splits", metavar="PATH",
+                    help="also write the corrected near-duplicate-aware split this tool "
+                         "computes internally, so 'certify then retrain' does not require "
+                         "a second tool run with independently chosen parameters. Written "
+                         "with both key spellings.")
     ap.add_argument("--out", default=os.path.join(R, "certify_report.json"))
     ap.add_argument("--boot", type=int, default=2000,
                     help="recorded in the report for provenance; the cluster-bootstrap\n"
@@ -408,8 +518,7 @@ def main():
         _ids, seqs = _read_fasta(a.fasta)
         y = np.array([int(x) for x in open(a.labels).read().split()])
         if a.splits:
-            sp = json.load(open(a.splits))
-            tr, te = np.array(sp["train"]), np.array(sp["test"])
+            tr, te = _load_splits(a.splits)
         else:
             rng = np.random.RandomState(a.seed)
             perm = rng.permutation(len(seqs))
@@ -421,6 +530,33 @@ def main():
                               boot=a.boot, seed=a.seed, full_scale_n=a.full_n)
     else:
         ap.error("give --self-validate, or --dataset, or --fasta with --labels")
+
+    corrected = rep.pop("_corrected_split", None)
+    if a.emit_splits:
+        if corrected is None:
+            print("[certify] --emit-splits: no corrected split was computed")
+        else:
+            ctr, cte = corrected
+            payload = {
+                "source": "audit.tools.certify",
+                "dataset": rep["dataset"],
+                "threshold": 0.7, "k": 8, "seed": a.seed,
+                "residual_leak_after_split": rep["residual_leak_after_split"],
+                "correction_safe": rep["correction_safe"],
+                "largest_cluster_cohesion": rep["largest_cluster_cohesion"],
+                # both spellings, so this file loads into either tool without a shim
+                "train_idx": [int(i) for i in ctr], "test_idx": [int(i) for i in cte],
+                "train": [int(i) for i in ctr], "test": [int(i) for i in cte],
+            }
+            with open(a.emit_splits, "w") as fh:
+                json.dump(payload, fh)
+            note = ("" if rep["correction_safe"] else
+                    "  WARNING: C9 says this dataset's clusters are chained "
+                    "(cohesion %.3f); this corrected split removes genuine signal. "
+                    "Prefer the novel-stratum readout on the as-shipped split."
+                    % rep["largest_cluster_cohesion"])
+            print(f"[certify] corrected split -> {a.emit_splits} "
+                  f"({len(ctr)} train / {len(cte)} test){note}")
 
     with open(a.out, "w") as fh:
         json.dump(rep, fh, indent=2, default=str)

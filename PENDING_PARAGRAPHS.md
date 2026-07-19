@@ -173,3 +173,122 @@ near-fixed-length human regulatory DNA" (Introduction, and the Discussion scope
 paragraph), that condition is now **refuted** and should be replaced by the construction
 condition: an un-deduplicated assembly step, plus a memorization-prone model in the
 comparison set.
+
+---
+
+## EDIT 5 — §3.3, P1 is scored on a statistic that post-dates it (please read carefully)
+
+This one is an integrity issue, not a polish item, and it is the kind a referee on a
+methodology paper will look for specifically. Flagging rather than fixing, since
+`main.tex` is yours.
+
+**Current text (line 124, end of the paragraph):**
+
+> Of the five, P1 holds under the corrected gap and fails under the raw one, P2 holds on
+> one leaky dataset and fails on the other, P3 and P4 hold, and P5 fails outright.
+
+Two things are wrong with the P1 clause.
+
+**(a) The corrected gap did not exist when P1 was registered.** P1 was committed in
+`exp_roster.py` as "kNN-1 has the largest graded memorization gap $g$", where $g$ was the
+*raw* `acc[>=0.9] - acc[<0.5]`. That is what the scoring code reads (`gg.graded_gap`) and
+`results/roster_predictions.csv` records `holds=False`. The balanced-accuracy correction
+was introduced **afterwards**, as the round-6 response to discovering the prevalence
+confound (commit "Round-6 blockers: ... the graded gap was confounded"). Scoring a
+pre-registered prediction on an outcome measure defined after the result was seen is
+outcome switching. Leading with "holds under the corrected gap" invites exactly that
+reading.
+
+**(b) Even on the corrected gap, P1 holds on only one of the two datasets it covers.**
+P1 was registered over "the leaky sets", plural. Corrected-gap winners:
+
+| dataset | raw-gap top | corrected-gap top | P1 |
+|---|---|---|---|
+| `human_enhancers_ensembl` | RF | **kNN-1** | fails raw, holds corrected |
+| `human_nontata_promoters` | kNN-15 | MLP | **fails both** |
+
+So P1 has the same shape as P2 — holds on one leaky dataset, fails on the other — and the
+sentence currently grants it more than P2 while P2 is the one that actually passed as
+registered.
+
+**Suggested replacement for the final sentence:**
+
+```latex
+Of the five, P1 fails as registered: on the raw gap it was committed to, the largest
+value belongs to the forest on \textit{human\_enhancers\_ensembl} and to
+$15$-nearest-neighbour on \textit{human\_nontata\_promoters}. We note, and label as
+post hoc, that under the prevalence-corrected gap of \S\ref{sec:m-graded}---a statistic
+we defined after P1 was committed, in response to the confound described there---$1$-NN
+does have the largest gap on \textit{human\_enhancers\_ensembl}, though still not on
+\textit{human\_nontata\_promoters}; we do not count this as a confirmation. P2 holds on
+one leaky dataset and fails on the other, P3 and P4 hold, and P5 holds on
+\textit{human\_enhancers\_ensembl} and fails on \textit{human\_nontata\_promoters}.
+```
+
+Note the P5 clause also needs the update from EDIT 3 ("fails outright" is now stale).
+
+**Nothing in \S4.5 needs changing** — it already scopes the corrected-gap ordering claim
+to `human_enhancers_ensembl`, and \S4.4 already says the corrected gap fails to separate
+the families on `human_nontata_promoters`. It is only the \S3.3 summary sentence that
+overstates.
+
+Paying this cost is worth it: a pre-registration whose author reports "our prediction
+failed" is far more persuasive than one where every prediction somehow held, and this
+paper's whole argument is that people should hold themselves to measurements they
+committed to in advance.
+
+---
+
+## EDIT 6 — the certification tool now has a ninth check (cohesion), and the paper should state its cut
+
+Round 7's practitioner lens found two defects in `audit/tools/certify.py`, both now fixed
+in `audit/**`. One of them changes what the paper can claim for the tool.
+
+**What was wrong.** The tool was offered as the operational deliverable for any new
+dataset, but it did not compute cluster cohesion — the one diagnostic the paper itself
+uses to decide whether *correcting* a split is legitimate rather than destructive. Run on
+`human_nontata_promoters` it returned a bare `LEAKY`, on the very dataset where the paper
+concludes single-linkage de-duplication over-removes genuine promoter signal. A
+practitioner following the tool would have re-split and destroyed signal.
+
+**What it does now.** C9 reports largest-cluster cohesion (fraction of member pairs that
+are real edges) and the fraction of clusters that are simple pairs, and below a cohesion
+of $0.5$ it downgrades `LEAKY` to `leaky-but-correction-unsafe`, directing the user to
+the novel-stratum readout on the as-shipped split instead of re-splitting. Verified
+full-scale: `human_nontata_promoters` → cohesion $0.084$, verdict
+`leaky-but-correction-unsafe` (`results/certify_nontata.json`). The cut is calibrated on
+this paper's two leaky datasets, which sit either side of it by an order of magnitude:
+
+| dataset | largest cluster | cohesion | clusters that are pairs | correction |
+|---|---|---|---|---|
+| `human_enhancers_ensembl` | 143 | **0.959** | 0.996 | safe |
+| `human_nontata_promoters` | 420 | **0.084** | 0.240 | unsafe |
+
+**(a) If the paper describes the tool's checks by number, it is now nine, not eight.**
+
+**(b) Suggested sentence for wherever the tool is introduced (\S6 or Methods):**
+
+```latex
+The tool additionally reports cluster cohesion---the fraction of member pairs in the
+largest component that are genuine near-duplicate edges---because whole-cluster
+assignment is only a legitimate correction when components are near-duplicate sets
+rather than single-linkage chains. Below a cohesion of $0.5$ it returns
+\emph{leaky-but-correction-unsafe} rather than \emph{leaky}, and directs the user to the
+novel-stratum readout on the as-shipped split instead of a re-split. The cut is
+calibrated on the two leaky datasets studied here, which fall an order of magnitude
+either side of it: \textit{human\_enhancers\_ensembl} has cohesion $0.96$ and
+\textit{human\_nontata\_promoters} $0.08$, which is the quantitative form of the
+distinction we draw between the clean case and the cautionary one.
+```
+
+This is worth having in the paper: it converts the ensembl/nonTATA split from a judgement
+call the reader has to trust into a stated, reproducible threshold, which is the single
+most common referee complaint about the current cautionary framing.
+
+**(c) The other fixed defect needs no paper change** but is worth knowing: the two shipped
+tools did not compose — `homology_split.py` writes `{train_idx, test_idx}` and `certify.py`
+read `{train, test}`, so certifying the repo's own `demo_splits.json` died on a raw
+`KeyError`. `certify.py` now accepts both spellings and gained `--emit-splits`, which
+writes back the corrected partition it already computed (in both spellings), so
+"certify then retrain" no longer requires a second run with independently chosen
+parameters.
