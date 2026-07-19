@@ -1,0 +1,4 @@
+dataset,source,len_med,n_pairs,jaccard_mean,jaccard_p99,jaccard_max,false_positive_rate_at_0p7
+human_ocr_ensembl,real DNA (clean dataset),316,3999,0.0045,0.0197,0.1556,0.0
+drosophila_enhancers_stark,real DNA (clean dataset),2143,4000,0.0266,0.0436,0.1693,0.0
+human_enhancers_cohn,real DNA (clean dataset),500,3999,0.0073,0.0222,0.2609,0.0
