@@ -120,6 +120,7 @@ cross-suite modules, which download the Nucleotide Transformer task files.
 | T27 | `python -m audit.experiments.full_scale_containment` | `full_scale_containment.csv` — full-scale containment for the clean sets | ~30 min |
 | T28 | `python -m audit.experiments.exp_transformer` | `exp_transformer.csv` — the from-scratch attention probe (not used in the paper) | ~2 h; needs torch |
 | T29 | `python -m audit.pipeline.rf_seed_variance` | `rf_seed_variance.csv` — the §4.2 RF *training*-seed robustness check (a different axis from step 18's re-split seeds) | ~15 min |
+| T0 | `python -m audit.pipeline.emit_tables` | `paper/tab_reportcard.tex`, `paper/tab_roster.tex` — regenerates the manuscript's numeric table bodies from the committed CSVs. **`paper/build.sh` runs this automatically**; the two `.tex` files are generated artefacts and must not be hand-edited. `--check` verifies without writing. | <5 s |
 | T30 | `python -m audit.experiments.exp_deep_seeds` | `exp_deep_cnn_seeds.csv` — the §4.4/§4.9 CNN *training*-seed replication of the pre-registered reference cell on `human_enhancers_ensembl`, both splits | ~35 min; needs torch |
 | T31 | `python -m audit.experiments.exp_deep_paired` | `exp_deep_cnn_paired.csv` — the §4.4 paired CNN-vs-LinearSVC cluster-bootstrap interval on the corrected split | ~16 min; needs torch; run T30 first (shares the cached prep) |
 

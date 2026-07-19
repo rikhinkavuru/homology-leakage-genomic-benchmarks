@@ -189,21 +189,7 @@ Of the seven binary datasets, only two---\textit{human\_enhancers\_ensembl} and 
 \begin{center}
 \begin{minipage}{\textwidth}
 \caption{Near-duplicate leakage report card. \textbf{Verdict} is LEAKY if the full-scale near-duplicate test fraction exceeds $0.1$ at Jaccard $0.7$; a ``clean'' verdict means only \emph{no forward-strand near-duplicate leakage detected}, subject to the disclosed length-pair cap. ``leak@0.7 (Jac / con)'' gives the leak fraction under the $8$-mer Jaccard and the length-robust containment index. ``Acc.\ lost'' is the best-model accuracy change under the near-duplicate-aware re-split (positive $=$ accuracy lost; accuracy fraction). ``RF rank'' is the random-forest rank before$\to$after correction. ``Reorders under chrom.-holdout?'' reports whether the best-model change reproduces under the chromosome-holdout control (measured for the two leaky datasets only). All leak fractions are full-scale. $^{\dagger}$\textit{demo\_coding\_vs\_intergenomic\_seqs} is clean under $8$-mer Jaccard ($0.078$) but its full-scale containment leak fraction ($0.131$) exceeds $0.1$---a borderline case the length-robust metric flags and the length-blind one misses.\label{tab:reportcard}}
-\resizebox{\textwidth}{!}{\begin{tabular}{@{}lrrrlrll@{}}
-\toprule
-Dataset & $n$ (full) & leak@0.7 (Jac) & leak@0.7 (con) & Verdict & Acc.\ lost & RF rank & Reorders under chrom.-holdout?\\
-\midrule
-human\_nontata\_promoters          & 36{,}131  & 0.406 & 0.445 & \textbf{LEAKY} & $+0.118$ & $1\!\to\!3$ & no (RF stays rank~1)\\
-human\_enhancers\_ensembl          & 154{,}842 & 0.384 & 0.845 & \textbf{LEAKY} & $+0.165$ & $1\!\to\!4$ & yes (RF $\to$ rank~4)\\
-demo\_coding\_vs\_intergenomic\_seqs & 100{,}000 & 0.078 & \textbf{0.131} & borderline$^{\dagger}$ & $-0.001$ & $4\!\to\!4$ & n/a\\
-human\_ocr\_ensembl                & 174{,}756 & 0.010 & 0.068 & clean & $+0.004$ & $4\!\to\!4$ & n/a\\
-demo\_human\_or\_worm               & 100{,}000 & 0.012 & 0.042 & clean & $-0.004$ & $4\!\to\!4$ & n/a\\
-drosophila\_enhancers\_stark       & 6{,}914   & 0.016 & 0.033 & clean & $+0.012$ & $2\!\to\!3$ & n/a\\
-human\_enhancers\_cohn             & 27{,}791  & 0.001 & 0.005 & clean & $-0.004$ & $4\!\to\!4$ & n/a\\
-\midrule
-human\_ensembl\_regulatory (3-class) & 289{,}061 & 0.005 & --    & clean & $-0.010$ & n/a & n/a\\
-\botrule
-\end{tabular}}
+\resizebox{\textwidth}{!}{\input{tab_reportcard}}
 \end{minipage}
 \end{center}
 \end{table*}
@@ -254,21 +240,7 @@ On \textit{human\_nontata\_promoters} the roster produces an even larger scrambl
 \begin{table}[tbp]
 \begin{center}
 \caption{Nine-model roster on \textit{human\_enhancers\_ensembl}, full scale, as-shipped versus near-duplicate-aware split. Gap$_{\text{bal}}$ is the graded memorization gap computed from \emph{balanced} accuracy within each stratum and is the statistic we rely on; Gap$_{\text{raw}}$ is the uncorrected accuracy difference, shown only for comparison because it is confounded by stratum class composition (\S\ref{sec:m-graded})---a constant classifier scores $+0.803$ on this dataset, which is why the raw column contains two large negative values that do not indicate ``negative memorization''. Note that the corrected column orders the models as the memorization account predicts and the raw column does not. ``Drop'' is the accuracy lost under correction, with a two-arm cluster-bootstrap interval; $^{*}$ marks intervals excluding zero. Models are ordered by as-shipped rank. The top three as-shipped finish within $0.0015$ of one another---a tie---yet span $23$ points on the corrected split. The corrected winner is the linear SVM, agreeing with the four-model comparison of \S4.3.\label{tab:roster}}
-\footnotesize\setlength{\tabcolsep}{3pt}\begin{tabular}{@{}lrrrrrl@{}}
-\toprule
-Model & Gap$_{\text{bal}}$ & Gap$_{\text{raw}}$ & As-shipped & Corrected & Drop & Rank\\
-\midrule
-MLP           & \textbf{0.234} & $0.159$ & \textbf{0.8736} & 0.7684 & $0.105^{*}$ & $1\!\to\!3$\\
-kNN-1         & \textbf{0.461} & $0.208$ & 0.8729 & 0.5370 & $0.336^{*}$ & $2\!\to\!9$\\
-ExtraTrees    & \textbf{0.370} & $0.210$ & 0.8721 & 0.6278 & $0.244^{*}$ & $3\!\to\!7$\\
-RandomForest  & \textbf{0.319} & $0.230$ & 0.8596 & 0.6957 & $0.164^{*}$ & $4\!\to\!5$\\
-LinearSVC     & \textbf{0.144} & $0.037$ & 0.7980 & \textbf{0.7975} & $0.001$ & $5\!\to\!1$\\
-LogisticReg.  & \textbf{0.154} & $0.037$ & 0.7809 & 0.7806 & $0.000$ & $6\!\to\!2$\\
-HistGB        & \textbf{0.162} & $0.034$ & 0.7636 & 0.7608 & $0.003$ & $7\!\to\!4$\\
-GaussianNB    & \textbf{0.129} & $-0.234$ & 0.6482 & 0.6492 & $-0.001$ & $8\!\to\!6$\\
-kNN-15        & \textbf{0.016} & $-0.684$ & 0.5357 & 0.5371 & $-0.001$ & $9\!\to\!8$\\
-\botrule
-\end{tabular}
+\footnotesize\setlength{\tabcolsep}{3pt}\input{tab_roster}
 \end{center}
 \end{table}
 

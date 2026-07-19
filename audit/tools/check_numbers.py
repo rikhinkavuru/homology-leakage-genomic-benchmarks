@@ -61,9 +61,32 @@ _cache = {}
 
 
 def doc(name):
+    r"""Read a document, resolving \input{} so every check sees the whole manuscript.
+
+    This matters more than it looks. When the table bodies moved out of main.tex into
+    generated \input files, every numeric check instantly went blind to the values in
+    them -- and the tables are precisely where the numbers live. Two corrected-gap
+    checks failed loudly and revealed it; the rest would have kept passing on reduced
+    coverage without saying so, which is the worst possible failure mode for a gate.
+    Inlining here restores full coverage and keeps it as tables move.
+    """
     if name not in _cache:
         with open(DOCS[name]) as fh:
-            _cache[name] = fh.read()
+            body = fh.read()
+        base = os.path.dirname(DOCS[name])
+
+        def _inline(m):
+            path = os.path.join(base, m.group(1))
+            if not path.endswith(".tex"):
+                path += ".tex"
+            try:
+                with open(path) as fh:
+                    return fh.read()
+            except OSError:
+                return m.group(0)      # leave unresolved rather than hide the reference
+
+        body = re.sub(r"\\input\{([^}]+)\}", _inline, body)
+        _cache[name] = body
     return _cache[name]
 
 
@@ -608,8 +631,43 @@ def check_cnn_seed_replication():
     return out
 
 
+def check_generated_tables():
+    """The manuscript's tables must be the generated ones, and must be current.
+
+    Two failure modes, both of which have precedent in this project. Someone edits a
+    generated .tex by hand and the next build silently reverts it; or a source CSV moves
+    and the committed .tex is never regenerated, so the paper ships a table that
+    disagrees with its own data. The first is caught by the header assertion, the second
+    by re-deriving both files in memory and comparing.
+    """
+    out = []
+    # deliberately the RAW file: doc() inlines \input, which would erase the very
+    # directive this check exists to assert
+    with open(DOCS["paper"]) as fh:
+        raw = fh.read()
+    for name in ("tab_reportcard", "tab_roster"):
+        out.append((("\\input{%s}" % name) in raw,
+                    f"paper: table body {name} is \\input, not hand-typed", ""))
+    try:
+        from audit.pipeline.emit_tables import build_reportcard, build_roster
+        for name, fn in (("tab_reportcard", build_reportcard),
+                         ("tab_roster", build_roster)):
+            path = os.path.join(HERE, "paper", f"{name}.tex")
+            cur = open(path).read() if os.path.exists(path) else None
+            fresh = fn()
+            out.append((cur == fresh, f"paper: {name}.tex is current with its source CSVs",
+                        "" if cur == fresh else
+                        "regenerate: python -m audit.pipeline.emit_tables"))
+            out.append((cur is not None and cur.startswith("% GENERATED"),
+                        f"paper: {name}.tex still carries its do-not-edit header", ""))
+    except Exception as ex:                                        # noqa: BLE001
+        out.append((False, "emit_tables importable and runnable", f"{type(ex).__name__}: {ex}"))
+    return out
+
+
 CHECKS = [
     ("retired claims", check_retired_claims),
+    ("generated tables", check_generated_tables),
     ("CNN seed replication / paired interval", check_cnn_seed_replication),
     ("imbalance panel", check_imbalance_panel),
     ("shared numbers across documents", check_shared_numbers),

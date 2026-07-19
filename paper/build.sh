@@ -9,6 +9,12 @@ cd "$HERE"
 
 LOG=/tmp/paper_build.log
 : > "$LOG"
+
+# Regenerate the numeric table bodies from the committed CSVs before compiling, so a
+# build can never ship a table that disagrees with its source. tab_reportcard.tex and
+# tab_roster.tex are generated files -- edit the CSV, not the .tex.
+PYTHONPATH="$HERE/.." "$HERE/../venv/bin/python" -m audit.pipeline.emit_tables >>"$LOG" 2>&1 \
+  || { echo "emit_tables FAILED -- see $LOG"; tail -20 "$LOG"; exit 1; }
 pdflatex -interaction=nonstopmode -file-line-error main.tex >>"$LOG" 2>&1 || true
 bibtex main   >>"$LOG" 2>&1 || true
 pdflatex -interaction=nonstopmode -file-line-error main.tex >>"$LOG" 2>&1 || true
