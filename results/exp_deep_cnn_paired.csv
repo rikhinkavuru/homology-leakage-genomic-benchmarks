@@ -1,0 +1,7 @@
+dataset,seed,cnn_acc_corr,svc_acc_corr,paired_diff,paired_ci_lo,paired_ci_hi,paired_excl0,epochs
+human_enhancers_ensembl,0,0.8131,0.7975,0.0156,0.0096,0.0214,True,9
+human_enhancers_ensembl,1,0.807,0.7975,0.0095,0.0039,0.0158,True,11
+human_enhancers_ensembl,2,0.809,0.7975,0.0115,0.0056,0.0176,True,11
+human_enhancers_ensembl,3,0.8111,0.7975,0.0136,0.0081,0.0192,True,9
+human_enhancers_ensembl,4,0.8028,0.7975,0.0053,-0.0006,0.0109,False,12
+human_enhancers_ensembl,mean,0.8086,0.7975,0.0111,0.0063,0.0161,True,

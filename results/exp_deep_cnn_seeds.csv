@@ -1,0 +1,6 @@
+dataset,seed,dropout,weight_decay,acc_orig,acc_corr,drop,drop_ci_cluster_lo,drop_ci_cluster_hi,drop_excl0_cluster,drop_ci_sample_lo,drop_ci_sample_hi,drop_excl0_sample,epochs_orig,epochs_corr
+human_enhancers_ensembl,0,0.3,0.0001,0.8272,0.8131,0.0141,0.0067,0.0211,True,0.0076,0.0202,True,9,9
+human_enhancers_ensembl,1,0.3,0.0001,0.8119,0.807,0.0049,-0.0026,0.0123,False,-0.001,0.0109,False,8,11
+human_enhancers_ensembl,2,0.3,0.0001,0.8359,0.809,0.0269,0.0196,0.0332,True,0.0214,0.0331,True,16,11
+human_enhancers_ensembl,3,0.3,0.0001,0.8235,0.8111,0.0124,0.0052,0.0193,True,0.0066,0.0188,True,14,9
+human_enhancers_ensembl,4,0.3,0.0001,0.8197,0.8028,0.0169,0.0096,0.0237,True,0.0108,0.0231,True,11,12
