@@ -91,11 +91,27 @@ cross-suite modules, which download the Nucleotide Transformer task files.
 | T9 | `python -m audit.experiments.exp_tuning` | `tuning_selection.csv` | ~15 min (nonTATA); the ensembl arm is hours |
 | T10 | `python -m audit.experiments.exp_bh_correction` | `bh_correction_frozen.csv` | < 5 s |
 | T11 | `python -m audit.tools.certify --self-validate` | `certify_self_validation.csv`; **exit 1 on drift** | ~2 s |
+| T12 | `python -m audit.experiments.exp_gue --cap 100000` | `gue_census.csv`, `gue_screen.csv` | ~40 min + download |
+| T13 | `python -m audit.experiments.exp_estimator_sensitivity` | `estimator_{sensitivity,specificity,specificity_real}.csv` | ~3 min |
 
 `certify` also runs end to end on a dataset (`--dataset NAME [--cap N]`) or on arbitrary
 input (`--fasta X.fa --labels y.txt [--full-n N]`). Without `--full-n` the C1 full-scale
 check reports `UNVERIFIABLE` and any clean verdict is downgraded to `provisional-clean`,
 because the tool cannot tell a full dataset from a subsample by inspection.
+
+Two notes on the newer modules. **T12 must be run uncapped** (`--cap 100000` exceeds every
+GUE task, so nothing is truncated): the first pass of this census capped training sets at
+20,000 and its clean verdicts were lower bounds rather than measurements, since truncating
+train can only lower a max-similarity-to-train statistic. Rows carry `train_frac_used` and
+`verdict_is_lower_bound` so a capped run is never mistaken for a full one. **T13** measures
+the detector's specificity on real DNA as well as synthetic; the synthetic figure alone
+understates the false-positive tail by more than an order of magnitude and should not be
+quoted on its own.
+
+`certify` additionally accepts `--emit-splits PATH`, which writes back the corrected
+near-duplicate-aware partition the certification itself used (in both `train_idx`/`test_idx`
+and `train`/`test` spellings), so retraining does not re-derive the split with different
+parameters.
 
 Modules that shell out to external tools (`exp_alignment` needs MMseqs2, `exp_repeat`
 needs `dustmasker`) write scratch files under `$AUDIT_SCRATCH` if set, otherwise the
