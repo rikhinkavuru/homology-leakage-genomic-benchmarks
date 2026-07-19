@@ -70,3 +70,33 @@ nontata full-scale numbers, so the headline is reproduced by two independent pat
 Fixed numpy seed (0) + sklearn `random_state=0`; a fixed ACGT k-mer vocabulary
 (featurization is data-independent); and an **exact, non-stochastic** Jaccard
 similarity (no MinHash). All seeds are listed in `results/seeds.txt`.
+
+## Tier-1 deepener modules (added after the first submission)
+
+These produce the coordinate/construction, roster, cross-suite and diagnostic results.
+All are CPU-only and run from the repo root as `python -m audit.<sub>.<module>`.
+`huggingface_hub` (pinned in `results/requirements.txt`) is required by the two
+cross-suite modules, which download the Nucleotide Transformer task files.
+
+| # | Command | Output | Approx. runtime |
+|---|---|---|---|
+| T1 | `python -m audit.experiments.exp_inversion_law [--bootstrap]` | `inversion_law_*.csv`, `figures/fig_inversion_*.png` | 1 s / 9 min with `--bootstrap` |
+| T2 | `python -m audit.experiments.exp_construction` | `construction_{signatures,provenance,rule,alignment_check}.csv` | ~1 min |
+| T3 | `python -m audit.experiments.exp_construction_manip [--only A\|B]` | `construction_manipulation.csv` | ~45 min (B is full-scale) |
+| T4 | `python -m audit.experiments.exp_crosssuite_census` | `crosssuite_census.csv` | ~5 min + download |
+| T5 | `python -m audit.experiments.exp_crosssuite_verify` | `crosssuite_exact_verification.csv` | ~2 min |
+| T6 | `python -m audit.experiments.exp_crosssuite_ranking` | `crosssuite_ranking{,_pairs}.csv` | ~15 min |
+| T7 | `python -m audit.experiments.exp_roster` | `roster_{rankings,predictions}.csv` | ~60 min (full-scale ensembl) |
+| T8 | `python -m audit.experiments.exp_graded_corrected` | `graded_gap_corrected.csv` | ~10 min |
+| T9 | `python -m audit.experiments.exp_tuning` | `tuning_selection.csv` | ~15 min (nonTATA); the ensembl arm is hours |
+| T10 | `python -m audit.experiments.exp_bh_correction` | `bh_correction_frozen.csv` | < 5 s |
+| T11 | `python -m audit.tools.certify --self-validate` | `certify_self_validation.csv`; **exit 1 on drift** | ~2 s |
+
+`certify` also runs end to end on a dataset (`--dataset NAME [--cap N]`) or on arbitrary
+input (`--fasta X.fa --labels y.txt [--full-n N]`). Without `--full-n` the C1 full-scale
+check reports `UNVERIFIABLE` and any clean verdict is downgraded to `provisional-clean`,
+because the tool cannot tell a full dataset from a subsample by inspection.
+
+Modules that shell out to external tools (`exp_alignment` needs MMseqs2, `exp_repeat`
+needs `dustmasker`) write scratch files under `$AUDIT_SCRATCH` if set, otherwise the
+platform temp directory.

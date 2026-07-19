@@ -514,21 +514,44 @@ for memorizers against 5.50 → 1.50 for the linear models. P4 **holds**. Three 
 An earlier version of `roster_predictions.csv` was overwritten per invocation and shipped
 only the ensembl rows, hiding the nonTATA failures; the module now merges by dataset.
 
-**`human_nontata_promoters` — a larger scramble that we decline to bank.** ExtraTrees
-falls 1→7 and kNN-1 rises 6→1 with supported margins, but decomposing each drop against
-the two-stratum product φ·g leaves large *positive* residuals (+0.152 ExtraTrees, +0.088
-LR), meaning most of the movement is not attributable to test-side near-duplicate
-memorization. Both committed predictions fail there (kNN-15 has the larger gap,
-ExtraTrees the larger drop). Combined with the known chaining (cohesion 0.083), the
-reading remains cautionary — the wider roster sharpens the existing verdict rather than
-overturning it.
+**`human_nontata_promoters` — a larger scramble that we decline to bank.** ExtraTrees falls
+1→8 and kNN-1 rises
+3→1 with supported margins. The reason
+we decline is **not** the residual of the drop against φ·g, which an earlier draft used: that residual is
+in fact *larger* on ensembl (max +0.2588) than on nonTATA (max +0.1516), so it
+cannot prefer one dataset over the other — it measures the train-side retraining penalty, which is a
+consequence of leakage on both. The valid discriminator is the **prevalence-corrected graded gap** (§4.1e):
+on nonTATA it does not separate the model families at all, while on ensembl it separates them cleanly.
 
-**A finding that complicates the mechanism story, reported rather than buried:** the
-graded gap and the drop are *not* the same quantity and can point in opposite directions.
-kNN-15 has the largest gap on nonTATA (0.255) and nearly the smallest drop (0.018);
-ExtraTrees has a small gap (0.067) and the largest drop (0.167). The drop contains a
-train-side retraining component that the two-stratum identity does not model, and for
-tree ensembles it dominates.
+### 4.1e The graded memorization gap was confounded by class prevalence
+
+Round 6 of the audit found that the paper's headline mechanism statistic was not
+"confound-immune" as described. The two similarity strata have very different class
+composition, in **opposite directions** on the two leaky datasets:
+
+| dataset | ≥0.9 stratum positive rate | <0.5 stratum positive rate | constant-classifier raw gap |
+|---|---|---|---|
+| `human_enhancers_ensembl` | 0.9997 (n=11,774) | 0.1968 (n=18,770) | **+0.803** |
+| `human_nontata_promoters` | 0.0015 (n=2,037) | 0.9817 (n=4,971) | **−0.980** |
+
+A constant always-predict-positive classifier, memorizing nothing, scores those gaps. This
+fully explains the two negative raw gaps the roster printed (kNN-15 −0.684, GaussianNB
+−0.234) without them meaning "negative memorization".
+
+`exp_graded_corrected.py` recomputes every gap from **balanced accuracy** within each
+stratum, for which a constant classifier scores exactly 0. **The correction strengthens the
+mechanism on ensembl and removes it on nonTATA** — independently reproducing the paper's
+clean-versus-cautionary split:
+
+| dataset | memorizers (mean) | others (mean) | largest corrected gap |
+|---|---|---|---|
+| ensembl | **+0.292** | +0.147 | **kNN-1, +0.461** (raw: +0.208) |
+| nonTATA | +0.122 | +0.166 | MLP, +0.229 |
+
+Consequence for the pre-registered P1 (kNN-1 has the largest gap): it **fails** under the
+raw statistic on ensembl (RF 0.230 vs 0.208) and **holds decisively** under the corrected
+one (kNN-1 0.461 vs RF 0.319). Both are reported; the prediction concerned memorization
+propensity, and the corrected statistic is the one that measures it.
 
 ### 4.2 A pre-registered prediction that failed
 
