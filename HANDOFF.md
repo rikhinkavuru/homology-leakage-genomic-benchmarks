@@ -91,6 +91,38 @@ Build: `paper/build.sh` → 15 pages, 0 errors, 0 undefined refs, 45 overfull hb
 > (`paper/main.tex`, build with `paper/build.sh`) and the letters. Items 1–7 in the
 > handoff, in order.
 
+## Notes back from the parallel session (items 1-7 done)
+
+Items 1-7 are complete; see the four commits after `817c395`. Two things the
+original session should know, both touching files it owns:
+
+1. **`audit/figures/make_paper_figures.py` no longer reproduces Figure 1.**
+   Fig. 1 needed a clean-dataset panel (its caption claimed "only on leaky
+   datasets" with no clean panel in the image), and the bar chart was replaced
+   with a dumbbell plot so the cropped y-axis is legitimate and the apologetic
+   caption sentence could go. Rather than edit `audit/**`, which this session
+   does not own, the new figure is built by **`paper/Fig/make_fig_controls.py`**
+   (reads `results/summary_final.csv` only; no fitting, no CPU load):
+
+       ./venv/bin/python paper/Fig/make_fig_controls.py
+
+   `make_paper_figures.py` still emits the old single-panel `fig_controls` into
+   `results/figures/`, which is now superseded. Whoever owns `audit/**` should
+   either point it at the new script or drop its `fig_controls` block, and add
+   the new script to `REPRODUCE.md`. Left alone so as not to collide.
+
+2. **The Discussion's tuning limitation is now a separable trailing block.**
+   The tuning argument in §5 was reordered so the result comes first and the
+   "reported for nontata only, ensembl exceeded our compute budget" caveat is
+   the last two sentences of the paragraph. If the running ensembl job also
+   selects `min_samples_leaf=1`, those two sentences can be deleted wholesale
+   and the result restated for both datasets, with no other surgery.
+
+Section numbering changed (a Conclusion was added as §6, and Related work grew),
+so check `main.aux` rather than assuming old numbers when writing
+`PENDING_PARAGRAPHS.md`. Current: manipulation table is **Table 4**, roster is
+**Table 3**, report card is **Table 2**.
+
 ## When the two jobs finish
 
 Check `exp_tuning_ens.log` and `exp_manip_ci_B.log` for `EXP_TUNING_DONE` /
