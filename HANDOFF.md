@@ -111,12 +111,23 @@ original session should know, both touching files it owns:
    either point it at the new script or drop its `fig_controls` block, and add
    the new script to `REPRODUCE.md`. Left alone so as not to collide.
 
-2. **The Discussion's tuning limitation is now a separable trailing block.**
-   The tuning argument in §5 was reordered so the result comes first and the
-   "reported for nontata only, ensembl exceeded our compute budget" caveat is
-   the last two sentences of the paragraph. If the running ensembl job also
-   selects `min_samples_leaf=1`, those two sentences can be deleted wholesale
-   and the result restated for both datasets, with no other surgery.
+2. **Both soon-to-be-obsolete disclosures are now cleanly deletable.** Exact
+   recipes, so neither is missed on the final merge:
+
+   - **Discussion §5, tuning limitation.** The tuning argument was reordered so
+     the result comes first and the caveat is the **last two sentences** of the
+     paragraph, beginning "One scope limit belongs with this argument." If the
+     ensembl job also selects `min_samples_leaf=1`, delete those two sentences
+     wholesale and restate the result for both datasets. No other surgery.
+   - **§4.7, manipulation intervals.** The no-interval disclosure is the **last
+     sentence** of the "Three caveats belong with this result" paragraph
+     ("And each condition is a single fit at a single split seed with no
+     interval attached…"). When Manipulation B's intervals land, delete that
+     sentence **and change "Three caveats" to "Two caveats"** in the same
+     paragraph — the count is baked into the opener.
+
+   As of this session's last build, both disclosures are still true and
+   correctly stated, and `PENDING_PARAGRAPHS.md` did not yet exist.
 
 Section numbering changed (a Conclusion was added as §6, and Related work grew),
 so check `main.aux` rather than assuming old numbers when writing

@@ -36,14 +36,19 @@ generality concern directly.
    matched size *and* balance — raises leakage 0.004 → 0.204, inflation
    +0.002 → +0.105, and **manufactures the reordering on demand** (RF promoted
    1st on the contaminated split, demoted to 4th by correction). Model code,
-   sequences and split ratio are untouched; only coordinates change. This converts
+   split ratio and (in the fix-a-leaky direction) the sequences themselves are
+   untouched; the intervention is on the construction step alone. This converts
    the causal claim from correlational to interventional.
 
 3. **A cross-suite census (§4.10) — and an honest null.** We applied the census
    unchanged to the Nucleotide Transformer downstream tasks. Three of twelve
    independent tasks are leaky, one at 25.0% *byte-identical* train/test overlap
-   (verified on a separate code path using no k-mers). **No ranking inverts on any
-   of them, and we report that null prominently rather than burying it.** The null
+   (verified on a separate code path using no k-mers). **No ranking inverts
+   materially on any of them, and we report that null prominently rather than
+   burying it.** One swap does occur — HistGradientBoosting overtakes the forest on
+   `enhancers` after correction, 0.887 vs 0.869 — but the two were separated by only
+   0.005 on the as-shipped split, so it is immaterial under our own inversion
+   criterion, and we say so rather than counting it either way. The null
    is not an embarrassment but a test passed: our diagnostic condition (§3.13)
    predicts it in advance from the as-shipped split, because reordering requires
    not just leakage but a challenger that is genuinely better on novel sequences,
@@ -78,7 +83,7 @@ cross-referenced below.
 - **Limited model scope.** Answered twice over: the nine-model roster above
   (§4.4), and a from-scratch 1D residual CNN with a pre-registered
   dropout×weight-decay grid and a binding refutation condition (§4.9). The named
-  pretrained foundation models are scoped out with a *measured* ≈100%
+  pretrained foundation models are scoped out with a *quantified* ≈100%
   pretraining-overlap confound rather than an asserted one (R1.1, R2.a3, R3.1).
 - **Validation of homology detection.** MMseqs2 alignment identity reproduces the
   effect metric-independently, and a length-robust containment index is added —
@@ -139,7 +144,7 @@ cohesion 0.96 — clean discrete locus duplication, where correction is a clean 
 whereas nontata's 420-member largest cluster has cohesion 0.083, i.e. heavy
 transitive chaining that over-removes genuine promoter and gene-family signal. We
 reframe both the corrected split and novel-only accuracy as explicit
-near-duplicate-bounded proxies (Methods §3.5, §3.6) and name leave-one-chromosome-out
+near-duplicate-bounded proxies (Methods §3.5, §3.9) and name leave-one-chromosome-out
 as the deployment-relevant control (§4.11). This is the core of the
 nontata-as-cautionary-case framing (§4.3, §5).
 
@@ -231,13 +236,17 @@ recommendations are in §6.
 **(i) Trained deep net:** answered by the from-scratch 1D residual CNN (§4.9),
 trained on the training split only, whose regularized reference cell drops on both
 leaky datasets with cluster-bootstrap CIs excluding zero — the memorization mechanism
-reaches a trained neural network with no pretraining confound. We also probed a
-from-scratch attention (Transformer) encoder under the identical protocol;
-consistent with transformers being data-hungry and weaker than convolutions on
-short, local-motif inputs, it underfits these 251–600 bp tasks and does not yield a
-clean aggregate-accuracy comparison, so we do not report it as evidence. The
-pretraining-contamination argument below justifies excluding *pretrained* attention
-models, not attention architectures per se.
+reaches a trained neural network with no pretraining confound. We also attempted a
+from-scratch attention (Transformer) encoder under the same protocol, and mention it
+here only so the record is complete: **it is not in the manuscript and we rest no
+claim on it.** It did not yield a usable comparison — on `human_nontata_promoters`
+(251 bp) the corrected split slightly *raised* its accuracy (drop −0.016),
+consistent with a data-hungry architecture underfitting a short, local-motif task,
+and the `human_enhancers_ensembl` arm did not finish within our compute budget. We
+therefore report the CNN as the trained-deep-net instrument and leave the
+from-scratch-attention question open rather than resting an argument on one
+incomplete run. Separately, the pretraining-contamination argument below justifies
+excluding *pretrained* attention models, not attention architectures per se.
 
 **(ii)/(iii) Named foundation models:** DNABERT-2, HyenaDNA and the Nucleotide
 Transformer are cited and discussed but scoped **out** of the split-effect evidence,
