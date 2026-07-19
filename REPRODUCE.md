@@ -56,14 +56,25 @@ for its built-in self-test (zero residual leakage on synthetic near-duplicates).
 
 ## Headline reproduction (quickest check)
 
-`python -m audit.pipeline.run_audit` reproduces the canonical result:
+`python -m audit.pipeline.run_audit` prints its own output, which is **not** the
+manuscript's canonical pair. It uses the legacy `predict_proba >= 0.5` decision rule;
+the paper fixes one convention throughout — sklearn's `.predict()`/argmax with the
+five-seed-mean corrected accuracy — and reports **0.9284 -> 0.8101, -11.8 pts** for
+human_nontata_promoters RF k6 (abstract, Table 2, §4.2, Conclusion). See
+`results/reconciled_numbers.md` for the full reconciliation and the one-line change
+that would align the two.
 
-- human_nontata_promoters, **RF k6**: original **0.9317** -> homology-aware **0.8117** (**-12.0 pts**)
-- LR k4: 0.827 -> 0.818 (-0.9 pts)  (monotone capacity scaling in between)
+| quantity | run_audit (`proba>=0.5`, 3-seed) | canonical (`.predict()`, 5-seed) |
+|---|---|---|
+| nontata RF k6 original | 0.9317 | 0.9284 |
+| nontata RF k6 corrected | 0.8117 | 0.8101 ± 0.0055 |
+| drop | -12.0 pts | **-11.8 pts** |
 
-Full numbers land in `results/results.md`. `audit/pipeline/run_robustness_full.py` independently
-re-loads and re-fits the full dataset from scratch and reproduces the same
-nontata full-scale numbers, so the headline is reproduced by two independent paths.
+`audit/pipeline/run_robustness_full.py` re-loads and re-fits the full dataset from
+scratch and is an independent path to the same conclusion, but not to identical
+digits: it gives 0.9317 -> 0.8105 (-12.1 pts) against run_audit's 0.8117, because the
+two average over different seed sets. Treat agreement to ~0.1 points as the
+reproduction criterion, not bit-equality. Full numbers land in `results/results.md`.
 
 ## Determinism
 

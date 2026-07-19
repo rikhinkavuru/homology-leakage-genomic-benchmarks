@@ -188,8 +188,10 @@ We now disclose that every balanced dataset is **curated** to a 0.500 positive
 fraction in both train and test (positive/negative subfolders); only nontata is a
 natural mild imbalance (0.544) (Methods §3.1). Because balance is preprocessed, we
 add a **prevalence stress test** (RF, π ∈ {0.5, 0.2, 0.1}) with prevalence-aware
-metrics: the leakage inflation is **revealed by AUPRC/MCC/minority-recall but masked
-by accuracy** (ensembl π=0.2: AUPRC 0.622 → 0.477, MCC 0.422 → 0.182, minority recall
+metrics: the leakage inflation is **revealed by AUPRC and MCC on both leaky datasets, and
+additionally by minority recall on `human_enhancers_ensembl`, but masked by accuracy on
+both** (on `human_nontata_promoters` minority recall is flat, 0.673 -> 0.674, and we
+say so in §4.13) (ensembl π=0.2: AUPRC 0.622 → 0.477, MCC 0.422 → 0.182, minority recall
 0.258 → 0.070, while accuracy barely moves, 0.844 → 0.808). The splitter is extended
 with a per-class realized-fraction check and preserves the target prevalence
 (realized 0.5001 / 0.2007 / 0.1001). **§4.13**; Methods §3.9.

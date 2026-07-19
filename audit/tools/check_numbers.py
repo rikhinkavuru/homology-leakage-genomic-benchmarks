@@ -488,8 +488,39 @@ def check_shared_numbers():
     return out
 
 
+def check_imbalance_panel():
+    """The prevalence stress test. No check covered exp_imbalance_panel.csv until round 27,
+    which is how two successive over-broad readings of it reached the manuscript: first
+    "nontata shows the same pattern" and then, as its replacement, "accuracy is the metric
+    least disturbed". Both were false on nontata. What IS true on both datasets is that
+    AUPRC and MCC fall further than accuracy, so that is what this asserts.
+    """
+    d = csv("exp_imbalance_panel.csv")
+    out = []
+    for ds, tag in (("human_enhancers_ensembl", "ensembl"),
+                    ("human_nontata_promoters", "nontata")):
+        sub = d[(d.dataset == ds) & (d.target_pi == 0.2)] if "target_pi" in d.columns else \
+              d[d.dataset == ds]
+        if len(sub) < 2:
+            continue
+        o = sub[sub.split == "original"].iloc[0]
+        c = sub[sub.split == "corrected"].iloc[0]
+        d_acc, d_auprc, d_mcc = (abs(o.acc - c.acc), abs(o.auprc - c.auprc),
+                                 abs(o.mcc - c.mcc))
+        out.append((d_auprc > d_acc and d_mcc > d_acc,
+                    f"{tag}: AUPRC and MCC both move more than accuracy",
+                    f"auprc {d_auprc:.3f}, mcc {d_mcc:.3f} vs acc {d_acc:.3f}"))
+    # and the specific superlative that was false must not reappear
+    out.append(absent("paper", 0.0, label="(placeholder)") if False else
+               (("accuracy is the metric least disturbed" not in " ".join(doc("paper").split())),
+                "the false 'accuracy least disturbed' generalization is absent",
+                "absent"))
+    return out
+
+
 CHECKS = [
     ("retired claims", check_retired_claims),
+    ("imbalance panel", check_imbalance_panel),
     ("shared numbers across documents", check_shared_numbers),
     ("letter section pointers", check_letter_section_refs),
     ("corrected graded gaps", check_corrected_gaps),
