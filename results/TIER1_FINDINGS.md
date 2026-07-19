@@ -605,8 +605,17 @@ committed in `results/audit_findings.csv`.
 | 1 | 7 | 56 | 47 | 0 | 22 | 19 | 6 |
 | 2 | 6 (rotated) | 44 | 38 | **3** | 21 | 13 | 1 |
 | 3 | 6 (rotated) | 47 | 37 | **4** | 19 | 13 | 1 |
-| 4 | 6 (rotated, frozen state) | 32 | 22 | **0** | **3** | 6 | **13** |
-| 5 | 5 (rotated, frozen state) | 30 | 26 | **0** | **2** | 15 | 9 |
+| 4 | 6 (rotated, frozen) | 32 | 22 | 0 | 3 | 6 | 13 |
+| 5 | 5 (rotated, frozen) | 30 | 26 | 0 | 2 | 15 | 9 |
+| 6 | 5 (rotated) | 36 | 31 | **2** | 16 | 13 | 0 |
+| 7 | 4 (**fresh eyes**) | 27 | 21 | 0 | 10 | 10 | 1 |
+
+**272 raised, 222 confirmed across seven rounds.** Round 7 deliberately used four
+perspectives none of the prior six had: a referee holding only the PDF, the curator of the
+criticized benchmark, a practitioner choosing models, and a replication specialist. They
+found defects the number-checking lenses structurally could not — the pre-registration
+bookkeeping contradicting itself, a centrepiece table printing the statistic the paper
+disowns, and a key causal contrast confounded by upstream data source.
 
 ### The convergence bar has NOT been met, and an earlier draft said otherwise
 
