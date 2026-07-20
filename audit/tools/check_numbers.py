@@ -855,6 +855,23 @@ def check_detector_specificity():
     out.append(near("paper", r"qualifying hit is on the reverse strand",
                     float(w.loc["human_enhancers_ensembl", "rev_only_frac"]), places=4,
                     label="ensembl reverse-strand-only share"))
+
+    # canonical census, suite-wide: the claim is that NO verdict moves, so assert the
+    # property rather than the sentence -- a rewrite of the prose must not silently
+    # retire it.
+    cc = csv("canonical_census_suite.csv")
+    out.append((int(cc.verdict_moved.sum()) == 0,
+                "canonicalization moves no verdict on any of the eight datasets",
+                f"{int(cc.verdict_moved.sum())} moved"))
+    out.append((cc.dataset.nunique() == 8,
+                "the canonical census covers the whole suite, not just the leaky pair",
+                f"{cc.dataset.nunique()} datasets"))
+    jac = cc[(cc.metric == "jaccard") & (cc.threshold == 0.7)]
+    out.append(near("paper", r"largest Jaccard movement anywhere", float(jac.delta.max()),
+                    places=4, label="largest canonical Jaccard movement"))
+    con = cc[(cc.metric == "containment") & (cc.threshold == 0.7)]
+    out.append(near("paper", r"largest containment movement", float(con.delta.max()),
+                    places=4, label="largest canonical containment movement"))
     return out
 
 

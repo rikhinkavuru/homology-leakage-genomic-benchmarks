@@ -455,9 +455,14 @@ threshold where the two tools agree on seven of eight verdicts it is $0.0025$ on
 \textit{human\_enhancers\_ensembl}, $0.0060$ on \textit{human\_nontata\_promoters}, and at most
 $0.0100$ on any of the eight datasets. Second, recomputing the census itself with canonical
 $k$-mers---each $k$-mer replaced by the lexicographic minimum of itself and its reverse
-complement---moves the leak fractions by $0.0006$ (Jaccard) and $0.0718$ (containment) on
-\textit{human\_enhancers\_ensembl} and by $0.0096$ and $0.0144$ on \textit{human\_nontata\_promoters},
-and moves no verdict (\texttt{results/canonical\_census\_suite.csv}). Reverse-strand-only leakage is
+complement---and doing so across the whole suite rather than on the two leaky datasets alone raises
+every leak fraction slightly and moves \emph{no} verdict on any of the eight, under either metric and
+at either threshold. The largest Jaccard movement anywhere is $0.0096$
+(\textit{human\_nontata\_promoters}, $0.4064\to0.4160$) and the largest containment movement $0.0718$
+(\textit{human\_enhancers\_ensembl}, $0.8454\to0.9172$); on the six datasets we call clean the
+Jaccard movement is at most $0.0030$ (\texttt{results/canonical\_census\_suite.csv}). Note that the
+clean rows there are the same $20{,}000$-sequence subsamples used elsewhere, so they confirm
+cleanliness rather than establish it. Reverse-strand-only leakage is
 therefore real but small, and bounded above by roughly one percentage point on every dataset here;
 the forward-only convention understates leakage by about that much and never by enough to change a
 verdict.
