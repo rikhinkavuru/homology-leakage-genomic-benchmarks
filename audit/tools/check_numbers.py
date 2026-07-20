@@ -383,7 +383,33 @@ def check_intervals_are_labelled():
          f"cluster {clu} vs combined {com}"),
         near("paper", r"combined-source interval---which additionally folds", com[0],
              places=1, label="nontata combined-source interval named where it is used"),
+    ] + _check_interval_robustness(cb)
+
+
+def _check_interval_robustness(cb):
+    """E1/E2/E4: the BCa-vs-percentile agreement and the Welch df, which are reported
+    as agreement rather than as corrections, so the numbers backing that claim are
+    guarded. If BCa ever diverged from percentile the paper's 'they agree' would be
+    false, and this catches it."""
+    leaky = cb[cb.dataset.isin(["human_enhancers_ensembl", "human_nontata_promoters"])]
+    max_shift = float(leaky.bca_vs_pct_max_shift.abs().max())
+    min_df = float(leaky.combined_df.min())
+    out = [
+        (max_shift <= 0.0006 + 1e-9,
+         "BCa differs from percentile by at most 0.0006 on every leaky delta",
+         f"max shift {max_shift}"),
+        (min_df > 4.0,
+         "every combined-source effective df exceeds the 4 a flat t_4 would assume",
+         f"min df {min_df}"),
+        says("paper", "differs from the percentile interval by at most $0.0006$",
+             label="the BCa agreement is stated in the supplement"),
     ]
+    # the two interval values the supplement quotes must match the CSV
+    ens = leaky[(leaky.dataset == "human_enhancers_ensembl") & (leaky.model == "RF_k6")].iloc[0]
+    e = [_pct(x) / 100 for x in re.findall(r"-?\d+\.\d+", str(ens.delta_ci_combined))[:2]]
+    out.append(near("paper", r"forest interval is unchanged at", e[0], places=3,
+                    label="ensembl combined interval quoted in the supplement", span=200))
+    return out
 
 
 def check_cohesion():

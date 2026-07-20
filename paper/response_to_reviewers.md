@@ -641,7 +641,7 @@ Four internal issues were also closed, all in the direction of claiming less:
 - Where a point estimate and its interval are computed on different estimands,
   that is disclosed rather than smoothed — the `human_nontata_promoters` headline
   is the five-seed mean, 11.8 points, while the combined-source interval is
-  computed on the seed-0 partition where the delta is 10.8, giving [8.8, 12.9].
+  computed on the seed-0 partition where the delta is 10.8, giving [8.7, 13.0].
 - All six registered predictions are scored in the text whether or not they held.
   **P1 fails as registered** — the corrected-gap reading that favours it was
   defined after P1 was committed and is labelled *post hoc* rather than counted;
