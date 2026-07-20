@@ -8,6 +8,7 @@ T1.5: complete the R3.3 cluster/block bootstrap answer.
 - Clean (5) LR+RF k6 delta cluster CI (does 'all clean deltas include 0' survive?).
 - 3-class best-model delta cluster CI.
 """
+import os
 import time
 import numpy as np, pandas as pd
 from audit.core import expkit as E
@@ -69,7 +70,36 @@ def crve_mean_ci(c, cl):
 def within_test_clusters(seqs, te):
     return E.clusters([seqs[i] for i in te], 0.7, 8)
 
-rows = []
+OUT = "results/cluster_bootstrap_full.partial.csv"
+
+
+def _done_keys():
+    """(dataset, model) pairs already computed, so a restart skips them.
+
+    This run was stopped twice by the supervisor partway through the expensive
+    ensembl arm, and because the script only wrote its CSV at the very end, both
+    times every completed row was lost. Checkpointing after each arm makes an
+    interruption cost one arm rather than the whole run.
+    """
+    if not os.path.exists(OUT):
+        return set()
+    d = pd.read_csv(OUT)
+    return set(zip(d.dataset, d.model))
+
+
+def _checkpoint(rows):
+    if rows:
+        pd.DataFrame(rows).to_csv(OUT, index=False)
+
+
+DONE = _done_keys()
+if DONE:
+    rows = pd.read_csv(OUT).to_dict("records")
+    print(f"[resume] {len(rows)} arm(s) already done: "
+          f"{sorted({r['dataset'] for r in rows})}", flush=True)
+else:
+    rows = []
+
 for d in E.LEAKY:
     seqs, y, otr, ote, tf = E.load(d)
     X = E.featurize(seqs, 6)
@@ -86,6 +116,8 @@ for d in E.LEAKY:
                 corr0[m] = (cc, cte)
     ocl = within_test_clusters(seqs, ote)
     for m in ["RF", "LR"]:
+        if (d, f"{m}_k6") in DONE:
+            print(f"[skip] {d} {m}", flush=True); continue
         c_o = (E.models()[m].fit(X[otr], y[otr]).predict(X[ote]) == y[ote]).astype(float)
         cc, cte = corr0[m]
         ccl = within_test_clusters(seqs, cte)
@@ -129,6 +161,7 @@ for d in E.LEAKY:
         print(f"[{d}] {m}: delta={delta:+.4f} icc={dd['icc']:.4f} deff={dd['deff']:.2f} "
               f"sampleCI={rows[-1]['delta_ci_sample']} clusterCI={rows[-1]['delta_ci_cluster']} "
               f"combinedCI={rows[-1]['delta_ci_combined']} ({time.time()-t0:.0f}s)", flush=True)
+        _checkpoint(rows)
 
 # clean 5 + 3-class deltas, cluster bootstrap
 for d in E.CLEAN + [E.THREECLASS]:
@@ -139,6 +172,8 @@ for d in E.CLEAN + [E.THREECLASS]:
     ocl = within_test_clusters(seqs, ote); ccl = within_test_clusters(seqs, cte)
     ms = ["RF", "LR"] if d != E.THREECLASS else ["RF"]
     for m in ms:
+        if (d, f"{m}_k6") in DONE:
+            continue
         c_o = (E.models()[m].fit(X[otr], y[otr]).predict(X[ote]) == y[ote]).astype(float)
         cc = (E.models()[m].fit(X[ctr], y[ctr]).predict(X[cte]) == y[cte]).astype(float)
         do_c = E.cluster_boot(c_o, ocl, BOOT); dc_c = E.cluster_boot(cc, ccl, BOOT)
@@ -146,9 +181,12 @@ for d in E.CLEAN + [E.THREECLASS]:
         rows.append(dict(dataset=d, model=f"{m}_k6", delta=round(float(c_o.mean()-cc.mean()), 4),
                          icc=None, deff=None, n_clusters=None,
                          delta_ci_cluster=[round(lo, 4), round(hi, 4)], excl0_cluster=bool(lo > 0 or hi < 0)))
+    _checkpoint(rows)
     print(f"[clean {d}] done ({time.time()-t0:.0f}s)", flush=True)
 
 df = pd.DataFrame(rows)
 df.to_csv("results/cluster_bootstrap_full.csv", index=False)
+if os.path.exists(OUT):
+    os.remove(OUT)
 print("\nEXP_CLUSTERBOOT_FULL_DONE", round(time.time()-t0), "s")
 print(df.to_string(index=False))
