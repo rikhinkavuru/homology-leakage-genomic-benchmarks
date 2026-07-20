@@ -1,0 +1,13 @@
+item,xsplit_ge50pct,suite
+h. nontata promoters,0.992,GB
+h. enhancers ensembl,0.7552,GB
+demo human or worm,0.073,GB
+d. enhancers stark,0.0358,GB
+demo coding vs interg.,0.0064,GB
+h. ocr ensembl,0.0062,GB
+h. enhancers cohn,0.006,GB
+h. ensembl regulatory,0.0,GB
+BEND chromatin accessibility,0.0,BEND
+BEND histone modification,0.0,BEND
+BEND gene finding,0.0017,BEND
+BEND enhancer annotation,0.0,BEND

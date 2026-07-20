@@ -13,14 +13,58 @@ import numpy as np, pandas as pd
 from audit.core import expkit as E
 
 t0 = time.time(); BOOT = 10000
+
+
+def welch_t(boot_sd, seed_sd, df_boot, df_seed=4, alpha=0.05):
+    """Critical value for a variance SUM whose two components carry different df.
+
+    The combined-source interval adds a cluster-bootstrap variance to a 5-seed
+    variance and used z=1.96 for the total. That is wrong in the conservative
+    direction for the seed component, which carries only 4 df -- but a flat t_4 is
+    wrong in the other direction, because the bootstrap component usually dominates
+    and is estimated from hundreds of clusters. Welch-Satterthwaite gives the
+    effective df of the sum, so each component is charged for its own precision:
+
+        df_eff = (s_b^2 + s_s^2)^2 / (s_b^4/df_b + s_s^4/df_s)
+
+    df_boot is taken as n_clusters-1, not BOOT-1: the cluster bootstrap's precision
+    is set by how many independent blocks exist, not by how many times we resample
+    them. Returns (tcrit, df_eff).
+    """
+    from scipy import stats
+    vb, vs = float(boot_sd) ** 2, float(seed_sd) ** 2
+    tot = vb + vs
+    if tot <= 0:
+        return float(stats.t.ppf(1 - alpha / 2, df_seed)), float(df_seed)
+    denom = (vb ** 2 / max(df_boot, 1)) + (vs ** 2 / max(df_seed, 1))
+    df_eff = tot ** 2 / denom if denom > 0 else float(df_seed)
+    return float(stats.t.ppf(1 - alpha / 2, df_eff)), float(df_eff)
+
+
 def crve_mean_ci(c, cl):
-    """Liang-Zeger cluster-robust 95% CI for a mean, clustered by cl."""
+    """Liang-Zeger cluster-robust 95% CI for a mean, clustered by cl.
+
+    E4: with a modest number of clusters the Liang-Zeger sandwich is downward
+    biased, so this uses the CR2 (bias-reduced) residual correction and a t
+    reference with G-1 df rather than the normal quantile. On a large G the two
+    agree; on the corrected arm, where cluster counts are modest, they do not.
+    """
+    from scipy import stats
     c = np.asarray(c, float); n = len(c); cbar = c.mean()
     r = c - cbar
     uniq = np.unique(cl)
-    meat = sum((r[cl == u].sum()) ** 2 for u in uniq)
+    G = len(uniq)
+    # CR2: inflate each cluster's residual by (1 - h_g)^(-1/2) with h_g = n_g/n,
+    # the leverage of cluster g for an intercept-only fit.
+    meat = 0.0
+    for u in uniq:
+        m = cl == u
+        h = m.sum() / n
+        adj = 1.0 / np.sqrt(max(1.0 - h, 1e-12))
+        meat += (r[m].sum() * adj) ** 2
     se = np.sqrt(meat) / n
-    return cbar, cbar - 1.96 * se, cbar + 1.96 * se, se
+    tcrit = float(stats.t.ppf(0.975, max(G - 1, 1)))
+    return cbar, cbar - tcrit * se, cbar + tcrit * se, se
 
 def within_test_clusters(seqs, te):
     return E.clusters([seqs[i] for i in te], 0.7, 8)
@@ -53,19 +97,33 @@ for d in E.LEAKY:
         d_s = do_s - dc_s; lo_s, hi_s = E.ci(d_s)
         do_c = E.cluster_boot(c_o, ocl, BOOT); dc_c = E.cluster_boot(cc, ccl, BOOT)
         d_c = do_c - dc_c; lo_c, hi_c = E.ci(d_c)
+        # E2: BCa beside the percentile interval, so "they agree" is a reported fact
+        # rather than an assumption. The delta is a difference of two independently
+        # resampled arms, so the jackknife is taken on each arm and combined the same
+        # way the statistic is.
+        jack = (E.cluster_jackknife(c_o, ocl).mean()
+                - E.cluster_jackknife(cc, ccl))          # vary the corrected arm
+        jack = np.concatenate([jack,
+                               E.cluster_jackknife(c_o, ocl) - float(cc.mean())])
+        bca_lo, bca_hi = E.ci_bca(d_c, delta_hat := float(c_o.mean() - cc.mean()), jack)
         # combined-source: fold 5-seed corrected-acc SD into the delta variance
         seed_sd = np.std(seed_acc[m], ddof=1)
         delta = float(c_o.mean() - cc.mean())
         boot_sd = np.std(d_c)                      # cluster-bootstrap SD of the delta
         comb_sd = np.sqrt(boot_sd ** 2 + seed_sd ** 2)
-        cb_lo, cb_hi = delta - 1.96 * comb_sd, delta + 1.96 * comb_sd
+        tcrit, df_eff = welch_t(boot_sd, seed_sd, df_boot=dd["n_clusters"] - 1)
+        cb_lo, cb_hi = delta - tcrit * comb_sd, delta + tcrit * comb_sd
         # CRVE cross-check on original acc
         _, crlo, crhi, crse = crve_mean_ci(c_o, ocl)
         rows.append(dict(dataset=d, model=f"{m}_k6", delta=round(delta, 4),
                          icc=round(dd["icc"], 4), deff=round(dd["deff"], 3), n_clusters=dd["n_clusters"],
                          delta_ci_sample=[round(lo_s, 4), round(hi_s, 4)], excl0_sample=bool(lo_s > 0 or hi_s < 0),
                          delta_ci_cluster=[round(lo_c, 4), round(hi_c, 4)], excl0_cluster=bool(lo_c > 0 or hi_c < 0),
-                         seed_sd=round(float(seed_sd), 4),
+                         delta_ci_bca=[round(bca_lo, 4), round(bca_hi, 4)],
+                         excl0_bca=bool(bca_lo > 0 or bca_hi < 0),
+                         bca_vs_pct_max_shift=round(max(abs(bca_lo - lo_c), abs(bca_hi - hi_c)), 4),
+                         seed_sd=round(float(seed_sd), 4), boot_sd=round(float(boot_sd), 4),
+                         combined_df=round(df_eff, 1), combined_tcrit=round(tcrit, 3),
                          delta_ci_combined=[round(cb_lo, 4), round(cb_hi, 4)], excl0_combined=bool(cb_lo > 0 or cb_hi < 0),
                          orig_acc_CRVE_ci=[round(crlo, 4), round(crhi, 4)]))
         print(f"[{d}] {m}: delta={delta:+.4f} icc={dd['icc']:.4f} deff={dd['deff']:.2f} "

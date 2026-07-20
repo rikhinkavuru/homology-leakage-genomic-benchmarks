@@ -1,0 +1,53 @@
+length,regime,perturbation,kind,magnitude,n_trials,jaccard_median,jaccard_detect_rate,jaccard_detect_lo,jaccard_detect_hi,containment_median,containment_detect_rate,containment_detect_lo,containment_detect_hi
+70,GUE core-promoter,exact copy,control,0,500,1.0,1.0,0.9926,1.0,1.0,1.0,0.9926,1.0
+70,GUE core-promoter,insertion 1 bp,insertion,1,500,0.8143,1.0,0.9926,1.0,0.9048,1.0,0.9926,1.0
+70,GUE core-promoter,deletion 1 bp,deletion,1,500,0.8116,1.0,0.9926,1.0,0.9032,1.0,0.9926,1.0
+70,GUE core-promoter,insertion 2 bp,insertion,2,500,0.8028,1.0,0.9926,1.0,0.9048,1.0,0.9926,1.0
+70,GUE core-promoter,deletion 2 bp,deletion,2,500,0.7971,1.0,0.9926,1.0,0.9016,1.0,0.9926,1.0
+70,GUE core-promoter,insertion 5 bp,insertion,5,500,0.7703,1.0,0.9926,1.0,0.9048,1.0,0.9926,1.0
+70,GUE core-promoter,deletion 5 bp,deletion,5,500,0.7536,1.0,0.9926,1.0,0.8966,1.0,0.9926,1.0
+70,GUE core-promoter,insertion 10 bp,insertion,10,500,0.7215,0.576,0.5313,0.6198,0.9048,1.0,0.9926,1.0
+70,GUE core-promoter,deletion 10 bp,deletion,10,500,0.6812,0.308,0.2678,0.3505,0.8868,1.0,0.9926,1.0
+70,GUE core-promoter,1 point mutation,substitution,1,500,0.7746,1.0,0.9926,1.0,0.873,1.0,0.9926,1.0
+70,GUE core-promoter,2 point mutations,substitution,2,500,0.6154,0.25,0.2126,0.2904,0.7619,1.0,0.9926,1.0
+70,GUE core-promoter,5 point mutations,substitution,5,500,0.3548,0.0,0.0,0.0074,0.5238,0.014,0.0056,0.0286
+70,GUE core-promoter,10 point mutations,substitution,10,500,0.156,0.0,0.0,0.0074,0.2698,0.0,0.0,0.0074
+200,Genomic Benchmarks nontata (251 bp),exact copy,control,0,500,1.0,1.0,0.9926,1.0,1.0,1.0,0.9926,1.0
+200,Genomic Benchmarks nontata (251 bp),insertion 1 bp,insertion,1,500,0.9277,1.0,0.9926,1.0,0.9637,1.0,0.9926,1.0
+200,Genomic Benchmarks nontata (251 bp),deletion 1 bp,deletion,1,500,0.9296,1.0,0.9926,1.0,0.9658,1.0,0.9926,1.0
+200,Genomic Benchmarks nontata (251 bp),insertion 2 bp,insertion,2,500,0.9208,1.0,0.9926,1.0,0.9637,1.0,0.9926,1.0
+200,Genomic Benchmarks nontata (251 bp),deletion 2 bp,deletion,2,500,0.9239,1.0,0.9926,1.0,0.9634,1.0,0.9926,1.0
+200,Genomic Benchmarks nontata (251 bp),insertion 5 bp,insertion,5,500,0.9152,1.0,0.9926,1.0,0.9683,1.0,0.9926,1.0
+200,Genomic Benchmarks nontata (251 bp),deletion 5 bp,deletion,5,500,0.905,1.0,0.9926,1.0,0.9628,1.0,0.9926,1.0
+200,Genomic Benchmarks nontata (251 bp),insertion 10 bp,insertion,10,500,0.8942,1.0,0.9926,1.0,0.9686,1.0,0.9926,1.0
+200,Genomic Benchmarks nontata (251 bp),deletion 10 bp,deletion,10,500,0.8844,1.0,0.9926,1.0,0.9617,1.0,0.9926,1.0
+200,Genomic Benchmarks nontata (251 bp),1 point mutation,substitution,1,500,0.9204,1.0,0.9926,1.0,0.9585,1.0,0.9926,1.0
+200,Genomic Benchmarks nontata (251 bp),2 point mutations,substitution,2,500,0.8469,1.0,0.9926,1.0,0.9171,1.0,0.9926,1.0
+200,Genomic Benchmarks nontata (251 bp),5 point mutations,substitution,5,500,0.682,0.332,0.2908,0.3752,0.812,1.0,0.9926,1.0
+200,Genomic Benchmarks nontata (251 bp),10 point mutations,substitution,10,500,0.4855,0.0,0.0,0.0074,0.6545,0.094,0.0699,0.123
+300,GUE promoter-300,exact copy,control,0,500,1.0,1.0,0.9926,1.0,1.0,1.0,0.9926,1.0
+300,GUE promoter-300,insertion 1 bp,insertion,1,500,0.9546,1.0,0.9926,1.0,0.9793,1.0,0.9926,1.0
+300,GUE promoter-300,deletion 1 bp,deletion,1,500,0.95,1.0,0.9926,1.0,0.976,1.0,0.9926,1.0
+300,GUE promoter-300,insertion 2 bp,insertion,2,500,0.947,1.0,0.9926,1.0,0.9761,1.0,0.9926,1.0
+300,GUE promoter-300,deletion 2 bp,deletion,2,500,0.9467,1.0,0.9926,1.0,0.9759,1.0,0.9926,1.0
+300,GUE promoter-300,insertion 5 bp,insertion,5,500,0.9377,1.0,0.9926,1.0,0.9761,1.0,0.9926,1.0
+300,GUE promoter-300,deletion 5 bp,deletion,5,500,0.9367,1.0,0.9926,1.0,0.9757,1.0,0.9926,1.0
+300,GUE promoter-300,insertion 10 bp,insertion,10,500,0.9253,1.0,0.9926,1.0,0.9761,1.0,0.9926,1.0
+300,GUE promoter-300,deletion 10 bp,deletion,10,500,0.9257,1.0,0.9926,1.0,0.9786,1.0,0.9926,1.0
+300,GUE promoter-300,1 point mutation,substitution,1,500,0.9468,1.0,0.9926,1.0,0.9727,1.0,0.9926,1.0
+300,GUE promoter-300,2 point mutations,substitution,2,500,0.8964,1.0,0.9926,1.0,0.9454,1.0,0.9926,1.0
+300,GUE promoter-300,5 point mutations,substitution,5,500,0.7667,1.0,0.9926,1.0,0.8696,1.0,0.9926,1.0
+300,GUE promoter-300,10 point mutations,substitution,10,500,0.6116,0.002,0.0001,0.0111,0.7603,1.0,0.9926,1.0
+500,GUE yeast EMP,exact copy,control,0,500,1.0,1.0,0.9926,1.0,1.0,1.0,0.9926,1.0
+500,GUE yeast EMP,insertion 1 bp,insertion,1,500,0.9701,1.0,0.9926,1.0,0.9858,1.0,0.9926,1.0
+500,GUE yeast EMP,deletion 1 bp,deletion,1,500,0.9737,1.0,0.9926,1.0,0.9877,1.0,0.9926,1.0
+500,GUE yeast EMP,insertion 2 bp,insertion,2,500,0.9681,1.0,0.9926,1.0,0.9858,1.0,0.9926,1.0
+500,GUE yeast EMP,deletion 2 bp,deletion,2,500,0.968,1.0,0.9926,1.0,0.9857,1.0,0.9926,1.0
+500,GUE yeast EMP,insertion 5 bp,insertion,5,500,0.9643,1.0,0.9926,1.0,0.9876,1.0,0.9926,1.0
+500,GUE yeast EMP,deletion 5 bp,deletion,5,500,0.9656,1.0,0.9926,1.0,0.9866,1.0,0.9926,1.0
+500,GUE yeast EMP,insertion 10 bp,insertion,10,500,0.9545,1.0,0.9926,1.0,0.9858,1.0,0.9926,1.0
+500,GUE yeast EMP,deletion 10 bp,deletion,10,500,0.9534,1.0,0.9926,1.0,0.9855,1.0,0.9926,1.0
+500,GUE yeast EMP,1 point mutation,substitution,1,500,0.968,1.0,0.9926,1.0,0.9837,1.0,0.9926,1.0
+500,GUE yeast EMP,2 point mutations,substitution,2,500,0.937,1.0,0.9926,1.0,0.9675,1.0,0.9926,1.0
+500,GUE yeast EMP,5 point mutations,substitution,5,500,0.8513,1.0,0.9926,1.0,0.9206,1.0,0.9926,1.0
+500,GUE yeast EMP,10 point mutations,substitution,10,500,0.7398,1.0,0.9926,1.0,0.8512,1.0,0.9926,1.0

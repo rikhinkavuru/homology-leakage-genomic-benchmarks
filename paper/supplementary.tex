@@ -471,13 +471,52 @@ The maximum-over-training-set caveat survives this and is worth restating: the c
 not a per-pair score, so a per-pair false-positive rate must fall well below $1/n_{\text{train}}$
 before the resulting fraction is negligible. What has changed is that this is now a measured
 inequality rather than an argument from construction and provenance. Two further properties are
-worth recording. Per-pair
-behaviour on real DNA is much heavier-tailed than on synthetic sequence: random pairs drawn from the
-clean datasets reach a Jaccard of $0.26$ over roughly $4{,}000$ sampled pairs, against a maximum of
-$0.019$ over uniform random sequence, because real genomes carry repeats and low-complexity
-tracts---so a synthetic null would materially understate the floor, which is why the floor argument
-rests on real clean data rather than on simulation. And the measured per-pair false-positive rate at
-threshold $0.7$ is $0.000$ on all three clean real-DNA panels.
+worth recording. Per-pair behaviour on real DNA is much
+heavier-tailed than on synthetic sequence, because real genomes carry repeats and low-complexity
+tracts, so a synthetic null would materially understate the floor and the floor argument rests on
+real clean data rather than on simulation. That tail is heavier than a sample reveals, and a sampled
+maximum must not be read as a ceiling: on \textit{drosophila\_enhancers\_stark} a $4{,}000$-pair
+sample tops out at a Jaccard of $0.169$, a $20{,}000$-pair sample at $0.509$, and exhaustive
+enumeration at $0.981$.
+
+\paragraph{The per-pair false-positive rate, measured exhaustively.} We previously reported this rate
+as $0.000$ from $4{,}000$ sampled pairs per clean dataset. That number was not wrong, but it was not
+evidence: $0/4{,}000$ excludes only rates above ${\sim}7\times10^{-4}$, while the near-duplicate
+density in these datasets is $3\times10^{-7}$ to $4\times10^{-6}$, so the sample would have returned
+$0.000$ whether or not false positives existed. It also rested on a warrant that does not hold---that
+any similarity between two members of a \emph{clean} dataset is by that verdict not leakage. Clean
+means below the $0.1$ cut, not free of duplicates, and these datasets do contain genuine
+near-duplicate pairs ($83$ of them, $27$ crossing the split), so a rate computed that way is an upper
+bound on the false-positive rate rather than the rate itself.
+
+We therefore enumerate rather than sample. Over all $17{,}997{,}000$ within-dataset pairs of each of
+the three clean datasets---$54$ million pairs, no sampling---the $8$-mer Jaccard at $0.7$ flags $5$
+pairs on \textit{human\_ocr\_ensembl}, $78$ on \textit{drosophila\_enhancers\_stark} and $0$ on
+\textit{human\_enhancers\_cohn}. Adjudicating every one of those $83$ by the Smith--Waterman
+criterion used above returns $83$ genuine homologs and \emph{no} false positive: the per-pair
+false-positive rate is $0.000$ with an exact upper bound of $2.05\times10^{-7}$, three orders of
+magnitude tighter than the sampled version and informative at last at the $1/n_{\text{train}}$ scale
+the maximum statistic requires. Repeat content does not change it. Using \texttt{dustmasker}
+low-complexity fraction and a $k$-mer-reuse score as repeat proxies, repeat-rich pairs sit higher in
+the body of the distribution (p99 $0.110$ against $0.019$ on \textit{human\_ocr\_ensembl}) but top
+out at $0.178$, nowhere near the threshold, and the flagged pairs are mostly repeat-\emph{poor}. The
+proxies are a real limitation and are stated as one: DUST sees simple and low-complexity repeats and
+is largely blind to interspersed elements, so an AluY is of ordinary composition and invisible to it.
+This bounds the simple-repeat contribution, not the Alu contribution.
+
+\paragraph{Indels.} The calibration above covers substitutions and window shifts, and the natural
+worry is that an indel is worse because it displaces every downstream $k$-mer. It is not, and the
+reason is that a $k$-mer set is order-free: displaced $k$-mers are still present, merely relocated,
+so a $d$\,bp indel destroys about $k+d$ $k$-mers local to the breakpoint, whereas a substitution
+destroys $k$ and injects $k$ spurious ones, damaging numerator and denominator at once. At $500$
+trials per cell, insertions and deletions of $1$, $2$ and $5$\,bp are detected at rate $1.000$ at
+every length, and only the $10$\,bp case at $70$\,bp falls short---$0.576$ $[0.531,0.620]$ for
+insertions, $0.308$ $[0.268,0.351]$ for deletions---which is a length effect, $10$\,bp being $14\%$
+of that sequence, rather than a displacement effect. Containment detects every indel at every length.
+The contrast with substitutions is sharp at $70$\,bp: a $5$\,bp indel is always detected, while two
+substitutions are missed $75\%$ of the time. The ``near-exact-duplicate detector on short sequences''
+framing is therefore edit-type-dependent as well as length-dependent
+(\texttt{results/calibration\_indels.csv}, \texttt{results/calibration\_repeats.csv}).
 
 \section{Imbalanced evaluation: full panel}\label{sec:s-imbres}
 Table~\ref{tab:imb} gives the prevalence panel at $\pi=0.2$. What generalizes across both datasets

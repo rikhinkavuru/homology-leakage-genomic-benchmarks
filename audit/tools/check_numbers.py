@@ -875,7 +875,68 @@ def check_detector_specificity():
     return out
 
 
+def check_decomposition_and_spread():
+    """B1's three-arm decomposition and B3's two spread controls.
+
+    Both replaced load-bearing claims, and B3's difficulty control WEAKENED one, so
+    these are guarded as properties as well as values: a later edit must not quietly
+    restore "the benchmark is blind to enormous real differences", which the
+    difficulty-matched arm does not support.
+    """
+    out = []
+    d = pd.read_csv(os.path.join(R, "eval_side_inflation.csv"))
+    ens = d[(d.dataset == "human_enhancers_ensembl") & (d.model == "RF")].iloc[0]
+    ntp = d[(d.dataset == "human_nontata_promoters") & (d.model == "RF")].iloc[0]
+    # the text states these in PERCENTAGE POINTS ("8.98 of the forest's 16.4 points"),
+    # so the check has to compare in the same units the sentence uses
+    out.append(near("paper", r"accounts for", 100 * float(ens.eval_side_inflation),
+                    places=2, label="ensembl RF evaluation-side inflation", span=520))
+    out.append(near("paper", r"accounts for the remaining", 100 * float(ens.split_side_effect),
+                    places=2, label="ensembl RF split-side effect", span=300))
+    out.append((abs(float(ens.eval_side_inflation) + float(ens.split_side_effect)
+                    - float(ens.total_drop)) < 5e-4,
+                "the two arms of the decomposition sum to the total drop", ""),)
+    out.append(near("paper", r"the same decomposition gives", 100 * float(ntp.eval_side_inflation),
+                    places=2, label="nontata RF evaluation-side inflation", span=200))
+    # the memorizer is the only model paying a retraining penalty on ensembl
+    e = d[d.dataset == "human_enhancers_ensembl"].set_index("model")
+    out.append((float(e.loc["RF", "split_side_effect"]) > 0
+                and all(float(e.loc[m, "split_side_effect"]) < 0
+                        for m in ("LR", "LinearSVC", "HGB")),
+                "only the forest pays a split-side penalty on ensembl", ""))
+    # the raw evaluation-side figure is prevalence-confounded; the balanced one is not
+    out.append(near("paper", r"From balanced accuracy, for which a constant classifier",
+                    float(ens.eval_side_inflation_balanced), places=4, signed=True,
+                    label="ensembl RF balanced evaluation-side inflation"))
+
+    s = pd.read_csv(os.path.join(R, "spread_control.csv"))
+    clean = s[(s.experiment == "roster_spread") & (~s.leaky)]
+    for dset in ("human_enhancers_cohn", "demo_human_or_worm"):
+        g = clean[clean.dataset == dset]
+        a = g[g.arm.str.startswith("as_shipped_split/as_shipped")].iloc[0]
+        c = g[g.arm.str.startswith("corrected_split/as_shipped")].iloc[0]
+        out.append((float(c.top3_spread) <= float(a.top3_spread) + 1e-9,
+                    f"{dset}: re-splitting does not expand top-3 spread",
+                    f"{a.top3_spread} -> {c.top3_spread}"))
+    m = s[s.experiment == "difficulty_matched"]
+    if len(m):
+        dm = m[m.arm.str.contains("difficulty_matched_to")].iloc[0]
+        out.append(near("paper", r"their spread expands from \$0\.0015\$",
+                        float(dm.top3_spread), places=4,
+                        label="difficulty-matched top-3 spread"))
+        out.append((float(dm.top3_spread) > 0.5 * 0.2314,
+                    "the difficulty control explains most of the spread expansion, "
+                    "so the strong reading is not claimed",
+                    f"matched {dm.top3_spread} vs corrected 0.2314"))
+    out.append((not any("blind to enormous real differences" in doc(k)
+                        for k in ("paper", "response", "cover")),
+                "retired: 'blind to enormous real differences' "
+                "(the difficulty-matched control does not support it)", ""))
+    return out
+
+
 CHECKS = [
+    ("decomposition / spread controls", check_decomposition_and_spread),
     ("detector specificity / hashFrag", check_detector_specificity),
     ("retired claims", check_retired_claims),
     ("generated tables", check_generated_tables),

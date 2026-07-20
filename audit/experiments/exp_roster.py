@@ -57,7 +57,8 @@ LEAKY = {"human_nontata_promoters", "human_enhancers_ensembl"}
 INVERSION_MARGIN = 0.01          # report_card.py:55 convention
 
 
-def make_roster(n_jobs=4):
+def make_roster(n_jobs=None):
+    n_jobs = E.N_JOBS if n_jobs is None else n_jobs
     """Nine learners on the same k=6 count features.
 
     The four models the paper already reports are taken VERBATIM from expkit.models(),

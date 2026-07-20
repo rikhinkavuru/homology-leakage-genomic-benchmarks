@@ -1,0 +1,9 @@
+dataset,model,n_test,n_novel,novel_frac,pos_rate_full,pos_rate_novel,acc_asshipped_full,acc_asshipped_novelonly,acc_corrected_resplit,n_corrected_seeds,eval_side_inflation,eval_side_ci_lo,eval_side_ci_hi,split_side_effect,total_drop,eval_side_share,bal_asshipped_full,bal_asshipped_novelonly,eval_side_inflation_balanced,constant_classifier_eval_side_gap
+human_enhancers_ensembl,LR,30970,18770,0.6061,0.5,0.1968,0.7809,0.7649,0.7776,3,0.0161,0.0121,0.0201,-0.0127,0.0033,4.7957,0.7809,0.7472,0.0338,0.3032
+human_enhancers_ensembl,LinearSVC,30970,18770,0.6061,0.5,0.1968,0.798,0.782,0.7952,3,0.016,0.0124,0.0198,-0.0132,0.0028,5.7492,0.798,0.766,0.032,0.3032
+human_enhancers_ensembl,RF,30970,18770,0.6061,0.5,0.1968,0.8596,0.7698,0.6957,3,0.0898,0.0869,0.0927,0.0741,0.1639,0.5478,0.8596,0.6807,0.1789,0.3032
+human_enhancers_ensembl,HGB,30970,18770,0.6061,0.5,0.1968,0.7636,0.7488,0.7574,3,0.0148,0.0105,0.019,-0.0086,0.0063,2.368,0.7636,0.7293,0.0343,0.3032
+human_nontata_promoters,LR,9034,4971,0.5503,0.5441,0.9817,0.8702,0.834,0.83,3,0.0361,0.0279,0.0442,0.0041,0.0402,0.8986,0.8737,0.8238,0.0499,-0.4376
+human_nontata_promoters,LinearSVC,9034,4971,0.5503,0.5441,0.9817,0.8876,0.8546,0.8063,3,0.0331,0.0264,0.0399,0.0482,0.0813,0.4069,0.8906,0.7749,0.1156,-0.4376
+human_nontata_promoters,RF,9034,4971,0.5503,0.5441,0.9817,0.9284,0.8793,0.8129,3,0.0491,0.0441,0.0543,0.0664,0.1155,0.425,0.9327,0.7875,0.1452,-0.4376
+human_nontata_promoters,HGB,9034,4971,0.5503,0.5441,0.9817,0.8905,0.8383,0.8244,3,0.0523,0.0456,0.0592,0.0139,0.0661,0.7903,0.8955,0.8044,0.0911,-0.4376

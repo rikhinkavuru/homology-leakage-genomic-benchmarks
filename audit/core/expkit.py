@@ -14,6 +14,10 @@ from frozen tables that used a `proba>=0.5` rule for RF -- that is the intended
 reconciliation.
 """
 from __future__ import annotations
+# MUST precede numpy: resources caps the BLAS thread pools, and the native
+# libraries read those env vars when numpy first loads them. It also starts the
+# orphan watchdog, so an experiment dies with the shell that launched it.
+from audit.core.resources import N_JOBS, describe as _describe_resources  # noqa: F401
 import os, itertools
 import numpy as np
 import pandas as pd
@@ -268,6 +272,58 @@ def cluster_boot(c, cl, boot=1000, seed=BSEED):
 
 def ci(draws, lo=2.5, hi=97.5):
     return float(np.percentile(draws, lo)), float(np.percentile(draws, hi))
+
+def ci_bca(draws, theta_hat, jack, alpha=0.05):
+    """Bias-corrected and accelerated interval (Efron), for E2.
+
+    The percentile interval is only correct when the bootstrap distribution is
+    symmetric and unbiased; accuracy deltas near a ceiling are neither. BCa corrects
+    both, using a bias term z0 from the share of draws below the point estimate and
+    an acceleration term from the jackknife skewness:
+
+        z0 = Phi^-1( #{draws < theta_hat} / B )
+        a  = sum(d^3) / (6 * (sum(d^2))^(3/2)),   d = mean(jack) - jack
+
+    Returns (lo, hi). Falls back to the percentile interval when the correction is
+    undefined (no variation in the jackknife, or z0 infinite), rather than
+    silently returning something wrong.
+    """
+    from scipy import stats
+    draws = np.asarray(draws, float)
+    B = len(draws)
+    if B == 0:
+        return (float("nan"), float("nan"))
+    prop = float((draws < theta_hat).mean())
+    if not 0.0 < prop < 1.0:
+        return ci(draws, 100 * alpha / 2, 100 * (1 - alpha / 2))
+    z0 = stats.norm.ppf(prop)
+    jack = np.asarray(jack, float)
+    d = jack.mean() - jack
+    denom = 6.0 * (np.sum(d ** 2) ** 1.5)
+    a = float(np.sum(d ** 3) / denom) if denom > 0 else 0.0
+    out = []
+    for z in (stats.norm.ppf(alpha / 2), stats.norm.ppf(1 - alpha / 2)):
+        adj = z0 + (z0 + z) / (1 - a * (z0 + z))
+        out.append(float(np.percentile(draws, 100 * stats.norm.cdf(adj))))
+    return out[0], out[1]
+
+def cluster_jackknife(c, cl):
+    """Leave-one-cluster-out means, the acceleration input for `ci_bca`.
+
+    Clusters, not observations: the resampling unit for these intervals is the whole
+    near-duplicate component, so the jackknife has to drop the same unit or the
+    acceleration term describes a different estimator than the bootstrap does.
+    """
+    c = np.asarray(c, float)
+    uniq = np.unique(cl)
+    tot, n = c.sum(), len(c)
+    out = []
+    for u in uniq:
+        m = cl == u
+        k = int(m.sum())
+        if n - k > 0:
+            out.append((tot - c[m].sum()) / (n - k))
+    return np.asarray(out, float)
 
 def icc_oneway(c, cl):
     """One-way ICC of a binary/continuous outcome across clusters + design effect."""

@@ -43,10 +43,10 @@ for d in E.LEAKY:
     print(f"[{d}] baselines done ({time.time()-t0:.0f}s)", flush=True)
 
     def run_rf(**kw):
-        rf = RandomForestClassifier(n_estimators=150, n_jobs=-1, random_state=0, **kw)
+        rf = RandomForestClassifier(n_estimators=150, n_jobs=E.N_JOBS, random_state=0, **kw)
         rf.fit(X[otr], y[otr])
         co = (rf.predict(X[ote]) == y[ote]).astype(float)
-        rf2 = RandomForestClassifier(n_estimators=150, n_jobs=-1, random_state=0, **kw)
+        rf2 = RandomForestClassifier(n_estimators=150, n_jobs=E.N_JOBS, random_state=0, **kw)
         rf2.fit(X[ctr], y[ctr])
         cc = (rf2.predict(X[cte]) == y[cte]).astype(float)
         gap, acchi, acclo, nhi, nlo = graded_gap(co, sim)

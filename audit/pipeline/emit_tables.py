@@ -194,6 +194,46 @@ def build_roster() -> str:
     return GENERATED + "\n".join(lines) + "\n"
 
 
+DECOMP_ORDER = ["RF", "LinearSVC", "LR", "HGB"]
+DECOMP_NAME = {"RF": "RandomForest", "LinearSVC": "LinearSVC",
+               "LR": "LogisticReg.", "HGB": "HistGB"}
+
+
+def build_decomposition() -> str:
+    """F1/B1: the three-arm decomposition, as a table instead of forty numbers in prose.
+
+    The middle column is the one the table exists for -- one fit on the as-shipped
+    training set, scored on the novel stratum alone -- because it separates what the
+    benchmark overstates about an existing model from what re-splitting costs by
+    retraining.
+    """
+    d = pd.read_csv(os.path.join(R, "eval_side_inflation.csv"))
+    lines = [r"\begin{tabular}{@{}llrrrrrr@{}}", r"\toprule",
+             (r"Dataset & Model & As-shipped & Novel-only & Corrected & "
+              r"Eval-side & Split-side & Total\\"),
+             (r" &  & (full test) & (same fit) & (re-split) & "
+              r"inflation & effect & drop\\"),
+             r"\midrule"]
+    for dset in ("human_enhancers_ensembl", "human_nontata_promoters"):
+        sub = d[d.dataset == dset].set_index("model")
+        for j, m in enumerate(DECOMP_ORDER):
+            if m not in sub.index:
+                continue
+            r = sub.loc[m]
+            name = tex_name(dset) if j == 0 else ""
+            lines.append(
+                f"{name} & {DECOMP_NAME[m]} & {num(r['acc_asshipped_full'], places=4)} & "
+                f"{num(r['acc_asshipped_novelonly'], places=4)} & "
+                f"{num(r['acc_corrected_resplit'], places=4)} & "
+                f"${num(r['eval_side_inflation'], places=4, signed=True)}$ & "
+                f"${num(r['split_side_effect'], places=4, signed=True)}$ & "
+                f"${num(r['total_drop'], places=4, signed=True)}$\\\\")
+        if dset == "human_enhancers_ensembl":
+            lines.append(r"\midrule")
+    lines += [r"\botrule", r"\end{tabular}"]
+    return GENERATED + "\n".join(lines) + "\n"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true",
@@ -203,6 +243,7 @@ def main():
     targets = {
         os.path.join(PAPER, "tab_reportcard.tex"): build_reportcard(),
         os.path.join(PAPER, "tab_roster.tex"): build_roster(),
+        os.path.join(PAPER, "tab_decomposition.tex"): build_decomposition(),
     }
     stale = []
     for path, body in targets.items():

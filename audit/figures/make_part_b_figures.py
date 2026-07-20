@@ -103,8 +103,13 @@ for ax, d in zip(axes, PANELS):
     ax.set_xlim(-0.5, 1.5); ax.set_ylim(4.5, 0.5)
     ax.set_xticks([0, 1]); ax.set_xticklabels(["original\n(leaky)", "near-dup.-\naware"])
     ax.set_yticks([1, 2, 3, 4]); ax.set_yticklabels(["1st", "2nd", "3rd", "4th"] if d == PANELS[0] else [])
+    # D6: Kendall tau is NOT annotated on the panels. The body text disclaims it as a
+    # primary statistic at four models, and at four models it also orders the two leaky
+    # panels opposite to the conclusions they carry. Printing it below keeps it available
+    # without putting a disclaimed statistic on the figure.
     tau = float(rank[(rank.dataset == d) & (rank.k == 6) & (rank.metric == "accuracy")]["kendall_tau"].iloc[0])
-    ax.set_title(f"{NICE[d]}\n{'LEAKY' if d in LEAKY else 'clean'}  (τ={tau:+.2f})", fontsize=10)
+    print(f"  [not plotted] kendall tau {d} k=6 accuracy = {tau:+.2f}")
+    ax.set_title(f"{NICE[d]}\n{'LEAKY' if d in LEAKY else 'clean'}", fontsize=10)
     for s in ("top", "right", "left"):
         ax.spines[s].set_visible(False)
 fig.suptitle("Model ranking: original (leaky) vs near-duplicate-aware split  ($k$=6, accuracy)", fontsize=12)

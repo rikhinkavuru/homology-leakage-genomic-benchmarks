@@ -1,0 +1,32 @@
+family,label,delta,p,bh_sig_own_family,bh_sig_pooled,changed,q_pooled,near_boundary
+A: per-dataset leaky-vs-clean deltas,human_nontata_promoters|RF_k6,0.1083,1.407e-35,True,True,False,2.1808500000000003e-34,False
+A: per-dataset leaky-vs-clean deltas,human_nontata_promoters|LR_k6,0.0407,4.447e-07,True,True,False,4.595233333333334e-06,False
+A: per-dataset leaky-vs-clean deltas,human_enhancers_ensembl|RF_k6,0.1639,4.543e-295,True,True,False,1.40833e-293,False
+A: per-dataset leaky-vs-clean deltas,human_enhancers_ensembl|LR_k6,0.0004,0.9199,False,False,False,0.9818877527088593,False
+A: per-dataset leaky-vs-clean deltas,human_enhancers_cohn|RF_k6,-0.0052,0.5734,False,False,False,0.779313043478261,False
+A: per-dataset leaky-vs-clean deltas,human_enhancers_cohn|LR_k6,-0.0016,0.857,False,False,False,0.9818877527088593,False
+A: per-dataset leaky-vs-clean deltas,human_ocr_ensembl|RF_k6,0.0139,0.1945,False,False,False,0.4019666666666667,False
+A: per-dataset leaky-vs-clean deltas,human_ocr_ensembl|LR_k6,0.0059,0.5782,False,False,False,0.779313043478261,False
+A: per-dataset leaky-vs-clean deltas,demo_human_or_worm|RF_k6,-0.0044,0.4181,False,False,False,0.7624176470588235,False
+A: per-dataset leaky-vs-clean deltas,demo_human_or_worm|LR_k6,-0.0034,0.4853,False,False,False,0.779313043478261,False
+A: per-dataset leaky-vs-clean deltas,demo_coding_vs_intergenomic_seqs|RF_k6,0.0006,0.9342,False,False,False,0.9818877527088593,False
+A: per-dataset leaky-vs-clean deltas,demo_coding_vs_intergenomic_seqs|LR_k6,0.0056,0.3818,False,False,False,0.7397374999999999,False
+A: per-dataset leaky-vs-clean deltas,drosophila_enhancers_stark|RF_k6,0.0235,0.1285,False,False,False,0.3319384615384615,False
+A: per-dataset leaky-vs-clean deltas,drosophila_enhancers_stark|LR_k6,0.0229,0.1392,False,False,False,0.3319384615384615,False
+A: per-dataset leaky-vs-clean deltas,human_ensembl_regulatory|RF_k6,0.0008,0.7775,False,False,False,0.9641,False
+B: cross-suite ranking grid,NT-original splice_sites_acceptors|LR,0.0268,0.052155296340445245,False,False,False,0.20210177331922533,False
+B: cross-suite ranking grid,NT-original splice_sites_acceptors|LinearSVC,0.0259,0.06637013546222259,False,False,False,0.20574741993289,False
+B: cross-suite ranking grid,NT-original splice_sites_acceptors|RF,0.0201,0.12530293048679564,False,False,False,0.3319384615384615,False
+B: cross-suite ranking grid,NT-original splice_sites_acceptors|HGB,0.0331,0.014919520168306333,False,False,False,0.07708418753624939,True
+B: cross-suite ranking grid,NT-original splice_sites_donors|LR,-0.0192,0.16651038492889203,False,False,False,0.3687015666282609,False
+B: cross-suite ranking grid,NT-original splice_sites_donors|LinearSVC,-0.0251,0.059447448105737655,False,False,False,0.20476343236420746,False
+B: cross-suite ranking grid,NT-original splice_sites_donors|RF,-0.0087,0.4969160804944237,False,False,False,0.779313043478261,False
+B: cross-suite ranking grid,NT-original splice_sites_donors|HGB,0.0003,0.9818877527088592,False,False,False,0.9818877527088593,False
+B: cross-suite ranking grid,NT-original enhancers|LR,0.0046,0.5517735698404957,False,False,False,0.779313043478261,False
+B: cross-suite ranking grid,NT-original enhancers|LinearSVC,0.0221,0.007875190988941183,False,True,True,0.048826184131435336,True
+B: cross-suite ranking grid,NT-original enhancers|RF,0.0413,2.204480981093937e-06,True,True,False,1.708472760347801e-05,False
+B: cross-suite ranking grid,NT-original enhancers|HGB,0.0185,0.03555412019710613,False,False,False,0.1574539608728986,False
+B: cross-suite ranking grid,NT-original promoter_no_tata|LR,-0.001,0.848356369857076,False,False,False,0.9818877527088593,False
+B: cross-suite ranking grid,NT-original promoter_no_tata|LinearSVC,-0.003,0.5680923124707364,False,False,False,0.779313043478261,False
+B: cross-suite ranking grid,NT-original promoter_no_tata|RF,0.0017,0.7690919381764845,False,False,False,0.9641,False
+B: cross-suite ranking grid,NT-original promoter_no_tata|HGB,0.0002,0.9696417944871898,False,False,False,0.9818877527088593,False

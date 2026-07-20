@@ -23,6 +23,10 @@ Similarity method (justification):
     (This is the exact form of the task's recommended "Option A".)
 """
 
+# Before numpy: caps BLAS thread pools and starts the orphan watchdog. n_jobs is a
+# scheduling knob only -- a fixed random_state makes the forest bit-identical
+# regardless of worker count (see chromosome_holdout.py:40).
+from audit.core.resources import N_JOBS
 import os
 import sys
 import glob
@@ -145,7 +149,7 @@ def make_models():
         Normalizer(norm="l2"),
         LogisticRegression(max_iter=5000, C=1.0, random_state=MODEL_SEED),
     )
-    rf = RandomForestClassifier(n_estimators=RF_TREES, n_jobs=-1,
+    rf = RandomForestClassifier(n_estimators=RF_TREES, n_jobs=N_JOBS,
                                 random_state=MODEL_SEED)
     return {"LR": lr, "RF": rf}
 

@@ -52,7 +52,8 @@ DATASETS = ["human_nontata_promoters", "human_enhancers_ensembl", "human_enhance
 LEAKY = {"human_nontata_promoters", "human_enhancers_ensembl"}
 
 
-def cv_select(X, y, idx, groups, grid, n_splits=5, grouped=False, n_jobs=4):
+def cv_select(X, y, idx, groups, grid, n_splits=5, grouped=False, n_jobs=None):
+    n_jobs = E.N_JOBS if n_jobs is None else n_jobs
     """Return (best_param, per-param mean CV accuracy). `grouped` holds whole
     near-duplicate clusters out together; otherwise plain stratified k-fold."""
     from sklearn.ensemble import RandomForestClassifier
@@ -97,7 +98,7 @@ def run(d, cap=None):
         best, scores = cv_select(X, y, tr, comp, GRID, grouped=grouped)
         # what that selection then scores, on both splits
         m = RandomForestClassifier(n_estimators=150, min_samples_leaf=best,
-                                   random_state=SEED, n_jobs=4)
+                                   random_state=SEED, n_jobs=E.N_JOBS)
         acc_o = float((m.fit(X[tr], y[tr]).predict(X[te]) == y[te]).mean())
         acc_c = float((m.fit(X[ctr], y[ctr]).predict(X[cte]) == y[cte]).mean())
         rows.append(dict(dataset=d, leaky=d in LEAKY, selector=tag,
