@@ -4,7 +4,7 @@
 \toprule
 Dataset & $n$ (full) & leak@0.7 (Jac) & leak@0.7 (con) & Verdict & Acc.\ lost & RF rank & Reorders under chrom.-holdout?\\
 \midrule
-human\_nontata\_promoters & 36{,}131 & 0.406 & 0.445 & \textbf{LEAKY} & $+0.118$ & $1\!\to\!3$ & no (RF stays rank~1)\\
+human\_nontata\_promoters & 36{,}131 & 0.406 & 0.445 & \textbf{LEAKY}$^{\ddagger}$ & $+0.118$ & $1\!\to\!3$ & no (RF stays rank~1)\\
 human\_enhancers\_ensembl & 154{,}842 & 0.384 & 0.845 & \textbf{LEAKY} & $+0.165$ & $1\!\to\!4$ & yes (RF $\to$ rank~4)\\
 demo\_coding\_vs\_intergenomic\_seqs & 100{,}000 & 0.078 & \textbf{0.131} & borderline$^{\dagger}$ & $-0.001$ & $4\!\to\!4$ & n/a\\
 human\_ocr\_ensembl & 174{,}756 & 0.010 & 0.068 & clean & $+0.004$ & $4\!\to\!4$ & n/a\\

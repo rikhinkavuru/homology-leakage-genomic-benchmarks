@@ -9,12 +9,32 @@
   doi     = {10.1186/s12863-023-01123-8}
 }
 
+% NOTE: rafi2025 (v1) is retained ONLY because the frozen prior submission
+% paper/main.tex and paper/main_v1_original.tex cite it. The current submission
+% (main_8pp.tex) cites rafi2026, the v2 of the same preprint. BibTeX emits only
+% cited entries, so main_8pp's bibliography carries v2 alone.
+%
+% This note asserted the same thing from 2026-07-20 while main_8pp.tex still cited
+% rafi2025 at two sites and rafi2026 at none, so main_8pp.bbl carried v1 alone --
+% the note described the intent, not the file, and an audit that greps this bib and
+% stops reads a fix that was not there. The citations were corrected on 2026-07-20;
+% `grep -c 'rafi2025' paper/main_8pp.tex` must stay 0.
 @article{rafi2025,
   author  = {Rafi, Abdul Muntakim and Kiyota, Brett and Yachie, Nozomu and de Boer, Carl},
   title   = {Detecting and avoiding homology-based data leakage in genome-trained sequence models},
   journal = {bioRxiv preprint},
   year    = {2025},
   doi     = {10.1101/2025.01.22.634321}
+}
+
+@article{rafi2026,
+  author  = {Rafi, Abdul Muntakim and Kiyota, Brett and Yachie, Nozomu and de Boer, Carl},
+  title   = {Characterizing homology-induced data leakage and memorization in genome-trained sequence models},
+  journal = {bioRxiv preprint},
+  year    = {2026},
+  note    = {version 2, posted 25 May 2026},
+  doi     = {10.1101/2025.01.22.634321},
+  url     = {https://www.biorxiv.org/content/10.1101/2025.01.22.634321v2}
 }
 
 @article{bushuiev2024,
@@ -294,4 +314,26 @@
   booktitle = {Advances in Neural Information Processing Systems, Datasets and Benchmarks Track},
   pages     = {62024--62061}, year = {2024},
   doi       = {10.52202/079017-1981}
+}
+
+@article{benjamini1995fdr,
+  author  = {Benjamini, Yoav and Hochberg, Yosef},
+  title   = {Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing},
+  journal = {Journal of the Royal Statistical Society: Series B},
+  volume  = {57},
+  number  = {1},
+  pages   = {289--300},
+  year    = {1995},
+  doi     = {10.1111/j.2517-6161.1995.tb02031.x}
+}
+
+@article{avsec2021enformer,
+  author  = {Avsec, {\v{Z}}iga and Agarwal, Vikram and Visentin, Daniel and Ledsam, Joseph R. and Grabska-Barwinska, Agnieszka and Taylor, Kyle R. and Assael, Yannis and Jumper, John and Kohli, Pushmeet and Kelley, David R.},
+  title   = {Effective gene expression prediction from sequence by integrating long-range interactions},
+  journal = {Nature Methods},
+  volume  = {18},
+  number  = {10},
+  pages   = {1196--1203},
+  year    = {2021},
+  doi     = {10.1038/s41592-021-01252-x}
 }

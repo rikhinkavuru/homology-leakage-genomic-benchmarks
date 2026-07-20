@@ -1,0 +1,52 @@
+suite,name,leak,species,task,prereg_leaky,correction_unsafe
+Genomic Benchmarks,human_nontata_promoters,0.406,human,promoter,False,True
+Genomic Benchmarks,human_enhancers_ensembl,0.384,human,enhancer,False,False
+Genomic Benchmarks,demo_coding_vs_intergenomic_seqs,0.078,human,other,False,False
+Genomic Benchmarks,human_ocr_ensembl,0.01,human,other,False,False
+Genomic Benchmarks,demo_human_or_worm,0.012,C. elegans,other,False,False
+Genomic Benchmarks,drosophila_enhancers_stark,0.016,Drosophila,enhancer,False,False
+Genomic Benchmarks,human_enhancers_cohn,0.001,human,enhancer,False,False
+Genomic Benchmarks,human_ensembl_regulatory (3-class),0.005,human,other,False,False
+Nucleotide Transformer,NT-original promoter_no_tata,0.0125,human,promoter,False,False
+Nucleotide Transformer,NT-original promoter_all,0.0127,human,promoter,False,False
+Nucleotide Transformer,NT-original promoter_tata,0.0145,human,promoter,False,False
+Nucleotide Transformer,NT-original enhancers,0.25,human,enhancer,False,False
+Nucleotide Transformer,NT-original enhancers_types,0.25,human,enhancer,False,False
+Nucleotide Transformer,NT-original splice_sites_all,0.0977,human,splice site,False,False
+Nucleotide Transformer,NT-original splice_sites_acceptors,0.2435,human,splice site,False,False
+Nucleotide Transformer,NT-original splice_sites_donors,0.2452,human,splice site,False,False
+Nucleotide Transformer,NT-original H3K4me1,0.0189,S. cerevisiae,histone / nucleosome,False,False
+Nucleotide Transformer,NT-original H3K4me2,0.0196,S. cerevisiae,histone / nucleosome,False,False
+Nucleotide Transformer,NT-original H3K4me3,0.0217,S. cerevisiae,histone / nucleosome,False,False
+Nucleotide Transformer,NT-original H3K9ac,0.013,S. cerevisiae,histone / nucleosome,False,False
+Nucleotide Transformer,NT-original H3K36me3,0.0181,S. cerevisiae,histone / nucleosome,False,False
+Nucleotide Transformer,NT-revised promoter_no_tata,0.0,human,promoter,False,False
+Nucleotide Transformer,NT-revised promoter_all,0.0006,human,promoter,False,False
+Nucleotide Transformer,NT-revised promoter_tata,0.0,human,promoter,False,False
+Nucleotide Transformer,NT-revised enhancers,0.003,human,enhancer,False,False
+Nucleotide Transformer,NT-revised enhancers_types,0.003,human,enhancer,False,False
+Nucleotide Transformer,NT-revised splice_sites_all,0.001,human,splice site,False,False
+Nucleotide Transformer,NT-revised splice_sites_acceptors,0.001,human,splice site,False,False
+Nucleotide Transformer,NT-revised splice_sites_donors,0.001,human,splice site,False,False
+Nucleotide Transformer,NT-revised H3K4me1,0.001,S. cerevisiae,histone / nucleosome,False,False
+Nucleotide Transformer,NT-revised H3K4me2,0.0014,S. cerevisiae,histone / nucleosome,False,False
+Nucleotide Transformer,NT-revised H3K4me3,0.0013,S. cerevisiae,histone / nucleosome,False,False
+Nucleotide Transformer,NT-revised H3K9ac,0.002,S. cerevisiae,histone / nucleosome,False,False
+Nucleotide Transformer,NT-revised H3K36me3,0.0013,S. cerevisiae,histone / nucleosome,False,False
+GUE,emp_H3,0.0087,S. cerevisiae,histone / nucleosome,False,False
+GUE,emp_H3K4me3,0.0171,S. cerevisiae,histone / nucleosome,False,False
+GUE,emp_H4,0.011,S. cerevisiae,histone / nucleosome,False,False
+GUE,human_tf_0,0.011,human,TF binding,True,False
+GUE,human_tf_1,0.012,human,TF binding,True,False
+GUE,human_tf_2,0.01,human,TF binding,True,False
+GUE,human_tf_3,0.025,human,TF binding,True,False
+GUE,human_tf_4,0.009,human,TF binding,True,False
+GUE,prom_300_all,0.0152,human,promoter,True,False
+GUE,prom_300_notata,0.0111,human,promoter,True,False
+GUE,prom_300_tata,0.0277,human,promoter,True,False
+GUE,prom_core_all,0.0149,human,promoter,True,False
+GUE,prom_core_notata,0.0136,human,promoter,True,False
+GUE,prom_core_tata,0.0408,human,promoter,True,False
+GUE,virus_covid,1.0,SARS-CoV-2,other,False,False
+GUE,mouse_0,0.0,mouse,TF binding,False,False
+GUE,mouse_1,0.0004,mouse,TF binding,False,False

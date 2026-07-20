@@ -132,7 +132,16 @@ def build_reportcard() -> str:
     for d in REPORTCARD_ORDER:
         row = card.loc[d]
         verdict = str(row["verdict"])
-        vtex = r"\textbf{LEAKY}" if verdict == "LEAKY" else verdict
+        # Three tiers, not two. `leaky-but-correction-unsafe` is what certify.py emits
+        # when a LEAKY dataset's largest-cluster cohesion falls below 0.5: its
+        # components are single-linkage chains rather than near-duplicate sets, so
+        # whole-cluster re-splitting quarantines related but non-duplicate sequences
+        # and removes genuine signal along with the leakage. The verdict is still
+        # LEAKY -- the corrected delta is what cannot be taken at face value.
+        vtex = {
+            "LEAKY": r"\textbf{LEAKY}",
+            "leaky-but-correction-unsafe": r"\textbf{LEAKY}$^{\ddagger}$",
+        }.get(verdict, verdict)
         con = num(row["leak_containment_0p7"])
         if verdict == "borderline":
             vtex = vtex + r"$^{\dagger}$"
