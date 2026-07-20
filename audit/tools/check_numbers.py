@@ -943,7 +943,46 @@ def check_decomposition_and_spread():
     return out
 
 
+def check_dose_replication():
+    """C6: the inversion threshold under replication, and P6's refutation.
+
+    This one is guarded hard because it runs AGAINST the paper. The single-fit sweep
+    reported a three-digit threshold and "none below it"; 9 of 15 replicated trials
+    below that value inverted. A later edit must not restore the sharp reading.
+    """
+    d = csv("dose_replication_summary.csv")
+    g = d[d.dose_target_share != "THRESHOLD_SUMMARY"].copy()
+    g["phi_mean"] = g.phi_mean.astype(float)
+    out = []
+    for _, r in g.sort_values("phi_mean").iterrows():
+        out.append(near("paper", r"rate rises from", float(r.inversion_prob), places=2,
+                        label=f"inversion probability at phi={r.phi_mean:.3f}", span=420))
+    # the intervals overlap, so no breakpoint is identifiable
+    los = g.split_cluster_ci_lo.astype(float)
+    his = g.split_cluster_ci_hi.astype(float)
+    out.append((float(los.max()) < float(his.min()),
+                "the split-clustered intervals overlap across all three doses, "
+                "so no threshold is identifiable",
+                f"max lo {los.max():.2f} < min hi {his.min():.2f}"))
+    summ = d[d.dose_target_share == "THRESHOLD_SUMMARY"]
+    if len(summ):
+        note = str(summ.iloc[0].per_split_seed_rates)
+        n_below = int(note.split("censored_below=")[1].split(";")[0])
+        out.append((n_below > 0,
+                    "trials inverted BELOW the committed single-fit threshold",
+                    f"censored_below={n_below}"))
+        out.append(says("paper", "Nine of the fifteen trials below the committed threshold",
+                        label="the paper states how many inverted below the threshold"))
+    out.append(says("paper", "is therefore refuted on replication",
+                    label="P6's refutation on replication is stated"))
+    # and the retired sharp reading must not come back
+    out.append(says("paper", "and finds none below it", want=False,
+                    label="retired: the single-fit 'none below it' claim"))
+    return out
+
+
 CHECKS = [
+    ("dose replication / P6", check_dose_replication),
     ("decomposition / spread controls", check_decomposition_and_spread),
     ("detector specificity / hashFrag", check_detector_specificity),
     ("retired claims", check_retired_claims),

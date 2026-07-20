@@ -322,13 +322,37 @@ graded gaps, and then asked whether the ranking actually inverts under the near-
 re-split. Prediction \textbf{P6}---inversion at every dose with $\varphi>\varphi^{*}$ and at none
 below---was committed in the module before it was run.
 
-The condition is right on all ten doses. As the dose rises the random forest climbs the as-shipped
+The condition is right on all ten doses \emph{as single fits}, and fails on replication; both are reported below. As the dose rises the random forest climbs the as-shipped
 ranking (rank~4 up to dose $0.20$, rank~3 at $0.25$, rank~1 from $0.30$) while remaining last on the
 corrected split at every dose, including the untouched control. The ranking first inverts at dose
 $0.30$, where $\varphi=0.106$ against a predicted breakdown point of $\varphi^{*}=0.060$, and
 inverts at all six higher doses; it does not invert at the three lower ones. Here we report the
 intermediate $[0.5,0.9)$ band, which runs $1.23$--$1.52\%$ of the test set across all ten doses,
 well inside the regime where \eqref{eq:twostratum} is permitted.
+
+\paragraph{Replication: the threshold does not survive it.} Each dose above is a single fit at one
+split seed and one model seed, and \texttt{ranking\_inverts} is a discrete outcome compared between
+two orderings whose top-two margins are of order $0.005$. A three-digit threshold read off one
+realisation of a Bernoulli outcome is not a measurement, so we replicated the three doses bracketing
+the transition across a $5$ split-seed $\times$ $3$ model-seed factorial, $45$ trials in all.
+
+The transition is not sharp and the committed threshold does not hold. Inversion probability is
+$0.60$ at $\varphi=0.088$ (9/15), $0.47$ at $\varphi=0.102$ (7/15) and $0.87$ at $\varphi=0.116$
+(13/15). Binomial intervals on the trials are $[0.32,0.84]$, $[0.21,0.73]$ and $[0.60,0.98]$; the
+correct unit is the split seed rather than the trial, since the split seed drives which rows are
+duplicated and how clusters are assigned, and clustering on it widens these to $[0.27,0.93]$,
+$[0.07,0.87]$ and $[0.60,1.00]$, which overlap across all three doses. Split-seed heterogeneity
+dominates: at $\varphi=0.088$ the five split seeds invert at rates $0.00$, $1.00$, $0.33$, $1.00$ and
+$0.67$.
+
+Two consequences, both against the single-fit result. \textbf{P6 is refuted on replication}: it
+predicted inversion above the diagnostic threshold and \emph{at none below}, and nine of the fifteen
+trials below the committed $\varphi=0.106$ inverted. And no three-digit threshold is identifiable in
+this range at all---the quantity the single-fit sweep reported as $0.106$ is better described as a
+rising probability across $\varphi\in[0.088,0.116]$ than as a breakpoint. What survives is the
+monotone tendency of inversion probability with dose, which the $0.60\to0.87$ endpoints support and
+the non-monotone middle dose does not contradict once the intervals are read
+(\texttt{results/dose\_replication\_summary.csv}).
 
 \paragraph{Four limits.} First, two of the ten rows are not fresh trials:
 \texttt{dose\_response.csv} rows \texttt{dose\_0.0000} and \texttt{dose\_0.9426} are field-identical

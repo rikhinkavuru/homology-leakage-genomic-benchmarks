@@ -1,0 +1,5 @@
+dose_target_share,phi_mean,phi_min,phi_max,n_trials,n_split_seeds,n_model_seeds,n_inversions,inversion_prob,binomial_ci_lo,binomial_ci_hi,split_cluster_ci_lo,split_cluster_ci_hi,per_split_seed_rates,mean_top2_margin_orig,mean_rf_drop
+0.25,0.0875,0.0818,0.0925,15,5.0,3.0,9,0.6,0.3229,0.8366,0.2667,0.9333,0.00;1.00;0.33;1.00;0.67,0.0046,0.0436
+0.3,0.1024,0.0965,0.105,15,5.0,3.0,7,0.4667,0.2127,0.7341,0.0667,0.8667,0.00;0.00;0.33;1.00;1.00,0.0038,0.0459
+0.35,0.1164,0.1113,0.127,15,5.0,3.0,13,0.8667,0.5954,0.9834,0.6,1.0,1.00;1.00;0.33;1.00;1.00,0.0053,0.0526
+THRESHOLD_SUMMARY,0.0958,0.0875,0.1164,15,,,14,,,,,,censored_below=9;censored_above=1;single_fit_committed_value=0.106,,
