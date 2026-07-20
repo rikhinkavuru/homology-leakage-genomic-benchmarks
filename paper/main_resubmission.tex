@@ -297,6 +297,17 @@ This research received no specific grant from any funding agency in the public, 
 \section*{Conflict of Interest}
 None declared.
 
+\section*{Responsible Disclosure}
+This paper reports a defect in a publicly maintained resource, so the finding is being
+reported to that resource's maintainers as well as published. A disclosure describing the
+duplicated-coordinate construction, its measured downstream effect and a suggested fix has
+been prepared for the Genomic Benchmarks issue tracker
+(\url{https://github.com/ML-Bioinfo-CEITEC/genomic_benchmarks}); its text is released with
+our code as \texttt{DISCLOSURE\_DRAFT.md}. \emph{It had not been filed at the time of
+writing}, and we state that rather than imply otherwise; the filing date, issue number and
+any response will be recorded here on submission. Four of the seven binary datasets carry
+none of this defect, and nothing here bears on the collection as a whole.
+
 \section*{Data Availability}
 All code required to reproduce the analyses, along with the report card, figures, the near-duplicate-aware splitter and the certification tool, is available at \url{https://github.com/rikhinkavuru/homology-leakage-genomic-benchmarks}. The Genomic Benchmarks datasets analysed here are publicly available and were obtained via the genomic-benchmarks package \citep{gresova2023}; they are not redistributed in our repository. The coordinate-space census of BEND (\S\ref{sec:r-bend}) uses only the \texttt{bed} annotation files distributed with that resource \citep{marin2024bend}, which carry their own split assignments and require no reference genome; those files are likewise not redistributed, and the script that downloads them and reproduces the census is included. Every upstream reference-genome and annotation URL on which the datasets depend---Ensembl releases $97$ and $100$, and the UCSC \texttt{hg38}/\texttt{hg19} REST endpoints---was re-resolved on 2026-07-20 and returned HTTP $200$; the release, artifact, live URL, archive host and access date for each are tabulated in \texttt{results/reference\_provenance.csv}. Because Ensembl release $116$ (June 2026) is the final release served on the current platform, we cite the dated archive hosts (\url{https://jul2019.archive.ensembl.org}, \url{https://apr2020.archive.ensembl.org}) alongside the live paths.
 

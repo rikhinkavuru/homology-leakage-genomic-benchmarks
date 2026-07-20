@@ -64,8 +64,14 @@ Five things carry the revision. Each targets the generality concern directly.
    top-two margin [−0.005, 0.006] including zero — **yet those three span 23
    accuracy points corrected** (0.768 / 0.537 / 0.628). 1-NN falls from rank 2 to
    rank 9, 0.873 → 0.537, which is 3.7 points above this balanced test set's base
-   rate. The benchmark is not merely crowning the wrong model; it is blind to
-   enormous real differences between models it reports as tied.
+   rate. We report that separation with the control it needs rather than at face
+   value: re-weighting the *as-shipped* test set to the corrected operating point,
+   with no re-split and no retraining, already expands the same trio's spread from
+   0.0015 to 0.1424, so difficulty alone accounts for most of the 0.2314. The claim
+   we make is that correction separates models the benchmark reports as tied by
+   more than a difficulty-matched test set of equal accuracy does — not that the
+   full 23 points measures real model quality. On two clean datasets the same
+   re-split does not expand spread at all.
 
 5. **An out-of-suite coordinate census at four orders of magnitude of interval
    length (§3.4).** Because the screen needs only shipped coordinates it runs

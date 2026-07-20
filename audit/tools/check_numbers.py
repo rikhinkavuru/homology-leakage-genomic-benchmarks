@@ -928,10 +928,14 @@ def check_decomposition_and_spread():
                     "the difficulty control explains most of the spread expansion, "
                     "so the strong reading is not claimed",
                     f"matched {dm.top3_spread} vs corrected 0.2314"))
-    out.append((not any("blind to enormous real differences" in doc(k)
-                        for k in ("paper", "response", "cover")),
-                "retired: 'blind to enormous real differences' "
-                "(the difficulty-matched control does not support it)", ""))
+    # says(), not a literal `in`: the response letter wraps this phrase across a line
+    # ("blind to\n   enormous real differences"), so the substring form reported ABSENT
+    # for a sentence that was present -- the exact vacuity this module's docstring warns
+    # about, reintroduced by a check written to catch a retired claim.
+    for k in ("paper", "response", "cover"):
+        out.append(says(k, "blind to enormous real differences", want=False,
+                        label=f"retired in {k}: 'blind to enormous real differences' "
+                              "(the difficulty-matched control does not support it)"))
     return out
 
 
