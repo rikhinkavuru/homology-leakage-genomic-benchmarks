@@ -1,0 +1,17 @@
+dataset,leaky,model,n_usable_bins,usable_bins,shape_raw_accuracy,reversals_raw,shape_balanced_accuracy,reversals_balanced,shape_auroc,reversals_auroc
+human_nontata_promoters,True,LR,4,"[0,0.5);[0.5,0.7);[0.7,0.9);[0.9,1.0]",monotone increasing,0,non-monotonic (interior DIP),1,non-monotonic (interior DIP),1
+human_nontata_promoters,True,LinearSVC,4,"[0,0.5);[0.5,0.7);[0.7,0.9);[0.9,1.0]",monotone increasing,0,non-monotonic (no interior extremum),1,monotone increasing,0
+human_nontata_promoters,True,RF,4,"[0,0.5);[0.5,0.7);[0.7,0.9);[0.9,1.0]",monotone increasing,0,monotone increasing,0,monotone increasing,0
+human_nontata_promoters,True,HGB,4,"[0,0.5);[0.5,0.7);[0.7,0.9);[0.9,1.0]",monotone increasing,0,non-monotonic (interior DIP),1,non-monotonic (no interior extremum),1
+human_enhancers_ensembl,True,LR,4,"[0,0.5);[0.5,0.7);[0.7,0.9);[0.9,1.0]",non-monotonic (interior PEAK),1,non-monotonic (interior PEAK),1,non-monotonic (no interior extremum),1
+human_enhancers_ensembl,True,LinearSVC,4,"[0,0.5);[0.5,0.7);[0.7,0.9);[0.9,1.0]",non-monotonic (interior PEAK),1,non-monotonic (interior PEAK),1,non-monotonic (no interior extremum),1
+human_enhancers_ensembl,True,RF,4,"[0,0.5);[0.5,0.7);[0.7,0.9);[0.9,1.0]",monotone increasing,0,monotone increasing,0,monotone increasing,0
+human_enhancers_ensembl,True,HGB,4,"[0,0.5);[0.5,0.7);[0.7,0.9);[0.9,1.0]",non-monotonic (interior PEAK),1,monotone increasing,0,non-monotonic (no interior extremum),1
+human_enhancers_cohn,False,LR,1,"[0,0.5)",undetermined (<3 usable bins),0,undetermined (<3 usable bins),0,undetermined (<3 usable bins),0
+human_enhancers_cohn,False,LinearSVC,1,"[0,0.5)",undetermined (<3 usable bins),0,undetermined (<3 usable bins),0,undetermined (<3 usable bins),0
+human_enhancers_cohn,False,RF,1,"[0,0.5)",undetermined (<3 usable bins),0,undetermined (<3 usable bins),0,undetermined (<3 usable bins),0
+human_enhancers_cohn,False,HGB,1,"[0,0.5)",undetermined (<3 usable bins),0,undetermined (<3 usable bins),0,undetermined (<3 usable bins),0
+demo_human_or_worm,False,LR,1,"[0,0.5)",undetermined (<3 usable bins),0,undetermined (<3 usable bins),0,undetermined (<3 usable bins),0
+demo_human_or_worm,False,LinearSVC,1,"[0,0.5)",undetermined (<3 usable bins),0,undetermined (<3 usable bins),0,undetermined (<3 usable bins),0
+demo_human_or_worm,False,RF,1,"[0,0.5)",undetermined (<3 usable bins),0,undetermined (<3 usable bins),0,undetermined (<3 usable bins),0
+demo_human_or_worm,False,HGB,1,"[0,0.5)",undetermined (<3 usable bins),0,undetermined (<3 usable bins),0,undetermined (<3 usable bins),0
