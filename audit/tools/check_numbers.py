@@ -245,7 +245,11 @@ def check_corrected_gaps():
     # 1-NN's corrected gap, the section's headline
     knn = float(g[(g.dataset == "human_enhancers_ensembl") &
                   (g.model == "kNN-1")].graded_gap_balanced.iloc[0])
-    out.append(near("paper", r"definitional memorizer", knn, signed=True,
+    # Anchored on the clause that STATES the value, not on "definitional memorizer":
+    # that phrase now occurs twice in the bundle (the roster spec introduces the term,
+    # the exploratory section uses it), and near() takes the first match, which was the
+    # occurrence that never carried the number.
+    out.append(near("paper", r"has by far the largest gap", knn, signed=True,
                     label=f"1-NN corrected gap {knn:+.3f}"))
     # Rule 2, applied where round 14 proved a single anchored check was not enough. Each
     # of these values is stated at several sites; an anchored check protects one of them
