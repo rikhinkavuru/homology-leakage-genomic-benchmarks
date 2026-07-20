@@ -220,7 +220,22 @@ def clopper_pearson(k, n, alpha=0.05):
     return (float(lo), float(hi))
 
 
-def summarise(pairs, pop):
+#: Minimum length, in bp, for BOTH sequences of a pair to be adjudicable.
+#:
+#: `human_enhancers_ensembl` ships rows as short as 2 bp. On those, an alignment-based
+#: ground truth is not merely noisy, it is undefined in both directions at once: a 6 bp
+#: exact match between a 7 bp row and a 300 bp row scores identity 1.00 and coverage
+#: 0.86 and is called a homolog, though a 6 bp match is expected by chance between any
+#: two genomic sequences; while a 15 bp BYTE-IDENTICAL pair -- a true duplicate, Jaccard
+#: 1.0 -- is called a non-homolog by any criterion carrying a minimum alignment length.
+#: Both errors are properties of the shipped rows, not of the detector, and each biases
+#: a different rate. Pairs with a sequence below this length are therefore excluded from
+#: the operating-characteristic estimate and counted separately, and the unrestricted
+#: numbers are reported beside them so the size of the exclusion stays visible.
+MIN_SEQ_LEN = 50
+
+
+def summarise(pairs, pop, min_len=MIN_SEQ_LEN):
     """Horvitz-Thompson: reweight each band's sample by band_pairs / n_sampled.
 
     Every rate carries an interval built from the per-band Clopper-Pearson bounds,
@@ -231,12 +246,19 @@ def summarise(pairs, pop):
     is reported separately as `recall_lo_driver`.
     """
     rows = []
-    for dset, P in pairs.groupby("dataset"):
+    for dset, P_all in pairs.groupby("dataset"):
         popd = pop[pop.dataset == dset].set_index("band")
-        for gt in ("homolog", "homolog_strict", "homolog_loose", "homolog_nofloor"):
+        P = P_all[(P_all.len_test >= min_len) & (P_all.len_train >= min_len)]
+        for gt in ("homolog", "homolog_strict", "homolog_loose"):
             per_band = {}
             for band, G in P.groupby("band"):
-                N = float(popd.loc[band, "band_pairs"])
+                # The band POPULATION has to be restricted the same way the sample is,
+                # or the weights put the excluded pairs straight back. The sample is
+                # uniform within a band, so the eligible share of the sample estimates
+                # the eligible share of the band: a Horvitz-Thompson estimator with an
+                # estimated stratum total.
+                n_all = int((P_all.band == band).sum())
+                N = float(popd.loc[band, "band_pairs"]) * (len(G) / n_all if n_all else 0.0)
                 n = len(G)
                 k = int(G[gt].sum())
                 w = N / n if n else 0.0
@@ -284,6 +306,11 @@ def summarise(pairs, pop):
                 low_band_n=low.get("n_sampled", np.nan),
                 low_band_k=low.get("k", np.nan),
                 low_band_p_hi=low.get("p_hi", np.nan),
+                # what the length-eligibility restriction cost, so it can be audited
+                min_seq_len=min_len,
+                n_sampled_all=len(P_all),
+                n_sampled_eligible=len(P),
+                frac_pairs_ineligible=round(1 - len(P) / len(P_all), 4) if len(P_all) else np.nan,
             ))
     return pd.DataFrame(rows)
 

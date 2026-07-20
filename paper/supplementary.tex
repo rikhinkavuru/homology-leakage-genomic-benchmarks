@@ -130,6 +130,24 @@ values never interpretable as memorization: $15$-nearest-neighbour's raw $-0.684
 $-0.234$ become $+0.016$ and $+0.129$, i.e.\ artifacts of predicting the minority class in a
 stratum that is $99.97\%$ positive.
 
+\begin{table}[htbp]
+\centering
+\caption{Nine-model roster on \textit{human\_enhancers\_ensembl}, full scale, as-shipped versus
+near-duplicate-aware split. Gap$_{\text{bal}}$ is the graded memorization gap computed from
+\emph{balanced} accuracy within each stratum and is the statistic relied on; Gap$_{\text{raw}}$ is
+the uncorrected accuracy difference, shown only for comparison because it is confounded by stratum
+class composition---a constant classifier scores $+0.803$ on this dataset, which is why the raw
+column carries two large negative values that do not indicate ``negative memorization''. The
+corrected column orders the models as the memorization account predicts and the raw column does
+not. ``Drop'' is the accuracy lost under correction, with a two-arm cluster-bootstrap interval;
+$^{*}$ marks intervals excluding zero. Models are ordered by as-shipped rank. The top three
+as-shipped finish within $0.0015$ of one another---a tie---yet span $23$ points on the corrected
+split, and the corrected winner is the linear SVM. Generated from
+\texttt{results/roster\_rankings.csv}; the prevalence-corrected gaps are exploratory
+(main text \S3.7).\label{tab:roster}}
+\footnotesize\setlength{\tabcolsep}{3pt}\input{tab_roster}
+\end{table}
+
 \subsection{From-scratch 1D CNN: architecture and grid}\label{sec:s-cnn}
 The probe is a from-scratch 1D residual convolutional network in the Basset
 \citep{kelley2016basset} / DeepSEA \citep{zhou2015deepsea} lineage: one-hot nucleotide input (no
@@ -389,12 +407,49 @@ window shift $10\%$ of length  & 1.00 & 1.00 & 1.00 & 1.00\\
 \end{tabular}
 \end{table}
 
-Specificity cannot be settled by pairwise sampling. The census statistic is not a per-pair score:
-for each test sequence it takes a \emph{maximum} over every training sequence, so a per-pair
-false-positive rate would have to fall well below $1/n_{\text{train}}$ before the resulting fraction
-were negligible, and bounding the per-pair rate tightly enough for a training set of $47{,}356$ rows
-would take on the order of $10^{7}$ pairs. We therefore argue the estimator floor from construction
-and provenance, as the main text does. Two further properties are worth recording. Per-pair
+\paragraph{The measured operating characteristic.} Specificity is estimable, and we measure it
+rather than argue it. Enumeration is not the expensive step---the census already forms every
+test--train pair by sparse matrix product---adjudication is, so we adjudicate a stratified sample.
+For each leaky dataset we tally the exact population of pairs in each Jaccard band and
+reservoir-sample within every band, flagged and unflagged alike: sampling the unflagged bands is
+what makes recall estimable, since the homologs the detector \emph{missed} live there. Each sampled
+pair is then adjudicated by Smith--Waterman local alignment (\texttt{PairwiseAligner}, EMBOSS
+\texttt{water} scoring), with ground truth the CD-HIT-EST-like criterion the curators omitted:
+local alignment covering ${\ge}50\%$ of the shorter sequence at ${\ge}80\%$ identity. Horvitz--Thompson
+weights (band population over band sample) return every rate to the full pair population, and each
+carries a Clopper--Pearson interval propagated in the direction \emph{worst} for the detector.
+
+Pairs in which either sequence is shorter than $50$\,bp are excluded and counted separately.
+\textit{human\_enhancers\_ensembl} ships rows as short as $2$\,bp, and on those an alignment ground
+truth fails in both directions at once: a $6$\,bp exact match between a $7$\,bp row and a $300$\,bp
+row scores identity $1.00$ at coverage $0.86$ and would be called homologous though a $6$\,bp match
+is expected by chance, while a $15$\,bp byte-identical pair---a true duplicate at Jaccard $1.0$---is
+called non-homologous by any criterion carrying a minimum alignment length. Both errors are
+properties of the shipped rows rather than of the detector, and each biases a different rate. The
+restriction removes $22.0\%$ of sampled \textit{human\_enhancers\_ensembl} pairs and none of
+\textit{human\_nontata\_promoters}'s, which are all $251$\,bp.
+
+The result is that the flag rule is essentially never wrong when it fires and frequently silent when
+it should not be. Every flagged band on both datasets adjudicates $100\%$ homologous
+($3{,}331$ and $4{,}300$ eligible pairs): precision is $1.000$, Clopper--Pearson lower bounds
+$0.951$ and $0.978$, and the per-pair false-positive rate is $0.000$ with upper bounds
+$1.5\times10^{-7}$ and $1.1\times10^{-6}$---below the $1/n_{\text{train}}$ scale at which a
+maximum-over-training-set statistic would be corrupted, which is what the estimator floor needed.
+Recall is the opposite story and is reported as such: $0.006$ on \textit{human\_enhancers\_ensembl}
+and $0.260$ on \textit{human\_nontata\_promoters}. The detector misses most true homologs, because
+homology at $80\%$ identity over half a sequence routinely leaves an $8$-mer Jaccard far below
+$0.7$---on \textit{human\_enhancers\_ensembl} $41.7\%$ of pairs in the $[0.1,0.3)$ band are genuine
+homologs, and $94.2\%$ in $[0.3,0.5)$. This is the quantitative form of the scope the main text
+already states: the instrument is a near-duplicate detector, not a homology detector, so every leak
+fraction we report is a \emph{lower} bound on homology-induced leakage, and a homology-aware tool
+would flag more. Per-band counts are in \texttt{results/detector\_specificity\_measured.csv} and the
+adjudicated pairs in \texttt{results/detector\_specificity\_pairs.csv}.
+
+The maximum-over-training-set caveat survives this and is worth restating: the census statistic is
+not a per-pair score, so a per-pair false-positive rate must fall well below $1/n_{\text{train}}$
+before the resulting fraction is negligible. What has changed is that this is now a measured
+inequality rather than an argument from construction and provenance. Two further properties are
+worth recording. Per-pair
 behaviour on real DNA is much heavier-tailed than on synthetic sequence: random pairs drawn from the
 clean datasets reach a Jaccard of $0.26$ over roughly $4{,}000$ sampled pairs, against a maximum of
 $0.019$ over uniform random sequence, because real genomes carry repeats and low-complexity

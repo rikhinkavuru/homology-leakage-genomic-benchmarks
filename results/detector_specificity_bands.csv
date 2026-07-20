@@ -1,0 +1,15 @@
+dataset,band,band_pairs,n_test,n_train,total_pairs
+human_nontata_promoters,j_lt_0p1,244697943,9034,27097,244794298
+human_nontata_promoters,j_0p1_0p3,62565,9034,27097,244794298
+human_nontata_promoters,j_0p3_0p5,12044,9034,27097,244794298
+human_nontata_promoters,j_0p5_0p7,9838,9034,27097,244794298
+human_nontata_promoters,j_0p7_0p8,4291,9034,27097,244794298
+human_nontata_promoters,j_0p8_0p9,4188,9034,27097,244794298
+human_nontata_promoters,j_ge_0p9,3429,9034,27097,244794298
+human_enhancers_ensembl,j_lt_0p1,3835028796,30970,123872,3836315840
+human_enhancers_ensembl,j_0p1_0p3,1217367,30970,123872,3836315840
+human_enhancers_ensembl,j_0p3_0p5,26564,30970,123872,3836315840
+human_enhancers_ensembl,j_0p5_0p7,18769,30970,123872,3836315840
+human_enhancers_ensembl,j_0p7_0p8,3423,30970,123872,3836315840
+human_enhancers_ensembl,j_0p8_0p9,139,30970,123872,3836315840
+human_enhancers_ensembl,j_ge_0p9,20782,30970,123872,3836315840
