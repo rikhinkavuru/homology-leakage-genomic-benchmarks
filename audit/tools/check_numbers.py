@@ -981,7 +981,46 @@ def check_dose_replication():
     return out
 
 
+def check_supplement_pointers():
+    r"""Every "Supplementary \S SN" in the main text must resolve to a real section,
+    and to one whose title is plausibly what the sentence is pointing at.
+
+    Cross-document \ref cannot resolve between two separate LaTeX documents, so these
+    pointers are typed by hand and silently rot whenever a supplement section is added,
+    removed or reordered. Moving seven blocks out of the main text renumbered the
+    supplement and left six pointers aimed at the wrong section, with the build
+    reporting zero undefined references throughout -- there is nothing for LaTeX to
+    catch. This is the only guard on them.
+    """
+    main = open(DOCS["paper"]).read()
+    supp_path = os.path.join(HERE, "paper", "supplementary.tex")
+    if not os.path.exists(supp_path):
+        return [(True, "no supplement to check", "")]
+    titles = re.findall(r"\\section\{(.+?)\}", open(supp_path).read())
+    out = [(len(titles) > 0, f"supplement has {len(titles)} numbered sections", "")]
+    # keywords that must appear in the target section's title, by section number
+    expect = {
+        5: ("bend",), 6: ("manipulation", "replication"), 7: ("robustness",),
+        10: ("exploratory",), 11: ("pretrained", "overlap-free"),
+        4: ("detector", "calibration"), 3: ("alignment",), 2: ("dose", "varphi"),
+    }
+    seen = set()
+    for m in re.finditer(r"Supplementary \\S ?S(\d+)", main):
+        n = int(m.group(1))
+        seen.add(n)
+        ok = 1 <= n <= len(titles)
+        out.append((ok, f"Supplementary \\S S{n} resolves to a real section",
+                    titles[n - 1][:52] if ok else f"only {len(titles)} sections exist"))
+        if ok and n in expect:
+            t = titles[n - 1].lower()
+            hit = any(k in t for k in expect[n])
+            out.append((hit, f"Supplementary \\S S{n} points at the right topic",
+                        f"S{n} = {titles[n-1][:46]!r}"))
+    return out
+
+
 CHECKS = [
+    ("supplement pointers", check_supplement_pointers),
     ("dose replication / P6", check_dose_replication),
     ("decomposition / spread controls", check_decomposition_and_spread),
     ("detector specificity / hashFrag", check_detector_specificity),

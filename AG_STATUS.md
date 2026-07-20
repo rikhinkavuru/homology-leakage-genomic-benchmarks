@@ -13,12 +13,12 @@ Regenerated 2026-07-20. CLOSED = in the built bundle and gated.
 | B2 | CLOSED | precision 1.000, FPR 0.000 (<=2.05e-7 exhaustive); 'unmeasurable' argument retired |
 | B3 | CLOSED | clean-dataset control passes; difficulty-matched control WEAKENS the claim; claim rewritten |
 | B4 | CLOSED | retitled to the conjunctive condition; exception scoped in abstract/intro/conclusion |
-| C1 | RUNNING | break-a-clean replicating on cohn (done: leak 0.463, RF rank 1->3) and stark; size-matched arm queued |
+| C1 | CLOSED | 3 donors: inflation replicates 3/3, reordering 2/3 (stark's forest already rank 4); size-matched fix-a-leaky control lands |
 | C2 | CLOSED | PREREGISTRATION.md with git log; CNN registration's lack of priority stated |
 | C3 | CLOSED | exploratory header; corrected gap registered forward |
 | C4 | CLOSED | canonical census suite-wide (no verdict moves) + hashFrag reverse-strand bound <=0.0100 |
 | C5 | CLOSED | third tier wired CSV -> table -> caption -> abstract -> figure |
-| C6 | QUEUED | dose replication, 3 doses x 5 split x 3 model seeds |
+| C6 | CLOSED | 45 trials: threshold NOT identifiable, P6 refuted on replication, both reported |
 | C7 | CLOSED | indels (detected better than substitutions); repeats; FPR re-measured exhaustively |
 | C8 | QUEUED | the suite's own published CNN on the corrected split |
 | C9 | DROPPED | maintainer disclosure removed at author's request |
