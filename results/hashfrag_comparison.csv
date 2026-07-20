@@ -1,0 +1,9 @@
+dataset,n_test,n_train,null_threshold,null_max,null_p999,null_pairs,leak_ours,verdict_ours,leak_hf_at_null,verdict_hf_at_null,agree_at_null,agree_threshold_lo,agree_threshold_hi,n_thresholds_agreeing,n_thresholds,best_kappa,best_kappa_threshold,rev_only_frac_at_best,wall_hashfrag_s,wall_ours_cached_s,n_scored_pairs
+human_nontata_promoters,9034,27097,44,44.0,43.43599999999992,1565,0.4064,LEAKY,0.5891,LEAKY,1,20.0,240.0,25,33,0.9464,200,0.0106,130.6,0.0,325984
+human_enhancers_ensembl,30970,123872,25,25.0,24.975999999999885,1009,0.3839,LEAKY,0.8121,LEAKY,1,20.0,360.0,30,32,0.7134,140,0.0054,2457.1,0.0,1231882
+human_enhancers_cohn,5000,15000,28,28.0,28.0,870,0.0012,clean,0.619,LEAKY,0,220.0,400.0,10,33,0.1344,400,0.0042,180.9,0.0,210214
+human_ocr_ensembl,4000,16000,88,88.0,86.66699999999992,1334,0.0015,clean,0.2617,LEAKY,0,180.0,400.0,12,33,0.2653,360,0.0005,64.6,0.0,134632
+demo_human_or_worm,5000,15000,28,28.0,27.19399999999996,1404,0.0032,clean,0.3812,LEAKY,0,100.0,400.0,16,33,0.4858,180,0.0026,21.9,0.0,91091
+demo_coding_vs_intergenomic_seqs,5000,15000,21,21.0,21.0,670,0.0224,clean,0.5884,LEAKY,0,140.0,400.0,14,33,0.7373,180,0.001,17.0,0.0,78308
+drosophila_enhancers_stark,1730,5184,30,30.0,29.74700000000007,1254,0.0156,clean,0.8636,LEAKY,0,,,0,32,0.0834,400,0.0145,211.0,0.0,119170
+human_ensembl_regulatory,3993,16007,28,28.0,28.0,830,0.0,clean,0.5001,LEAKY,0,160.0,400.0,13,33,0.0,20,0.0841,87.1,2.3,117502

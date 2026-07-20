@@ -445,6 +445,23 @@ fraction we report is a \emph{lower} bound on homology-induced leakage, and a ho
 would flag more. Per-band counts are in \texttt{results/detector\_specificity\_measured.csv} and the
 adjudicated pairs in \texttt{results/detector\_specificity\_pairs.csv}.
 
+\paragraph{Strand, measured two ways.} The census reads forward-strand $k$-mers, so a
+reverse-complemented near-duplicate is invisible to it by construction, and a ``clean'' verdict that
+has never been measured strand-symmetrically is a weaker statement than the report card implies. Two
+independent measurements bound the gap. First, hashFrag builds its BLAST database from \emph{both}
+orientations of every training sequence and labels reverse-strand database entries, so the share of
+test sequences whose \emph{only} qualifying hit is on the reverse strand is directly readable: at the
+threshold where the two tools agree on seven of eight verdicts it is $0.0025$ on
+\textit{human\_enhancers\_ensembl}, $0.0060$ on \textit{human\_nontata\_promoters}, and at most
+$0.0100$ on any of the eight datasets. Second, recomputing the census itself with canonical
+$k$-mers---each $k$-mer replaced by the lexicographic minimum of itself and its reverse
+complement---moves the leak fractions by $0.0006$ (Jaccard) and $0.0718$ (containment) on
+\textit{human\_enhancers\_ensembl} and by $0.0096$ and $0.0144$ on \textit{human\_nontata\_promoters},
+and moves no verdict (\texttt{results/canonical\_census\_suite.csv}). Reverse-strand-only leakage is
+therefore real but small, and bounded above by roughly one percentage point on every dataset here;
+the forward-only convention understates leakage by about that much and never by enough to change a
+verdict.
+
 The maximum-over-training-set caveat survives this and is worth restating: the census statistic is
 not a per-pair score, so a per-pair false-positive rate must fall well below $1/n_{\text{train}}$
 before the resulting fraction is negligible. What has changed is that this is now a measured

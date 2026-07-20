@@ -809,7 +809,57 @@ def tex_dataset(d):
     return d.replace("_", r"\_")
 
 
+def check_detector_specificity():
+    """The measured operating characteristic, and the hashFrag head-to-head.
+
+    These replaced an argument that specificity could not be measured, so they are the
+    numbers most likely to be read closely by a referee and the ones with no prior
+    guard at all.
+    """
+    m = csv("detector_specificity_measured.csv")
+    pooled = m[(m.band == "POOLED") & (m.ground_truth == "homolog")].set_index("dataset")
+    out = []
+    for d, short in (("human_enhancers_ensembl", "ensembl"),
+                     ("human_nontata_promoters", "nontata")):
+        r = pooled.loc[d]
+        out.append(near("paper", r"Clopper--Pearson lower bounds", float(r.precision_lo),
+                        places=3, label=f"{short} precision lower bound"))
+        out.append((abs(float(r.precision) - 1.0) < 1e-9,
+                    f"{short}: measured precision is exactly 1.000",
+                    f"{r.precision}"))
+        out.append((float(r.fpr) == 0.0, f"{short}: measured per-pair FPR is 0",
+                    f"{r.fpr}"))
+    # the recall pair, which is the number that bounds the paper's own scope claim
+    out.append(near("paper", r"Recall runs the other way",
+                    float(pooled.loc["human_enhancers_ensembl"].recall), places=3,
+                    label="ensembl measured recall"))
+
+    s = csv("hashfrag_sweep.csv")
+    w = s[s.threshold == 220].set_index("dataset")
+    agree = int(w.verdicts_agree.sum())
+    out.append((agree == 7, "hashFrag reproduces 7 of 8 verdicts in the agreement window",
+                f"{agree}/8 at threshold 220"))
+    out.append((w.loc["drosophila_enhancers_stark", "verdicts_agree"] == 0,
+                "the sole disagreement is drosophila_enhancers_stark", ""))
+    for d, short in (("human_enhancers_ensembl", "ensembl"),
+                     ("human_nontata_promoters", "nontata")):
+        out.append(near("paper", r"a window at \$220\$--\$240\$", float(w.loc[d, "kappa"]),
+                        places=3, label=f"{short} hashFrag kappa", span=620))
+        out.append(near("paper", r"a window at \$220\$--\$240\$",
+                        float(w.loc[d, "agreement"]), places=3,
+                        label=f"{short} hashFrag agreement", span=620))
+    # the strand bound, stated in the supplement
+    out.append((float(w.rev_only_frac.max()) <= 0.0100 + 1e-9,
+                "reverse-strand-only leakage is at most 0.0100 on every dataset",
+                f"max {w.rev_only_frac.max():.4f}"))
+    out.append(near("paper", r"qualifying hit is on the reverse strand",
+                    float(w.loc["human_enhancers_ensembl", "rev_only_frac"]), places=4,
+                    label="ensembl reverse-strand-only share"))
+    return out
+
+
 CHECKS = [
+    ("detector specificity / hashFrag", check_detector_specificity),
     ("retired claims", check_retired_claims),
     ("generated tables", check_generated_tables),
     ("selective quotation", check_no_selective_quotation),
