@@ -462,6 +462,18 @@ def main():
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args()
     print("== check_submissions: derived manuscripts against their sources ==\n")
+    # submissions/ is not in the public tree: it holds venue-tailored rewrites, names the
+    # target journals and ranks them, and is the author's working directory rather than a
+    # reproducibility artifact. A clone therefore has nothing for this gate to check, and a
+    # module that raises FileNotFoundError on a clean clone is the same defect this project
+    # keeps finding in other people's repositories. Say so and exit clean.
+    if not os.path.isdir(S):
+        print(f"no submissions/ directory at {S}\n"
+              "This gate checks the journal-tailored manuscripts, which are kept out of the\n"
+              "public tree (see .gitignore). Nothing to check here; the manuscript of record\n"
+              "is guarded by audit/tools/check_numbers.py, which runs on a clean clone.")
+        print("\nRESULT: SKIPPED")
+        return 0
     total, failed = run()
     print(f"{total - failed}/{total} checks pass")
     ok = failed == 0
