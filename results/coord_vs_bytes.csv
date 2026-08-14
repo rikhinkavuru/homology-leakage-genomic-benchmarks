@@ -1,0 +1,4 @@
+dataset,cls,n_rows,n_train,n_test,n_distinct_coords,n_coords_mult1,n_coords_mult2,frac_rows_on_dup_coord,p_exactly_one_in_test,expected_test_coord_in_train,realised_test_coord_in_train,observed_byte_identical_test,rel_gap_realised_vs_observed
+human_enhancers_ensembl,positive,77421,61936,15485,40934,4447,36487,0.9426,0.320017,11676.4,11694,11774,-0.0068
+human_enhancers_ensembl,negative,77421,61936,15485,77421,77421,0,0.0,0.320017,0.0,0,11774,-1.0
+human_enhancers_ensembl,both,154842,123872,30970,118355,81868,36487,,,11676.4,11694,11774,-0.0068

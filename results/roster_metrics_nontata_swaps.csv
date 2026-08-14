@@ -1,0 +1,4 @@
+dataset,metric,top_orig,top_corr,swaps,margin_orig_ci,margin_corr_ci,inverts_by_criterion
+human_nontata_promoters,acc,ExtraTrees,kNN-1,True,"[0.0282, 0.0406]","[0.0707, 0.1086]",True
+human_nontata_promoters,auroc,ExtraTrees,ExtraTrees,False,,,False
+human_nontata_promoters,f1,ExtraTrees,kNN-1,True,"[0.0297, 0.0420]","[0.0399, 0.0685]",True

@@ -1,0 +1,13 @@
+dataset,statistic,gap_version,value,pvalue,n_models
+human_nontata_promoters,spearman_drop_vs_gap,raw,0.0167,0.9661,9
+human_nontata_promoters,spearman_drop_vs_gap,prevalence_corrected,0.8333,0.0053,9
+human_nontata_promoters,mean_drop_memorizers,na,0.0898,,4
+human_nontata_promoters,mean_drop_others,na,0.0589,,5
+human_nontata_promoters,mean_gap_memorizers,prevalence_corrected,0.1215,,4
+human_nontata_promoters,mean_gap_others,prevalence_corrected,0.1786,,5
+human_enhancers_ensembl,spearman_drop_vs_gap,raw,0.8833,0.0016,9
+human_enhancers_ensembl,spearman_drop_vs_gap,prevalence_corrected,0.9833,0.0,9
+human_enhancers_ensembl,mean_drop_memorizers,na,0.1857,,4
+human_enhancers_ensembl,mean_drop_others,na,0.0216,,5
+human_enhancers_ensembl,mean_gap_memorizers,prevalence_corrected,0.2915,,4
+human_enhancers_ensembl,mean_gap_others,prevalence_corrected,0.1646,,5

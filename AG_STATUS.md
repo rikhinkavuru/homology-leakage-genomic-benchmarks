@@ -20,7 +20,7 @@ Regenerated 2026-07-20. CLOSED = in the built bundle and gated.
 | C5 | CLOSED | third tier wired CSV -> table -> caption -> abstract -> figure |
 | C6 | CLOSED | 45 trials: threshold NOT identifiable, P6 refuted on replication, both reported |
 | C7 | CLOSED | indels (detected better than substitutions); repeats; FPR re-measured exhaustively |
-| C8 | QUEUED | the suite's own published CNN on the corrected split |
+| C8 | RUN, NOT USABLE | the suite's own published CNN collapsed to chance on both arms (0.5000 / 0.5001 at 10 epochs, seed 0). Recorded in `results/exp_published_cnn.csv` and cited nowhere: a network that did not train measures nothing about the split. Needs a longer schedule or a learning-rate fix before it says anything. |
 | C9 | DROPPED | maintainer disclosure removed at author's request |
 | C10 | CLOSED | SHA-256 manifest of 9 cache entries + upstream release pinning |
 | D1-D8 | CLOSED | all eight internal inconsistencies |

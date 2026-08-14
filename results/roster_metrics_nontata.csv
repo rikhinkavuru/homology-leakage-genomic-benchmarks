@@ -1,0 +1,10 @@
+dataset,model,family,acc_orig,auroc_orig,f1_orig,acc_corr,auroc_corr,f1_corr,rank_acc_orig,rank_acc_corr,rank_auroc_orig,rank_auroc_corr,rank_f1_orig,rank_f1_corr
+human_nontata_promoters,kNN-1,memorizer,0.9252,0.9311,0.9263,0.8829,0.8846,0.8892,3,1,8,8,3,1
+human_nontata_promoters,kNN-15,memorizer,0.8725,0.9502,0.8728,0.8304,0.9031,0.8367,7,2,5,6,8,5
+human_nontata_promoters,RF,memorizer,0.9284,0.9938,0.9307,0.82,0.9294,0.8451,2,5,2,2,2,2
+human_nontata_promoters,ExtraTrees,memorizer,0.9597,0.9966,0.962,0.7931,0.9363,0.8348,1,8,1,1,1,6
+human_nontata_promoters,MLP,other,0.9163,0.9628,0.9198,0.8062,0.903,0.8324,4,7,3,7,4,7
+human_nontata_promoters,HGB,other,0.8905,0.957,0.8929,0.827,0.9146,0.8421,5,4,4,3,5,3
+human_nontata_promoters,LinearSVC,linear,0.8876,0.945,0.8925,0.8083,0.9033,0.8313,6,6,6,5,6,8
+human_nontata_promoters,LR,linear,0.8702,0.9381,0.8747,0.8294,0.912,0.8421,8,3,7,4,7,3
+human_nontata_promoters,GaussianNB,other,0.7868,0.7938,0.7959,0.7861,0.7933,0.7945,9,9,9,9,9,9

@@ -47,11 +47,16 @@ import pandas as pd
 
 from audit.core import expkit as E
 
-SEEDS = [0, 1, 2, 3, 4]
-EPOCHS = 10
+SEEDS = [0, 1, 2]
+EPOCHS = 12
 BATCH = 128
 EMBED = 100
 DATASETS = ["human_enhancers_ensembl"]
+# 20k subsample. Full scale is ~3 GPU-free hours per seed on this CPU, and a subsample
+# is admissible here for the same reason it is elsewhere in this paper: subsampling can
+# only HIDE leakage, so it makes the demotion CONSERVATIVE. The leak in the as-shipped
+# split survives subsampling because near-duplicate partners are drawn together.
+SUBSAMPLE = 20000
 # The package tokenizes at character level over the observed alphabet, padding to a fixed
 # length. We rebuild that here rather than importing the loader, because our splits are
 # index-based over the cached frame and the package's loader returns its own ordering.
@@ -70,7 +75,24 @@ def encode(seqs, max_len, vocab=None):
 
 
 def run_arm(X, y, tr, te, seed, n_classes, vocab_size, max_len, device):
+    """Train the published CNN architecture and return its test-set predictions.
+
+    A DEFECT IN THE PUBLISHED CLASS, and how it is handled. For a binary task
+    `genomic_benchmarks.models.torch.CNN` sets `output_activation = nn.Sigmoid()`, so
+    `forward` returns a probability, and then `train_loop` computes
+    `binary_cross_entropy_with_logits(pred, y)` on it -- applying the sigmoid a SECOND
+    time inside the loss. The effective probability is sigmoid(sigmoid(logit)), the
+    gradient is vanishing, and the model does not train: on our data the loss sticks at
+    ln 2 and every logit collapses to ~0, giving exactly chance accuracy. We verified
+    this is the shipped behaviour, not our harness. To run the published ARCHITECTURE we
+    therefore replace the output activation with the identity so `forward` returns raw
+    logits, which is what `binary_cross_entropy_with_logits` expects; the convolutional
+    stack, dimensions, optimizer (Adam at library defaults) and tokenization are
+    otherwise the package's own. This is the smallest change that makes the published
+    model trainable, and it is disclosed rather than silent.
+    """
     import torch
+    import torch.nn as nn
     from torch.utils.data import TensorDataset, DataLoader
     from genomic_benchmarks.models.torch import CNN
 
@@ -78,20 +100,25 @@ def run_arm(X, y, tr, te, seed, n_classes, vocab_size, max_len, device):
     np.random.seed(seed)
     model = CNN(number_of_classes=n_classes, vocab_size=vocab_size,
                 embedding_dim=EMBED, input_len=max_len, device=device).to(device)
+    model.output_activation = nn.Identity()          # see docstring: undo double-sigmoid
     ds = TensorDataset(torch.from_numpy(X[tr]),
                        torch.from_numpy(y[tr].astype(np.float32)).unsqueeze(1))
     dl = DataLoader(ds, batch_size=BATCH, shuffle=True)
-    model.fit(dl, epochs=EPOCHS)
+    opt = torch.optim.Adam(model.parameters())       # package's own optimizer choice
+    for _ in range(EPOCHS):
+        model.train()
+        for xb, yb in dl:
+            xb, yb = xb.to(device), yb.to(device)
+            loss = model.loss(model(xb), yb)
+            opt.zero_grad(); loss.backward(); opt.step()
 
     model.eval()
     preds = []
     with torch.no_grad():
         for s in range(0, len(te), 512):
             xb = torch.from_numpy(X[te[s:s + 512]]).to(device)
-            p = torch.sigmoid(model(xb)).cpu().numpy().ravel()
-            preds.append(p)
-    p = np.concatenate(preds)
-    return (p >= 0.5).astype(int)
+            preds.append((model(xb).cpu().numpy().ravel() > 0).astype(int))  # logit>0
+    return np.concatenate(preds)
 
 
 def main():
@@ -100,11 +127,13 @@ def main():
     rows = []
     t0 = time.time()
     for d in DATASETS:
-        seqs, y, otr, ote, tf = E.load(d, full=True)
+        seqs, y, otr, ote, tf = E.load(d, full=False, cap=SUBSAMPLE)
         y = np.asarray(y)
         max_len = int(np.percentile([len(s) for s in seqs], 99))
         X, vocab = encode(seqs, max_len)
         comp = E.cached_clusters(d, seqs, 0.7, 8)
+        if len(comp) != len(seqs):        # cache is full-scale; recompute on the subsample
+            comp = E.clusters(seqs, 0.7, 8)
         n_classes = int(len(np.unique(y)))
         print(f"[{d}] n={len(seqs)} max_len={max_len} vocab={len(vocab)+2} "
               f"classes={n_classes}", flush=True)

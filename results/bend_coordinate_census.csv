@@ -1,0 +1,5 @@
+suite,task,partition,folds,n_train,n_test,n_total,len_med,len_max,xsplit_ge1bp,xsplit_ge50pct,xsplit_ge90pct,xsplit_exact,coord_verdict
+BEND,chromatin_accessibility,chromosome,1,1410554,372153.0,2062129,512,512,0.0,0.0,0.0,0.0,clean
+BEND,histone_modification,chromosome,1,433861,120567.0,625229,512,512,0.0,0.0,0.0,0.0,clean
+BEND,gene_finding,identity-80pct,1,4783,597.0,5977,7330,13000,0.1826,0.0017,0.0,0.0,clean
+BEND,enhancer_annotation,chromosome,10,257,,285,100096,100096,0.0,0.0,0.0,0.0,clean

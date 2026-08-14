@@ -1,0 +1,11 @@
+suite,task,arm,seed,n_test,phi,acc_LR,acc_LinearSVC,acc_RF,acc_HGB,order,best,margin_RF_minus_HGB,margin_ci95,margin_se,margin_excl0,mcnemar_b,mcnemar_c,mde_from_boot_se
+NT-original,enhancers,random_resplit_cluster_blind,0,400,0.1525,0.91,0.9125,0.9225,0.93,HGB>RF>LinearSVC>LR,HGB,-0.0075,"[-0.0325, 0.0175]",0.0125,False,11,14,0.0246
+NT-original,enhancers,random_resplit_cluster_blind,1,400,0.14,0.915,0.9,0.9025,0.9125,LR>HGB>RF>LinearSVC,LR,-0.01,"[-0.0350, 0.0150]",0.0128,False,11,15,0.025
+NT-original,enhancers,random_resplit_cluster_blind,2,400,0.125,0.895,0.88,0.8975,0.8775,RF>LR>LinearSVC>HGB,RF,0.02,"[-0.0075, 0.0450]",0.0132,False,18,10,0.0258
+NT-original,enhancers,random_resplit_cluster_blind,3,400,0.125,0.905,0.9,0.8975,0.9025,LR>HGB>LinearSVC>RF,LR,-0.005,"[-0.0301, 0.0201]",0.0132,False,13,15,0.0259
+NT-original,enhancers,random_resplit_cluster_blind,4,400,0.13,0.9175,0.915,0.9125,0.9175,LR>HGB>LinearSVC>RF,LR,-0.005,"[-0.0350, 0.0225]",0.0148,False,16,18,0.029
+NT-original,enhancers,random_resplit_cluster_blind,5,400,0.15,0.8975,0.8925,0.9025,0.8925,RF>LR>LinearSVC>HGB,RF,0.01,"[-0.0176, 0.0377]",0.0146,False,19,15,0.0286
+NT-original,enhancers,random_resplit_cluster_blind,6,400,0.12,0.8975,0.905,0.9025,0.905,LinearSVC>HGB>RF>LR,LinearSVC,-0.0025,"[-0.0251, 0.0224]",0.0122,False,11,12,0.0238
+NT-original,enhancers,random_resplit_cluster_blind,7,400,0.1225,0.915,0.9275,0.915,0.9075,LinearSVC>LR>RF>HGB,LinearSVC,0.0075,"[-0.0200, 0.0349]",0.0136,False,16,13,0.0266
+NT-original,enhancers,random_resplit_cluster_blind,8,400,0.145,0.8925,0.895,0.9075,0.885,RF>LinearSVC>LR>HGB,RF,0.0225,"[-0.0050, 0.0525]",0.0144,False,21,12,0.0282
+NT-original,enhancers,random_resplit_cluster_blind,9,400,0.125,0.9075,0.9175,0.8975,0.9075,LinearSVC>LR>HGB>RF,LinearSVC,-0.01,"[-0.0300, 0.0125]",0.0112,False,8,12,0.022

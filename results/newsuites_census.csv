@@ -1,0 +1,18 @@
+suite,task,family,organism,label_type,n_train,n_test,n_train_full,n_test_full,subsampled,verdict_is_lower_bound,len_min,len_med,len_max,n_classes,exact_dup_test_in_train,leak_jaccard_0p7,leak_jaccard_0p9,leak_containment_0p7,leak_containment_0p9,sim_min,sim_median,verdict,seconds
+PGB,lncrna/g_max,lncrna,Glycine max,classification,11430,490,11430,490,False,False,102,622,1800,2,0.0,0.0041,0.0,0.051,0.0041,0.0199,0.0353,clean,13.3
+PGB,lncrna/m_esculenta,lncrna,Manihot esculenta,classification,4934,360,4934,360,False,False,108,592,2534,2,0.0,0.0028,0.0,0.0333,0.0111,0.0181,0.0377,clean,6.1
+PGB,lncrna/s_bicolor,lncrna,Sorghum bicolor,classification,8654,734,8654,734,False,False,117,807,5971,2,0.0,0.0082,0.0014,0.0409,0.0191,0.0181,0.0341,clean,13.8
+PGB,lncrna/s_lycopersicum,lncrna,Solanum lycopersicum,classification,7274,1072,7274,1072,False,False,105,333,6000,2,0.0,0.0037,0.0,0.0121,0.0009,0.0154,0.0313,clean,6.2
+PGB,lncrna/t_aestivum,lncrna,Triticum aestivum,classification,11252,1810,11252,1810,False,False,108,327,4880,2,0.0166,0.1199,0.0387,0.2232,0.0796,0.0175,0.0621,LEAKY,9.2
+PGB,lncrna/z_mays,lncrna,Zea mays,classification,8423,1629,8423,1629,False,False,201,489,2600,2,0.016,0.0669,0.0424,0.1381,0.0773,0.0166,0.0399,borderline,7.8
+PGB,poly_a/arabidopsis_thaliana,poly_a,Arabidopsis thaliana,classification,170835,30384,170835,30384,False,False,400,400,400,2,0.0,0.0018,0.0006,0.0026,0.001,0.0184,0.0382,clean,878.8
+PGB,poly_a/chlamydomonas_reinhardtii,poly_a,Chlamydomonas reinhardtii,classification,90378,10542,90378,10542,False,False,400,400,400,2,0.0,0.0008,0.0001,0.0047,0.0005,0.0195,0.0305,clean,130.4
+PGB,poly_a/medicago_truncatula,poly_a,Medicago truncatula,classification,47277,8850,47277,8850,False,False,400,400,400,2,0.0,0.0002,0.0,0.001,0.0,0.0188,0.0369,clean,44.0
+PGB,poly_a/oryza_sativa_indica_group,poly_a,Oryza sativa indica,classification,98139,16776,98139,16776,False,False,400,400,400,2,0.0,0.0008,0.0,0.003,0.0,0.0195,0.0305,clean,172.3
+PGB,poly_a/oryza_sativa_japonica_group,poly_a,Oryza sativa japonica,classification,120621,20232,120621,20232,False,False,400,400,400,2,0.0,0.0034,0.0001,0.0093,0.0007,0.0195,0.0311,clean,132.6
+PGB,poly_a/trifolium_pratense,poly_a,Trifolium pratense,classification,111138,13746,111138,13746,False,False,400,400,400,2,0.0,0.0009,0.0,0.0057,0.0001,0.02,0.0407,clean,90.9
+PGB,pro_seq/m_esculenta,pro_seq,Manihot esculenta,classification,16852,812,16852,812,False,False,1000,1000,1000,2,0.0,0.0,0.0,0.0,0.0,0.0275,0.1022,clean,7.2
+PGB,promoter_strength/leaf,promoter_strength,multi-species (leaf assay),regression,58179,7154,58179,7154,False,False,170,170,170,,0.0,0.0179,0.0059,0.0287,0.0109,0.0253,0.0449,clean,10.8
+PGB,promoter_strength/protoplast,promoter_strength,multi-species (protoplast assay),regression,61051,7595,61051,7595,False,False,170,170,170,,0.0,0.0184,0.0054,0.0299,0.0111,0.0252,0.0453,clean,8.4
+PGB,terminator_strength/leaf,terminator_strength,multi-species (leaf assay),regression,43294,5309,43294,5309,False,False,170,170,170,,0.0,0.0154,0.0057,0.0315,0.0113,0.0223,0.0452,clean,11.3
+PGB,terminator_strength/protoplast,terminator_strength,multi-species (protoplast assay),regression,43289,5309,43289,5309,False,False,170,170,170,,0.0,0.0154,0.0055,0.0309,0.0113,0.0252,0.0452,clean,13.6

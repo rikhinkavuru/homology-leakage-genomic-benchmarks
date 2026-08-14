@@ -1,0 +1,2 @@
+dataset,n_cells,grid,delta_mean,delta_min,delta_max,delta_sd_total,var_split,var_train,var_resid,sd_split,sd_train,sd_resid,pct_split,pct_train,pct_resid
+human_nontata_promoters,25,5,0.11748,0.1049,0.1267,0.00662,4.053375000000006e-05,3.413500000000119e-07,9.722650000000011e-06,0.00637,0.00058,0.00312,80.1,0.7,19.2

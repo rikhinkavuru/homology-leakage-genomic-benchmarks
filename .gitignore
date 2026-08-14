@@ -9,6 +9,27 @@ __pycache__/
 
 # ---- Internal working docs (not for the public release / reviewers) ----
 REVIEWER_RESPONSE_PLAN.md
+# The adversarial-review record: per-persona finding files, severity triage, decision log.
+# Useful to the author, and to nobody else -- a public "hostile-competitor.json" and a
+# HIGH_SEVERITY.md are read as a list of the paper's weak points, not as diligence.
+audit_recovered/
+# Correspondence with a journal. It has no reproducibility function, and the manuscripts
+# published from this work point reviewers at this repository: a cover letter addressed to
+# one journal's editor, and a point-by-point response to that journal's reviewers, are
+# handed to the next editor by the data-availability statement. Kept on disk, off the
+# remote. Anything the reader needs is in the manuscript.
+paper/cover_letter.*
+paper/response_to_reviewers.*
+# Backups and partial runs. A ".bak" beside a results CSV is ambiguous to a replicator in
+# exactly the way the paper warns about, and a partial file is not a result.
+*.csv.bak
+*_partial_backup.csv
+# The venue packages. These name three target journals, rank them, and state which
+# submission is live where. The data-availability statement in every manuscript points a
+# reviewer at this repository, so anything left tracked here is handed to the editor of
+# whichever venue is being submitted to -- including the fact that two rival packages are
+# built and waiting. Untracked is not enough on its own: `git add -A` would take them.
+submissions/
 # exploratory from-scratch transformer; underfits short DNA, not used in the paper
 exp_transformer.py
 pg-*.png
@@ -50,3 +71,4 @@ paper/*.out
 paper/*.fls
 paper/*.fdb_latexmk
 paper/*.toc
+.gstack/

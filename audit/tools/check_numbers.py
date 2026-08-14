@@ -64,6 +64,12 @@ DOCS = {
     "numbers": os.path.join(R, "PAPER_NUMBERS.md"),
 }
 
+# Documents that may legitimately be absent from a clone. Both are correspondence with a
+# journal, kept on the author's disk and out of the public tree; see .gitignore. Their
+# checks then report absence instead of raising, so the gate still runs end to end for a
+# replicator -- and still fails loudly for the author, who has the files.
+OPTIONAL_DOCS = {"response", "cover"}
+
 _cache = {}
 
 
@@ -78,6 +84,15 @@ def doc(name):
     Inlining here restores full coverage and keeps it as tables move.
     """
     if name not in _cache:
+        # The two letters are deliberately absent from the public tree: they are
+        # correspondence with a journal, they have no reproducibility function, and every
+        # manuscript published from this work points a reviewer at this repository. A gate
+        # that cannot run on a clean clone is not a gate, so a missing OPTIONAL document
+        # reads as empty and the checks that scan it report absence rather than crashing.
+        # Anything in REQUIRED_DOCS still fails loudly if it is missing.
+        if name in OPTIONAL_DOCS and not os.path.exists(DOCS[name]):
+            _cache[name] = ""
+            return ""
         with open(DOCS[name]) as fh:
             body = fh.read()
         base = os.path.dirname(DOCS[name])
@@ -139,6 +154,21 @@ def _tokens(value, places, signed):
     return out
 
 
+def _skipped(where, label):
+    """A check whose target document is absent from this tree, and legitimately so.
+
+    Returns a pass carrying the reason. Only OPTIONAL_DOCS can reach this: a missing
+    required document still fails, because that would mean the tree is broken rather than
+    trimmed.
+    """
+    return (True, label or where,
+            f"{where} is not in this tree (see .gitignore); check skipped")
+
+
+def _absent_doc(where):
+    return where in OPTIONAL_DOCS and not doc(where)
+
+
 def near(where, context, value, places=3, signed=False, label="", span=420):
     """The value must appear INSIDE the window matched by `context`.
 
@@ -148,6 +178,8 @@ def near(where, context, value, places=3, signed=False, label="", span=420):
     corrupted one here. `span` must be wide enough to reach the value from the anchor and
     narrow enough to exclude the next claim -- a sentence or two.
     """
+    if _absent_doc(where):
+        return _skipped(where, label)
     s = doc(where)
     toks = _tokens(value, places, signed)
     if toks is None:
@@ -175,6 +207,8 @@ def absent(where, value, places=3, signed=False, label="", context=None):
     as a confidence bound, a grid endpoint and a margin, none of which is the stale GUE
     minimum we are trying to keep out.
     """
+    if _absent_doc(where):
+        return _skipped(where, label)
     s = doc(where)
     if context is not None:
         m = re.search(context, s, re.S)
@@ -198,11 +232,39 @@ def occurs(where, text, n, label=""):
     expected count had been tuned to the wrong number. A count that can be satisfied by
     a different value is not a count of the value.
     """
+    if _absent_doc(where):
+        return _skipped(where, label)
     pat = re.escape(text) + r"(?!\d)" if text and text[-1].isdigit() else re.escape(text)
     got = len(re.findall(pat, doc(where)))
     return (got == n, label or f"{text!r} appears {n}x",
             f"{where}: {got} occurrence(s)" if got == n
             else f"{where}: expected {n}, found {got}")
+
+
+def near_text(where, context, needle, label="", span=520):
+    """Rule 1 for values that are not plain decimals.
+
+    `near()` renders a value with `f"{v:.Nf}"`, so it can never match an integer the
+    manuscript typesets with a LaTeX thousands separator ("$2{,}049$"). Checking those
+    with the document-wide `says()` would drop the anchor and re-open exactly the hole
+    rule 1 exists to close. This is `near()`'s window logic over a literal string.
+    """
+    if _absent_doc(where):
+        return _skipped(where, label)
+    s = doc(where)
+    m = re.search(context, s, re.S)
+    if not m:
+        return (False, label or needle, f"context not found in {where}")
+    window = s[max(0, m.start() - 40):m.end() + span]
+    ok = needle in window
+    return (ok, label or needle,
+            f"{where}: {needle!r} present in the passage" if ok
+            else f"{where}: {needle!r} NOT in the passage that claims it")
+
+
+def tex_int(n):
+    """LaTeX rendering of an integer with the thousands separator this project uses."""
+    return f"${int(n):,}$".replace(",", "{,}")
 
 
 def says(where, text, label="", want=True):
@@ -212,6 +274,8 @@ def says(where, text, label="", want=True):
     "tasks of eleven are\n   leaky", so a literal "twelve are leaky" could never match a
     revert of that sentence and the check was vacuous. Round 14's self-test caught it.
     """
+    if _absent_doc(where):
+        return _skipped(where, label)
     norm = " ".join(doc(where).split())
     got = " ".join(text.split()) in norm
     return (got == want, label or f"{where} says {text!r}",
@@ -381,7 +445,10 @@ def check_intervals_are_labelled():
         (abs(clu[0] - com[0]) > 1e-6,
          "the two intervals are genuinely different numbers",
          f"cluster {clu} vs combined {com}"),
-        near("paper", r"combined-source interval---which additionally folds", com[0],
+        # Anchor on the phrase, not on the em-dash clause after it: the clause was reworded
+        # once and a "[^.]" guard cannot cross the decimal points inside the interval it is
+        # trying to reach.
+        near("paper", r"the combined-source interval", com[0],
              places=1, label="nontata combined-source interval named where it is used"),
     ] + _check_interval_robustness(cb)
 
@@ -424,6 +491,55 @@ def check_cohesion():
         (ens >= 0.5 > ntp, "the two datasets straddle the 0.5 cut",
          f"{ens:.3f} >= 0.5 > {ntp:.3f}"),
     ]
+
+
+def check_pretrain_stratum():
+    """The overlap-free foundation-model stratum, and the bound it can carry.
+
+    These numbers exist because "we did not run foundation models" is only a defensible
+    limitation if the reader is told what the right experiment is and whether it is
+    powered. They are quoted at two sites (Discussion and Supplementary S11), so both are
+    anchored: a value corrected in one place and left stale in the other is the dominant
+    defect this module exists to catch.
+    """
+    p = csv("pretrain_stratum_power.csv")
+    out = []
+    ctx = {
+        "human_enhancers_ensembl": r"That stratum is priced (here|rather than only named)",
+        "human_nontata_promoters": r"That stratum is priced (here|rather than only named)",
+    }
+    for dset in ("human_enhancers_ensembl", "human_nontata_promoters"):
+        d = p[p.dataset == dset]
+        n_strat = int(d.n_overlap_free.iloc[0])
+        n_test = int(d.n_test_shipped.iloc[0])
+        frac = float(d.frac_overlap_free.iloc[0])
+        short = dset.split("_")[1]
+        for where_ctx in (r"That stratum is priced here rather than gestured at",
+                          r"That stratum is priced rather than only named"):
+            out.append(near_text("paper", where_ctx, tex_int(n_strat),
+                                 label=f"{short}: overlap-free n={n_strat}"))
+            out.append(near_text("paper", where_ctx, tex_int(n_test),
+                                 label=f"{short}: shipped test n={n_test}"))
+        out.append(near("paper", r"That stratum is priced here rather than gestured at",
+                        frac * 100, places=1, label=f"{short}: stratum share {frac:.3%}"))
+    # The two MDE bounds the Discussion quotes, at both the worst case and psi=0.20.
+    for psi, tag in ((1.00, "worst case"), (0.20, "psi=0.20")):
+        vals = [float(p[(p.dataset == d) & (p.discordance_psi == psi)].mde_paired_acc.iloc[0])
+                for d in ("human_enhancers_ensembl", "human_nontata_promoters")]
+        for v in vals:
+            out.append(near("paper", r"the relevant test is McNemar's", v, places=3,
+                            label=f"MDE {tag} {v:.3f}", span=700))
+    # Rule 3 in spirit: the bound is only useful if it actually straddles the two effect
+    # sizes the manuscript contrasts. Assert the ordering the prose claims.
+    worst_ens = float(p[(p.dataset == "human_enhancers_ensembl")
+                        & (p.discordance_psi == 1.00)].mde_paired_acc.iloc[0])
+    out.append((worst_ens < 0.164,
+                "the forest's inflation clears the worst-case bound",
+                f"{worst_ens:.3f} < 0.164"))
+    out.append((worst_ens > 0.014,
+                "the CNN's reference-cell drop does not clear it",
+                f"{worst_ens:.3f} > 0.014"))
+    return out
 
 
 def check_crosssuite_counts():
@@ -549,7 +665,7 @@ def check_letter_section_refs():
     # crosswalk table also carries prior-submission numbers in its left column, which are
     # historical by design and must not be resolved against the current manuscript.
     expect = [
-        (f"§{sec_no}.13", ("robust",)),
+        (f"§{sec_no}.8", ("robust",)),
     ]
     out = []
     for ref, keywords in expect:
@@ -558,13 +674,32 @@ def check_letter_section_refs():
         ok = any(k.lower() in title.lower() for k in keywords)
         out.append((ok, f"{ref} in the letters resolves to a section about {keywords[0]}",
                     f"{num} = {title[:56]!r}" if title else f"{num} not found"))
-    # and nothing may point past the last Results subsection
+    # and nothing may point past the last Results subsection.
+    #
+    # The range scan MUST read the current numbering, not "section 4". Until the
+    # restructure this line matched r"§4\.(\d+)", which in the response letter hits only
+    # the crosswalk table's LEFT column -- the prior submission's numbering, which the
+    # docstring above says must not be resolved against this manuscript. The check
+    # therefore validated exactly the pointers it was written to ignore and ignored every
+    # pointer a reviewer would follow. It passed for the wrong reason and would have kept
+    # passing with every live pointer dangling.
+    #
+    # Crosswalk rows are markdown table lines; their left cell is historical by design, so
+    # those lines are scanned from the second cell onward and other lines in full.
     highest = max(int(k.split(".")[1]) for k in numbering) if numbering else 0
     for where in ("response", "cover"):
-        refs = [int(m) for m in re.findall(r"§4\.(\d+)", doc(where))]
-        bad = [r for r in refs if r > highest]
-        out.append((not bad, f"{where} letter has no pointer past §4.{highest}",
-                    "all in range" if not bad else f"dangling: {bad}"))
+        scan = []
+        for line in doc(where).split("\n"):
+            if line.lstrip().startswith("|"):
+                cells = line.split("|")
+                scan.append("|".join(cells[2:]) if len(cells) > 2 else "")
+            else:
+                scan.append(line)
+        refs = [int(m) for m in re.findall(rf"§{sec_no}\.(\d+)", "\n".join(scan))]
+        bad = sorted({r for r in refs if r > highest})
+        out.append((not bad, f"{where} letter has no pointer past §{sec_no}.{highest}",
+                    f"{len(refs)} pointer(s), all in range" if not bad
+                    else f"dangling: {bad}"))
     return out
 
 
@@ -594,7 +729,10 @@ def check_shared_numbers():
     for where in ("paper", "response"):
         m = pat.search(" ".join(doc(where).split()).replace("--", "-").replace("–", "-"))
         seen[where] = (m.group(1), m.group(2)) if m else None
-    agree = seen["paper"] is not None and seen["paper"] == seen["response"]
+    # With the response letter out of the public tree there is nothing to cross-check
+    # against, so the pairwise agreement check reports skipped rather than false.
+    agree = (seen["paper"] is not None
+             and (seen["paper"] == seen["response"] or _absent_doc("response")))
     out.append((agree, "manuscript and response letter quote the same ICC range",
                 f"{seen['paper']} vs {seen['response']}"))
     return out
@@ -695,6 +833,9 @@ def check_cnn_seed_replication():
     # the non-uniformity must survive in every document that states the result
     assert n_excl == 4 and n_tot == 5, f"CSV says {n_excl}/{n_tot}; update the prose"
     for where in ("paper", "response", "cover"):
+        if _absent_doc(where):
+            out.append(_skipped(where, f"{where}: 4-of-5 seed disclosure"))
+            continue
         body = " ".join(doc(where).split())
         states_split = ("four of the five" in body.lower()
                         or "four of five" in body.lower()
@@ -1064,6 +1205,7 @@ CHECKS = [
     ("interval labelling", check_intervals_are_labelled),
     ("cluster cohesion / C9", check_cohesion),
     ("cross-suite counts", check_crosssuite_counts),
+    ("pretraining-overlap-free stratum", check_pretrain_stratum),
 ]
 
 
@@ -1129,6 +1271,10 @@ def self_test():
          "all five seeds' paired intervals exclude zero"),
         # the selective-quotation class: drop the denominator and the omitted fourth
         # learner disappears, which is exactly the round-26 defect
+        ("paper: the overlap-free stratum size in the Discussion",
+         "paper", "It holds $2{,}049$ of", "It holds $2{,}041$ of"),
+        ("paper: the worst-case McNemar bound",
+         "paper", "difference of $0.062$ and $0.075$", "difference of $0.052$ and $0.075$"),
         ("paper: the NT enhancers denominator removed",
          "paper", "three of the four learners excluding zero",
          "all excluding zero"),

@@ -1,0 +1,2 @@
+dataset,seed,acc_orig,acc_corr,drop,drop_ci_cluster_lo,drop_ci_cluster_hi,drop_excl0_cluster,epochs,n_test_orig,n_test_corr
+human_enhancers_ensembl,0,0.5,0.5001,-0.0001,-0.0096,0.0094,False,10,30970,30971

@@ -1,15 +1,19 @@
-# Near-duplicate leakage can reorder model rankings on a genomic benchmark suite
+# Overlapping construction plus a position-blind split
 
-Code and data for the paper *"Near-duplicate leakage can reorder model rankings on a
-genomic benchmark suite: an audit of Genomic Benchmarks"* (Kavuru; resubmission of
-BIOADV-2026-296, Bioinformatics Advances).
+Code and data for *"Overlapping construction plus a position-blind split: a curation
+defect in genomic sequence benchmarks and the model rankings it inverts"* (Kavuru). The
+manuscript is under review; this repository is the reproducibility artifact for it.
 
-**Claim.** On the Genomic Benchmarks binary suite, near-duplicate sequences that span
-the train/test split inflate the apparent performance of memorization-prone models and
-can **reorder which model appears best** — demonstrated cleanly on `human_enhancers_ensembl`
-(airtight across accuracy/AUROC/F1, a chromosome-holdout control, a winner-probability
-bootstrap, and MMseqs2 alignment) and as an explicit cautionary partial case on
-`human_nontata_promoters`. We ship a per-dataset leakage **report card** and a drop-in,
+**Claim.** On the Genomic Benchmarks binary suite, near-duplicate sequences that span the
+train/test split arise from an omitted merge step in curation, are visible in the shipped
+coordinate annotations before any model is trained, and **materially distort model
+comparison — and, under stated conditions, invert it**. The inversion is demonstrated on
+`human_enhancers_ensembl` (holding under accuracy, AUROC and F1, a chromosome-holdout
+control, a winner-probability bootstrap and an MMseqs2 re-clustering), manufactured to
+order on two of three independent clean donors, and reported as a **negative result** on
+`human_nontata_promoters`, where the demotion does not survive a threshold-free metric. It
+requires a memorization-prone learner in the comparison set; that is a stated scope
+condition, not a caveat. We ship a per-dataset leakage **report card** and a drop-in,
 dependency-free **near-duplicate-aware splitter** so any dataset can be certified before use.
 
 ## Reproduce

@@ -1,0 +1,11 @@
+dataset,n_test_shipped,n_overlap_free,frac_overlap_free,n_pos,n_neg,pos_share_of_test_pos,neg_share_of_test_neg,discordance_psi,alpha,power,mde_paired_acc
+human_enhancers_ensembl,30970,2049,0.0662,826,1223,0.0533,0.079,0.1,0.05,0.8,0.0196
+human_enhancers_ensembl,30970,2049,0.0662,826,1223,0.0533,0.079,0.2,0.05,0.8,0.0277
+human_enhancers_ensembl,30970,2049,0.0662,826,1223,0.0533,0.079,0.3,0.05,0.8,0.0339
+human_enhancers_ensembl,30970,2049,0.0662,826,1223,0.0533,0.079,0.5,0.05,0.8,0.0438
+human_enhancers_ensembl,30970,2049,0.0662,826,1223,0.0533,0.079,1.0,0.05,0.8,0.0619
+human_nontata_promoters,9034,1381,0.1529,368,1013,0.0749,0.2459,0.1,0.05,0.8,0.0238
+human_nontata_promoters,9034,1381,0.1529,368,1013,0.0749,0.2459,0.2,0.05,0.8,0.0337
+human_nontata_promoters,9034,1381,0.1529,368,1013,0.0749,0.2459,0.3,0.05,0.8,0.0413
+human_nontata_promoters,9034,1381,0.1529,368,1013,0.0749,0.2459,0.5,0.05,0.8,0.0533
+human_nontata_promoters,9034,1381,0.1529,368,1013,0.0749,0.2459,1.0,0.05,0.8,0.0754
