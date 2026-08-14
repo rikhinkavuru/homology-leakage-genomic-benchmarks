@@ -48,7 +48,10 @@ results/hashfrag_sweep.csv        per dataset x threshold: hashFrag leak fractio
 results/hashfrag_comparison.csv   per dataset at the shuffled-null threshold, plus the
                                   threshold range over which the verdicts agree, plus
                                   wall-clock
-results/hashfrag_pairs.csv        every scored pair, our Jaccard beside their score
+results/hashfrag_pairs.csv        every scored pair, our Jaccard beside their score.
+                                  NOT COMMITTED: 144 MB, above GitHub's file-size limit.
+                                  Re-run this module to regenerate it; the summary tables
+                                  the supplement cites are committed.
 """
 from __future__ import annotations
 import os, sys, shutil, subprocess, time

@@ -72,3 +72,9 @@ paper/*.fls
 paper/*.fdb_latexmk
 paper/*.toc
 .gstack/
+
+# hashFrag's per-pair dump: 144 MB, above GitHub's 100 MB hard limit, and regenerable by
+# `python -m audit.experiments.exp_hashfrag`. The summary tables it feeds -- the ones the
+# supplement actually cites -- are committed; the raw pair list is not, because a
+# reproducibility artifact nobody can clone is not one.
+results/hashfrag_pairs.csv
