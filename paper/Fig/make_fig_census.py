@@ -133,12 +133,20 @@ for i, s in enumerate(SUITES):
 ax.axvline(0.1, color="k", ls="--", lw=1.0, zorder=1)
 
 # Square-root x so the sub-0.1 region, where 44 of the 51 censuses sit, is legible.
-ax.set_xscale("function", functions=(lambda v: np.sqrt(np.clip(v, 0, None)),
-                                     lambda v: np.clip(v, 0, None) ** 2))
+#
+# The transform is SIGNED. An earlier version clipped negatives to zero on the way in,
+# which silently mapped every negative x to the same place as zero -- so the negative left
+# limit below produced no margin at all, the axis started exactly at the first data value,
+# and every marker at a leak fraction of 0.000 was drawn half outside the axes and cut in
+# half by the spine. Those are real measurements, on the two rows a reader checks first.
+# sign(v)*sqrt(|v|) is monotone through the origin, so a negative limit is honoured.
+ax.set_xscale("function", functions=(lambda v: np.sign(v) * np.sqrt(np.abs(v)),
+                                     lambda u: np.sign(u) * u ** 2))
 ticks = [0, 0.02, 0.05, 0.1, 0.2, 0.4, 0.7, 1.0]
 ax.set_xticks(ticks)
 ax.set_xticklabels([f"{t:g}" for t in ticks])
-ax.set_xlim(-0.004, 1.10)
+# Margin wide enough for the largest marker at x=0 to clear the spine.
+ax.set_xlim(-0.006, 1.13)
 
 ax.text(0.107, 2.70, "LEAKY cut, 0.1", fontsize=7, va="center")
 ax.set_yticks([2, 1, 0])
